@@ -1,8 +1,4 @@
-import 'package:capyapy_dashboard/presentation/pages/billings/billing_page.dart';
-import 'package:capyapy_dashboard/presentation/pages/projects/projects_page.dart';
-import 'package:capyapy_dashboard/presentation/pages/settings/settings_page.dart';
 import 'package:capyapy_dashboard/presentation/pages/dashboard/widget/analytics_chart.dart';
-import 'package:capyapy_dashboard/presentation/pages/dashboard/widget/dashboard_sidebar.dart';
 import 'package:capyapy_dashboard/presentation/pages/dashboard/widget/notifications_section.dart';
 import 'package:capyapy_dashboard/presentation/pages/dashboard/widget/overview_card.dart';
 import 'package:flutter/material.dart';
@@ -32,41 +28,6 @@ class DashboardView extends StatefulWidget {
 }
 
 class _DashboardViewState extends State<DashboardView> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _pages = const [
-    DashboardOverviewPage(),
-    ProjectsPage(),
-    BillingPage(),
-    SettingsPage(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width > 900;
-    return Scaffold(
-      backgroundColor: AppColors.background(context),
-      body: Row(
-        children: [
-          if (isDesktop)
-            DashboardSidebar(
-              selectedIndex: _selectedIndex,
-              onItemSelected: (index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-            ),
-          Expanded(child: _pages[_selectedIndex]),
-        ],
-      ),
-    );
-  }
-}
-
-class DashboardOverviewPage extends StatelessWidget {
-  const DashboardOverviewPage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
@@ -156,7 +117,7 @@ class DashboardOverviewPage extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                Text('���️', style: TextStyle(fontSize: 16)),
+                                Text('🖥️', style: TextStyle(fontSize: 16)),
                               ],
                             ),
                           ),
