@@ -27,6 +27,36 @@ class ProjectCreationWizard extends StatelessWidget {
           return _buildWizardView(context, state);
         }
 
+        // Handle initial state - show loading until wizard is ready
+        if (state is ProjectBuilderInitial) {
+          return Container(
+            color: AppColors.background(context),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // Handle error state
+        if (state is ProjectBuilderError) {
+          return Container(
+            color: AppColors.background(context),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${state.message}',
+                    style: GoogleFonts.inter(fontSize: 16, color: Colors.red),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(onPressed: onClose, child: Text('Close')),
+                ],
+              ),
+            ),
+          );
+        }
+
         return Container();
       },
     );

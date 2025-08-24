@@ -50,6 +50,7 @@ class _DashboardViewState extends State<DashboardView> {
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       shadowColor: Colors.transparent,
+      foregroundColor: Colors.transparent,
       automaticallyImplyLeading: false,
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {

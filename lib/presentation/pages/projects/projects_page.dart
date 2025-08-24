@@ -22,39 +22,43 @@ class _ProjectsPageState extends State<ProjectsPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => ProjectBuilderBloc(),
-      child: BlocListener<ProjectBuilderBloc, ProjectBuilderState>(
-        listener: (context, state) {
-          if (state is ProjectBuilderSuccess) {
-            setState(() {
-              _showCreateProjectWizard = false;
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Project "${state.project.projectName}" created successfully!',
+      child: Builder(
+        builder: (context) => BlocListener<ProjectBuilderBloc, ProjectBuilderState>(
+          listener: (context, state) {
+            if (state is ProjectBuilderSuccess) {
+              setState(() {
+                _showCreateProjectWizard = false;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Project "${state.project.projectName}" created successfully!',
+                  ),
+                  backgroundColor: Colors.green,
                 ),
-                backgroundColor: Colors.green,
-              ),
-            );
-          } else if (state is ProjectBuilderError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error: ${state.message}'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        child: _showCreateProjectWizard
-            ? ProjectCreationWizard(
-                onClose: () {
-                  setState(() {
-                    _showCreateProjectWizard = false;
-                  });
-                  context.read<ProjectBuilderBloc>().add(const ResetBuilder());
-                },
-              )
-            : _buildProjectsOverview(context),
+              );
+            } else if (state is ProjectBuilderError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Error: ${state.message}'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          child: _showCreateProjectWizard
+              ? ProjectCreationWizard(
+                  onClose: () {
+                    setState(() {
+                      _showCreateProjectWizard = false;
+                    });
+                    context.read<ProjectBuilderBloc>().add(
+                      const ResetBuilder(),
+                    );
+                  },
+                )
+              : _buildProjectsOverview(context),
+        ),
       ),
     );
   }
@@ -132,7 +136,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                             ),
                           ),
                           ElevatedButton.icon(
-                            onPressed: _startProjectCreation,
+                            onPressed: () => _startProjectCreation(context),
                             icon: Icon(Icons.add, size: 16),
                             label: Text('New'),
                             style: ElevatedButton.styleFrom(
@@ -182,7 +186,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                             ),
                           ),
                           ElevatedButton.icon(
-                            onPressed: _startProjectCreation,
+                            onPressed: () => _startProjectCreation(context),
                             icon: Icon(Icons.add),
                             label: Text('Create New Project'),
                             style: ElevatedButton.styleFrom(
@@ -212,7 +216,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: MediaQuery.of(context).size.width > 1000 ? 4 : 2,
+          crossAxisCount: MediaQuery.of(context).size.width > 1300 ? 4 : 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           childAspectRatio: 1.4,
@@ -339,10 +343,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
     );
   }
 
-  void _startProjectCreation() {
+  void _startProjectCreation(BuildContext blocContext) {
     setState(() {
       _showCreateProjectWizard = true;
     });
-    context.read<ProjectBuilderBloc>().add(const StartProjectCreation());
+    blocContext.read<ProjectBuilderBloc>().add(const StartProjectCreation());
   }
 }

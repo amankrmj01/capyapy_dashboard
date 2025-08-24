@@ -45,13 +45,13 @@ class ProjectBuilderBloc
   ) {
     if (state is ProjectBuilderInProgress) {
       final currentState = state as ProjectBuilderInProgress;
-      emit(
-        currentState.copyWith(
-          projectName: event.projectName,
-          basePath: event.basePath,
-          isValid: event.projectName.isNotEmpty && event.basePath.isNotEmpty,
-        ),
+      final newState = currentState.copyWith(
+        projectName: event.projectName,
+        basePath: event.basePath,
       );
+      // Update validation state
+      final isValid = _validateCurrentStep(newState);
+      emit(newState.copyWith(isValid: isValid));
     }
   }
 
@@ -61,26 +61,12 @@ class ProjectBuilderBloc
   ) {
     if (state is ProjectBuilderInProgress) {
       final currentState = state as ProjectBuilderInProgress;
-      List<DataModel> updatedModels = List.from(currentState.dataModels);
-
-      // Add default User model if auth is enabled and doesn't exist
-      if (event.hasAuth &&
-          !updatedModels.any((model) => model.modelName == 'User')) {
-        updatedModels.insert(0, _createDefaultUserModel());
-      }
-
-      // Remove User model if auth is disabled
-      if (!event.hasAuth) {
-        updatedModels.removeWhere((model) => model.modelName == 'User');
-      }
-
-      emit(
-        currentState.copyWith(
-          hasAuth: event.hasAuth,
-          authStrategy: event.authStrategy,
-          dataModels: updatedModels,
-        ),
+      final newState = currentState.copyWith(
+        hasAuth: event.hasAuth,
+        authStrategy: event.authStrategy,
       );
+      final isValid = _validateCurrentStep(newState);
+      emit(newState.copyWith(isValid: isValid));
     }
   }
 
@@ -90,7 +76,9 @@ class ProjectBuilderBloc
       final updatedModels = List<DataModel>.from(currentState.dataModels)
         ..add(event.dataModel);
 
-      emit(currentState.copyWith(dataModels: updatedModels));
+      final newState = currentState.copyWith(dataModels: updatedModels);
+      final isValid = _validateCurrentStep(newState);
+      emit(newState.copyWith(isValid: isValid));
     }
   }
 
@@ -104,7 +92,9 @@ class ProjectBuilderBloc
 
       if (event.index >= 0 && event.index < updatedModels.length) {
         updatedModels[event.index] = event.dataModel;
-        emit(currentState.copyWith(dataModels: updatedModels));
+        final newState = currentState.copyWith(dataModels: updatedModels);
+        final isValid = _validateCurrentStep(newState);
+        emit(newState.copyWith(isValid: isValid));
       }
     }
   }
@@ -119,7 +109,9 @@ class ProjectBuilderBloc
 
       if (event.index >= 0 && event.index < updatedModels.length) {
         updatedModels.removeAt(event.index);
-        emit(currentState.copyWith(dataModels: updatedModels));
+        final newState = currentState.copyWith(dataModels: updatedModels);
+        final isValid = _validateCurrentStep(newState);
+        emit(newState.copyWith(isValid: isValid));
       }
     }
   }
@@ -130,7 +122,9 @@ class ProjectBuilderBloc
       final updatedEndpoints = List<Endpoint>.from(currentState.endpoints)
         ..add(event.endpoint);
 
-      emit(currentState.copyWith(endpoints: updatedEndpoints));
+      final newState = currentState.copyWith(endpoints: updatedEndpoints);
+      final isValid = _validateCurrentStep(newState);
+      emit(newState.copyWith(isValid: isValid));
     }
   }
 
@@ -144,7 +138,9 @@ class ProjectBuilderBloc
 
       if (event.index >= 0 && event.index < updatedEndpoints.length) {
         updatedEndpoints[event.index] = event.endpoint;
-        emit(currentState.copyWith(endpoints: updatedEndpoints));
+        final newState = currentState.copyWith(endpoints: updatedEndpoints);
+        final isValid = _validateCurrentStep(newState);
+        emit(newState.copyWith(isValid: isValid));
       }
     }
   }
@@ -159,7 +155,9 @@ class ProjectBuilderBloc
 
       if (event.index >= 0 && event.index < updatedEndpoints.length) {
         updatedEndpoints.removeAt(event.index);
-        emit(currentState.copyWith(endpoints: updatedEndpoints));
+        final newState = currentState.copyWith(endpoints: updatedEndpoints);
+        final isValid = _validateCurrentStep(newState);
+        emit(newState.copyWith(isValid: isValid));
       }
     }
   }
@@ -246,5 +244,21 @@ class ProjectBuilderBloc
         ),
       ],
     );
+  }
+
+  bool _validateCurrentStep(ProjectBuilderInProgress state) {
+    switch (state.currentStep) {
+      case 0: // Basic Info
+        return state.projectName.trim().isNotEmpty &&
+            state.basePath.trim().isNotEmpty;
+      case 1: // Auth Settings
+        return true; // Auth step is always valid
+      case 2: // Data Models
+        return state.dataModels.isNotEmpty;
+      case 3: // Endpoints
+        return state.endpoints.isNotEmpty;
+      default:
+        return false;
+    }
   }
 }

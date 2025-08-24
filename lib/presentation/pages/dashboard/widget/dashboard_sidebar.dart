@@ -15,148 +15,153 @@ class DashboardSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 280,
-      decoration: BoxDecoration(
-        color: AppColors.surface(context),
-        border: Border(
-          right: BorderSide(color: AppColors.border(context), width: 1),
+      padding: EdgeInsets.all(12),
+      color: AppColors.background(context),
+      child: Container(
+        width: 280,
+        decoration: BoxDecoration(
+          color: AppColors.surface(context),
+          borderRadius: BorderRadius.circular(12),
+          border: Border(
+            right: BorderSide(color: AppColors.border(context), width: 1),
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          // Logo/Header
-          Container(
-            padding: const EdgeInsets.all(24),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.blue, Colors.purple],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+        child: Column(
+          children: [
+            // Logo/Header
+            Container(
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.blue, Colors.purple],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Center(
-                    child: Text('🚀', style: TextStyle(fontSize: 20)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'CapyAPI',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary(context),
-                        ),
-                      ),
-                      Text(
-                        'Mock Service Hub',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: AppColors.textSecondary(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Navigation Items
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildNavItem(
-                  context,
-                  icon: '🧭',
-                  label: 'Dashboard',
-                  index: 0,
-                  isSelected: selectedIndex == 0,
-                ),
-                _buildNavItem(
-                  context,
-                  icon: '🗂️',
-                  label: 'Projects',
-                  index: 1,
-                  isSelected: selectedIndex == 1,
-                ),
-                _buildNavItem(
-                  context,
-                  icon: '💳',
-                  label: 'Billing',
-                  index: 2,
-                  isSelected: selectedIndex == 2,
-                ),
-                _buildNavItem(
-                  context,
-                  icon: '⚙️',
-                  label: 'Settings',
-                  index: 3,
-                  isSelected: selectedIndex == 3,
-                ),
-              ],
-            ),
-          ),
-
-          // User Profile Section
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.background(context),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border(context), width: 1),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.blue,
-                  child: Text(
-                    'JD',
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                    child: Center(
+                      child: Text('🚀', style: TextStyle(fontSize: 20)),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'John Doe',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary(context),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CapyAPI',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary(context),
+                          ),
                         ),
-                      ),
-                      Text(
-                        'john@example.com',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: AppColors.textSecondary(context),
+                        Text(
+                          'Mock Service Hub',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary(context),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // Navigation Items
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _buildNavItem(
+                    context,
+                    icon: '🧭',
+                    label: 'Dashboard',
+                    index: 0,
+                    isSelected: selectedIndex == 0,
+                  ),
+                  _buildNavItem(
+                    context,
+                    icon: '🗂️',
+                    label: 'Projects',
+                    index: 1,
+                    isSelected: selectedIndex == 1,
+                  ),
+                  _buildNavItem(
+                    context,
+                    icon: '💳',
+                    label: 'Billing',
+                    index: 2,
+                    isSelected: selectedIndex == 2,
+                  ),
+                  _buildNavItem(
+                    context,
+                    icon: '⚙️',
+                    label: 'Settings',
+                    index: 3,
+                    isSelected: selectedIndex == 3,
+                  ),
+                ],
+              ),
+            ),
+
+            // User Profile Section
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.background(context),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border(context), width: 1),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.blue,
+                    child: Text(
+                      'JD',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'John Doe',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary(context),
+                          ),
+                        ),
+                        Text(
+                          'john@example.com',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: AppColors.textSecondary(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

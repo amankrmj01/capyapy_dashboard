@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class ProjectsList extends StatelessWidget {
-  final VoidCallback onCreateProject;
+  final void Function(BuildContext) onCreateProject;
 
   const ProjectsList({super.key, required this.onCreateProject});
 
@@ -292,7 +292,6 @@ class ProjectsList extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onCreateProject,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(20),
