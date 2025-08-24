@@ -172,7 +172,7 @@ class _DashboardViewState extends State<DashboardView> {
           crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 4 : 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 1.5,
+          childAspectRatio: 1.4,
         ),
         delegate: SliverChildListDelegate([
           OverviewCard(
@@ -180,7 +180,6 @@ class _DashboardViewState extends State<DashboardView> {
             value: "128 / 500",
             subtitle: "Today's API Calls",
             icon: "📊",
-            progress: 0.256,
             tooltip: "Your daily API quota resets at midnight",
             color: Colors.blue,
           ),

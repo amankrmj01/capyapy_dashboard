@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 import '../../../../core/constants/app_colors.dart';
 
@@ -16,6 +15,7 @@ class DashboardCard extends StatelessWidget {
   final Color? progressColor;
 
   const DashboardCard({
+    super.key,
     required this.title,
     required this.value,
     required this.subText,
@@ -25,7 +25,6 @@ class DashboardCard extends StatelessWidget {
     this.chart,
     this.progressValue,
     this.progressColor,
-    super.key,
   });
 
   @override
@@ -33,8 +32,9 @@ class DashboardCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface(context),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withAlpha(25),
@@ -49,98 +49,92 @@ class DashboardCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   color: iconColor.withAlpha(51),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: iconColor, size: 24),
               ),
               const Spacer(),
-              if (chart != null) Expanded(child: chart!),
+              if (indicatorColor != null)
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: indicatorColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 16),
           Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: AppColors.textSecondary(context),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
             value,
             style: GoogleFonts.inter(
-              fontSize: 24,
+              fontSize: 28,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary(context),
             ),
           ),
           const SizedBox(height: 4),
           Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary(context),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
             subText,
             style: GoogleFonts.inter(
               fontSize: 12,
-              color: indicatorColor ?? AppColors.textSecondary(context),
-              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary(context),
             ),
           ),
           if (progressValue != null) ...[
             const SizedBox(height: 12),
             Row(
               children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: progressColor?.withAlpha(51),
-                    borderRadius: BorderRadius.circular(6),
+                Text(
+                  'Progress',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppColors.textSecondary(context),
                   ),
-                  child: Center(
-                    child: Text(
-                      '+$progressValue%',
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: progressColor,
-                      ),
-                    ),
+                ),
+                const Spacer(),
+                Text(
+                  '$progressValue%',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary(context),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 4),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: (progressValue ?? 0) / 100,
+                backgroundColor: AppColors.border(context),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  progressColor ?? iconColor,
+                ),
+                minHeight: 6,
+              ),
+            ),
+          ],
+          if (chart != null) ...[
+            const SizedBox(height: 16),
+            SizedBox(height: 60, child: chart!),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class DashboardPieChart extends StatelessWidget {
-  final List<PieChartSectionData> sections;
-  final double height;
-  final double centerSpaceRadius;
-
-  const DashboardPieChart({
-    required this.sections,
-    this.height = 80,
-    this.centerSpaceRadius = 20,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      child: PieChart(
-        PieChartData(
-          sections: sections,
-          sectionsSpace: 2,
-          centerSpaceRadius: centerSpaceRadius,
-        ),
       ),
     );
   }
