@@ -1,5 +1,3 @@
-import 'package:capyapy_dashboard/data/models/project_model.dart';
-
 import 'models.dart';
 
 class EndpointAnalytics {
@@ -63,4 +61,28 @@ class EndpointAnalytics {
 
   double get errorRate =>
       totalCalls > 0 ? (errorCalls / totalCalls) * 100 : 0.0;
+
+  EndpointAnalytics copyWith({
+    int? totalCalls,
+    int? successfulCalls,
+    int? errorCalls,
+    double? averageResponseTime,
+    Map<String, int>? callsByDay,
+    Map<String, int>? callsByHour,
+    Map<int, int>? responseCodeCounts,
+    DateTime? lastCalledAt,
+    List<ApiCallDataPoint>? recentDataPoints,
+  }) {
+    return EndpointAnalytics(
+      totalCalls: totalCalls ?? this.totalCalls,
+      successfulCalls: successfulCalls ?? this.successfulCalls,
+      errorCalls: errorCalls ?? this.errorCalls,
+      averageResponseTime: averageResponseTime ?? this.averageResponseTime,
+      callsByDay: callsByDay ?? this.callsByDay,
+      callsByHour: callsByHour ?? this.callsByHour,
+      responseCodeCounts: responseCodeCounts ?? this.responseCodeCounts,
+      lastCalledAt: lastCalledAt ?? this.lastCalledAt,
+      recentDataPoints: recentDataPoints ?? this.recentDataPoints,
+    );
+  }
 }

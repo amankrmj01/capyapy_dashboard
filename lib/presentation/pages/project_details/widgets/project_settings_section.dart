@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../data/models/auth_strategy.dart';
+import '../../../../data/models/project_metadata.dart';
 import '../../../../data/models/project_model.dart';
+import '../../../../data/models/storage_config.dart';
 
 class ProjectSettingsSection extends StatefulWidget {
   final Project project;
@@ -657,7 +660,7 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
   }
 
   Widget _buildSaveButton() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: _saveSettings,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../data/models/project_model.dart';
+import '../../../data/models/models.dart';
 import '../../bloc/project_details/project_details_bloc.dart';
 import '../../bloc/project_details/project_details_event.dart';
 import '../../bloc/project_details/project_details_state.dart';

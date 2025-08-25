@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../data/models/project_model.dart';
+import '../../../../data/models/backward_compatibility.dart';
+import '../../../../data/models/endpoint_analytics.dart';
+import '../../../../data/models/http_config.dart';
+import '../../../../data/models/project_endpoint.dart';
 
 class EndpointEditorDialog extends StatefulWidget {
   final Endpoint? endpoint;
@@ -140,7 +143,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
     return Dialog(
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.9,
         child: Column(
@@ -231,7 +234,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<HttpMethod>(
-                      value: _selectedMethod,
+                      initialValue: _selectedMethod,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -323,7 +326,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _requestContentType,
+                      initialValue: _requestContentType,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -409,7 +412,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<int>(
-                      value: int.parse(_responseStatus),
+                      initialValue: int.parse(_responseStatus),
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -452,7 +455,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _responseContentType,
+                      initialValue: _responseContentType,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),

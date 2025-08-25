@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../../data/models/endpoint_analytics.dart';
+import '../../../../../data/models/http_config.dart';
+import '../../../../../data/models/project_data_model.dart';
+import '../../../../../data/models/project_endpoint.dart';
 import '../../../../bloc/project_builder/project_builder_event.dart';
 import '../../../../bloc/project_builder/project_builder_state.dart';
 import '../../../../bloc/project_builder/project_builder_bloc.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../data/models/project_model.dart';
 
 class EndpointsStep extends StatefulWidget {
   final ProjectBuilderInProgress state;

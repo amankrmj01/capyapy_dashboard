@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../data/models/project_model.dart';
+import '../../../../data/models/models.dart';
 
 class ProjectOverviewSection extends StatefulWidget {
   final Project project;

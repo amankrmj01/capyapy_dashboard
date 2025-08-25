@@ -1,4 +1,4 @@
-import 'project_model.dart';
+import 'models.dart';
 
 /// Example usage and sample data for the Project model
 /// This demonstrates how to create and use all the comprehensive project models

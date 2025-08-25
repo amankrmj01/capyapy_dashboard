@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../data/models/project_model.dart';
+import '../../../data/models/backward_compatibility.dart';
 import 'project_builder_event.dart';
 import 'project_builder_state.dart';
 
@@ -211,38 +211,6 @@ class ProjectBuilderBloc
 
   void _onResetBuilder(ResetBuilder event, Emitter<ProjectBuilderState> emit) {
     emit(const ProjectBuilderInitial());
-  }
-
-  DataModel _createDefaultUserModel() {
-    final now = DateTime.now();
-    return DataModel(
-      id: 'user_model_default',
-      modelName: 'User',
-      collectionName: 'users',
-      description: 'Default user model with authentication fields',
-      fields: const [
-        ModelField(
-          name: 'id',
-          type: FieldType.string,
-          required: true,
-          unique: true,
-        ),
-        ModelField(name: 'password', type: FieldType.string, required: true),
-        ModelField(
-          name: 'email',
-          type: FieldType.string,
-          required: true,
-          unique: true,
-        ),
-        ModelField(
-          name: 'createdAt',
-          type: FieldType.date,
-          defaultValue: 'now',
-        ),
-      ],
-      createdAt: now,
-      updatedAt: now,
-    );
   }
 
   bool _validateCurrentStep(ProjectBuilderInProgress state) {

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../../data/models/project_model.dart';
+import '../../../data/models/auth_strategy.dart';
+import '../../../data/models/backward_compatibility.dart';
 
 abstract class ProjectBuilderEvent extends Equatable {
   const ProjectBuilderEvent();

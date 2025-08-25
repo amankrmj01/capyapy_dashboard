@@ -1,5 +1,3 @@
-import 'package:capyapy_dashboard/data/models/project_model.dart';
-
 import 'models.dart';
 
 class Project {

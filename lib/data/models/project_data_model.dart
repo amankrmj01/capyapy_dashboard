@@ -1,5 +1,3 @@
-import 'package:capyapy_dashboard/data/models/project_model.dart';
-
 import 'models.dart';
 
 class ProjectDataModel {
@@ -57,4 +55,28 @@ class ProjectDataModel {
           json['updatedAt'] ?? DateTime.now().toIso8601String(),
         ),
       );
+
+  ProjectDataModel copyWith({
+    String? id,
+    String? modelName,
+    String? collectionName,
+    String? description,
+    List<MongoDbField>? fields,
+    List<MongoDbIndex>? indexes,
+    Map<String, dynamic>? mongoDbOptions,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return ProjectDataModel(
+      id: id ?? this.id,
+      modelName: modelName ?? this.modelName,
+      collectionName: collectionName ?? this.collectionName,
+      description: description ?? this.description,
+      fields: fields ?? this.fields,
+      indexes: indexes ?? this.indexes,
+      mongoDbOptions: mongoDbOptions ?? this.mongoDbOptions,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }

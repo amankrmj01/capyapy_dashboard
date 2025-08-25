@@ -1,5 +1,3 @@
-import 'package:capyapy_dashboard/data/models/project_model.dart';
-
 import 'models.dart';
 
 class ProjectEndpoint {
@@ -71,4 +69,34 @@ class ProjectEndpoint {
           json['updatedAt'] ?? DateTime.now().toIso8601String(),
         ),
       );
+
+  ProjectEndpoint copyWith({
+    String? id,
+    String? path,
+    HttpMethod? method,
+    String? description,
+    bool? authRequired,
+    RequestConfig? request,
+    ResponseConfig? response,
+    Map<String, String>? pathParams,
+    Map<String, String>? queryParams,
+    EndpointAnalytics? analytics,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return ProjectEndpoint(
+      id: id ?? this.id,
+      path: path ?? this.path,
+      method: method ?? this.method,
+      description: description ?? this.description,
+      authRequired: authRequired ?? this.authRequired,
+      request: request ?? this.request,
+      response: response ?? this.response,
+      pathParams: pathParams ?? this.pathParams,
+      queryParams: queryParams ?? this.queryParams,
+      analytics: analytics ?? this.analytics,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }

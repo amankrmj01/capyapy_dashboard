@@ -50,4 +50,26 @@ class ApiCallsAnalytics {
 
   double get overallErrorRate =>
       totalCalls > 0 ? (totalErrorCalls / totalCalls) * 100 : 0.0;
+
+  ApiCallsAnalytics copyWith({
+    int? totalCalls,
+    int? totalSuccessfulCalls,
+    int? totalErrorCalls,
+    Map<String, int>? callsByEndpoint,
+    Map<String, int>? callsByDate,
+    Map<String, int>? callsByMonth,
+    double? averageResponseTime,
+    DateTime? lastUpdated,
+  }) {
+    return ApiCallsAnalytics(
+      totalCalls: totalCalls ?? this.totalCalls,
+      totalSuccessfulCalls: totalSuccessfulCalls ?? this.totalSuccessfulCalls,
+      totalErrorCalls: totalErrorCalls ?? this.totalErrorCalls,
+      callsByEndpoint: callsByEndpoint ?? this.callsByEndpoint,
+      callsByDate: callsByDate ?? this.callsByDate,
+      callsByMonth: callsByMonth ?? this.callsByMonth,
+      averageResponseTime: averageResponseTime ?? this.averageResponseTime,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+    );
+  }
 }

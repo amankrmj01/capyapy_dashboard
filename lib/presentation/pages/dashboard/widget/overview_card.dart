@@ -76,7 +76,7 @@ class OverviewCard extends StatelessWidget {
                         child: Switch(
                           value: isToggled,
                           onChanged: (value) => onToggle?.call(),
-                          activeColor: color,
+                          activeThumbColor: color,
                         ),
                       )
                     else if (tooltip != null)

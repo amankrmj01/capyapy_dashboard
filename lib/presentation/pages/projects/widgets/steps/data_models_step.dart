@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../../data/models/mongodb_field.dart';
+import '../../../../../data/models/mongodb_index.dart';
+import '../../../../../data/models/project_data_model.dart';
 import '../../../../bloc/project_builder/project_builder_bloc.dart';
 import '../../../../bloc/project_builder/project_builder_event.dart';
 import '../../../../bloc/project_builder/project_builder_state.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../data/models/project_model.dart';
 
 class DataModelsStep extends StatefulWidget {
   final ProjectBuilderInProgress state;

@@ -1,5 +1,3 @@
-import 'models.dart';
-
 class MongoDbIndex {
   final String name;
   final Map<String, int> fields; // field: 1 for ascending, -1 for descending
