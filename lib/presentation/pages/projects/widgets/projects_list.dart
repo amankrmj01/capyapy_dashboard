@@ -3,9 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/models.dart';
-import '../../../bloc/project_details/project_details_event.dart';
+import '../../../bloc/project_details/project_details_bloc.dart';
 import '../../../bloc/projects/projects_bloc.dart';
 import '../../../bloc/projects/projects_state.dart';
+import '../../project_details/project_details_page.dart';
 
 class ProjectsList extends StatelessWidget {
   final void Function(BuildContext) onCreateProject;
@@ -170,7 +171,15 @@ class ProjectsList extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // TODO: Navigate to project details
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider<ProjectDetailsBloc>(
+                  create: (_) => ProjectDetailsBloc(),
+                  child: ProjectDetailsPage(project: project),
+                ),
+              ),
+            );
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
