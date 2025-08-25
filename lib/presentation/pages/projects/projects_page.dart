@@ -4,7 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../bloc/project_builder/project_builder_bloc.dart';
 import '../../bloc/project_builder/project_builder_event.dart';
 import '../../bloc/project_builder/project_builder_state.dart';
+import '../../bloc/projects/projects_bloc.dart';
+import '../../bloc/projects/projects_event.dart';
+import '../../bloc/projects/projects_state.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../data/repositories/project_repository_impl.dart';
+import '../../../data/datasources/mock_project_data_source.dart';
 import 'widgets/project_creation_wizard.dart';
 import 'widgets/projects_list.dart';
 
@@ -55,43 +60,53 @@ class _ProjectsPageState extends State<ProjectsPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ProjectBuilderBloc(),
-      child: Builder(
-        builder: (context) => BlocListener<ProjectBuilderBloc, ProjectBuilderState>(
-          listener: (context, state) {
-            if (state is ProjectBuilderSuccess) {
-              setState(() {
-                _showCreateProjectWizard = false;
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Project "${state.project.projectName}" created successfully!',
-                  ),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            } else if (state is ProjectBuilderError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error: ${state.message}'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-          child: _showCreateProjectWizard
-              ? ProjectCreationWizard(
-                  onClose: () {
+      create: (_) => ProjectsBloc(
+        projectRepository: ProjectRepositoryImpl(
+          dataSource: MockProjectDataSource(),
+        ),
+      )..add(const LoadProjects()),
+      child: BlocProvider(
+        create: (_) => ProjectBuilderBloc(),
+        child: Builder(
+          builder: (context) =>
+              BlocListener<ProjectBuilderBloc, ProjectBuilderState>(
+                listener: (context, state) {
+                  if (state is ProjectBuilderSuccess) {
                     setState(() {
                       _showCreateProjectWizard = false;
                     });
-                    context.read<ProjectBuilderBloc>().add(
-                      const ResetBuilder(),
+                    // Refresh projects after creating a new one
+                    context.read<ProjectsBloc>().add(const RefreshProjects());
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Project "${state.project.projectName}" created successfully!',
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
                     );
-                  },
-                )
-              : _buildProjectsOverview(context),
+                  } else if (state is ProjectBuilderError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: ${state.message}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: _showCreateProjectWizard
+                    ? ProjectCreationWizard(
+                        onClose: () {
+                          setState(() {
+                            _showCreateProjectWizard = false;
+                          });
+                          context.read<ProjectBuilderBloc>().add(
+                            const ResetBuilder(),
+                          );
+                        },
+                      )
+                    : _buildProjectsOverview(context),
+              ),
         ),
       ),
     );
@@ -259,50 +274,121 @@ class _ProjectsPageState extends State<ProjectsPage> {
   }
 
   Widget _buildQuickStats(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: MediaQuery.of(context).size.width > 1300 ? 4 : 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.4,
-        children: [
-          _buildStatCard(
-            context,
-            icon: '📊',
-            title: 'Total Projects',
-            value: '8',
-            subtitle: '3 Active',
-            color: Colors.blue,
+    return BlocBuilder<ProjectsBloc, ProjectsState>(
+      builder: (context, state) {
+        if (state is ProjectsLoading) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: MediaQuery.of(context).size.width > 1300 ? 4 : 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.4,
+              children: List.generate(
+                4,
+                (index) => _buildLoadingStatCard(context),
+              ),
+            ),
+          );
+        }
+
+        if (state is ProjectsLoaded) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: MediaQuery.of(context).size.width > 1300 ? 4 : 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.4,
+              children: [
+                _buildStatCard(
+                  context,
+                  icon: '📊',
+                  title: 'Total Projects',
+                  value: '${state.totalProjects}',
+                  subtitle: '${state.activeProjects} Active',
+                  color: Colors.blue,
+                ),
+                _buildStatCard(
+                  context,
+                  icon: '🔗',
+                  title: 'Endpoints',
+                  value: '${state.totalEndpoints}',
+                  subtitle: 'Across all projects',
+                  color: Colors.green,
+                ),
+                _buildStatCard(
+                  context,
+                  icon: '📝',
+                  title: 'Data Models',
+                  value: '${state.totalModels}',
+                  subtitle: 'Total schemas',
+                  color: Colors.orange,
+                ),
+                _buildStatCard(
+                  context,
+                  icon: '⚡',
+                  title: 'API Calls',
+                  value: _formatNumber(state.totalApiCalls),
+                  subtitle: 'This month',
+                  color: Colors.purple,
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Error or initial state - show empty cards
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: MediaQuery.of(context).size.width > 1300 ? 4 : 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.4,
+            children: [
+              _buildStatCard(
+                context,
+                icon: '📊',
+                title: 'Total Projects',
+                value: '--',
+                subtitle: 'Loading...',
+                color: Colors.blue,
+              ),
+              _buildStatCard(
+                context,
+                icon: '🔗',
+                title: 'Endpoints',
+                value: '--',
+                subtitle: 'Loading...',
+                color: Colors.green,
+              ),
+              _buildStatCard(
+                context,
+                icon: '📝',
+                title: 'Data Models',
+                value: '--',
+                subtitle: 'Loading...',
+                color: Colors.orange,
+              ),
+              _buildStatCard(
+                context,
+                icon: '⚡',
+                title: 'API Calls',
+                value: '--',
+                subtitle: 'Loading...',
+                color: Colors.purple,
+              ),
+            ],
           ),
-          _buildStatCard(
-            context,
-            icon: '🔗',
-            title: 'Endpoints',
-            value: '42',
-            subtitle: 'Across all projects',
-            color: Colors.green,
-          ),
-          _buildStatCard(
-            context,
-            icon: '📝',
-            title: 'Data Models',
-            value: '15',
-            subtitle: 'Total schemas',
-            color: Colors.orange,
-          ),
-          _buildStatCard(
-            context,
-            icon: '⚡',
-            title: 'API Calls',
-            value: '1,234',
-            subtitle: 'This month',
-            color: Colors.purple,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -322,7 +408,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
         border: Border.all(color: AppColors.border(context), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -337,11 +423,11 @@ class _ProjectsPageState extends State<ProjectsPage> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
-                  child: Text(icon, style: TextStyle(fontSize: 20)),
+                  child: Text(icon, style: const TextStyle(fontSize: 20)),
                 ),
               ),
               const Spacer(),
@@ -379,6 +465,94 @@ class _ProjectsPageState extends State<ProjectsPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildLoadingStatCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border(context), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.grey.withValues(alpha: 0.3),
+                    ),
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Container(
+            height: 24,
+            width: 60,
+            decoration: BoxDecoration(
+              color: Colors.grey.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            height: 14,
+            width: 80,
+            decoration: BoxDecoration(
+              color: Colors.grey.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Container(
+            height: 12,
+            width: 100,
+            decoration: BoxDecoration(
+              color: Colors.grey.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}k';
+    }
+    return number.toString();
   }
 
   Widget _buildProjectsList(BuildContext context) {
