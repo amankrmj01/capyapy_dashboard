@@ -1,16 +1,81 @@
-# capyapy_dashboard
+# Capyapy Dashboard
 
-A new Flutter project.
+A modern Flutter web dashboard for managing mock API projects, data models, endpoints, and billing.
+Built with GoRouter for navigation and BLoC for state management.
+
+## Features
+
+- Responsive dashboard UI for desktop and mobile
+- Project management: create, view, edit, delete projects
+- Data models and endpoints management
+- Billing and settings pages
+- Sidebar navigation (desktop)
+- GoRouter-based navigation
+- BLoC state management
+
+## Screenshots
+
+<!-- Add screenshots here -->
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- [Flutter](https://flutter.dev/docs/get-started/install) (3.x or later)
+- Dart SDK
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Installation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/capyapy_dashboard.git
+   cd capyapy_dashboard
+   ```
+2. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+
+### Running the App
+
+To run the app locally:
+
+```bash
+flutter run -d chrome
+```
+
+## Project Structure
+
+```
+lib/
+  core/         # App-wide constants, router, theme, utils
+  data/         # Models, datasources, repositories
+  domain/       # Entities, repositories, usecases
+  presentation/ # UI pages, widgets, BLoC
+  main.dart     # App entry point
+```
+
+## Navigation
+
+- Uses [GoRouter](https://pub.dev/packages/go_router) for declarative routing
+- Example route: `/project/:id` for project details
+- Sidebar navigation for desktop, tab navigation for mobile
+
+## State Management
+
+- Uses [flutter_bloc](https://pub.dev/packages/flutter_bloc) for managing state
+- Each major feature (dashboard, projects, project details) has its own BLoC
+
+## Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would
+like to change.
+
+## License
+
+[MIT](LICENSE)
+
+## Contact
+
+For questions or feedback, contact [yourname@domain.com](mailto:yourname@domain.com)
+
