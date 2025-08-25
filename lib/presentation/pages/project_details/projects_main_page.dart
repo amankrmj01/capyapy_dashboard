@@ -1,27 +1,28 @@
+import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/data_models_section.dart';
+import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/endpoints_section.dart';
 import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/project_details_sidebar.dart';
+import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/project_overview_section.dart';
+import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/project_settings_section.dart';
 import 'package:flutter/material.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/models.dart';
-import 'widgets/project_overview_section.dart';
-import 'widgets/data_models_section.dart';
-import 'widgets/endpoints_section.dart';
-import 'widgets/project_settings_section.dart';
 
-class ProjectDetailsPage extends StatefulWidget {
+class ProjectMainPage extends StatefulWidget {
   final Project project;
   final Function(Project)? onProjectUpdated;
 
-  const ProjectDetailsPage({
+  const ProjectMainPage({
     super.key,
     required this.project,
     this.onProjectUpdated,
   });
 
   @override
-  State<ProjectDetailsPage> createState() => _ProjectDetailsPageState();
+  State<ProjectMainPage> createState() => _ProjectMainPageState();
 }
 
-class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
+class _ProjectMainPageState extends State<ProjectMainPage> {
   int _selectedIndex = 0;
 
   Function(Project) get _onProjectUpdated => widget.onProjectUpdated ?? (p) {};

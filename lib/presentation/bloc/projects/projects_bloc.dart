@@ -30,7 +30,7 @@ class ProjectsBloc extends Bloc<ProjectsEvent, ProjectsState> {
       );
       final totalApiCalls = projects.fold<int>(
         0,
-        (sum, project) => sum + (project.apiCallsAnalytics?.totalCalls ?? 0),
+        (sum, project) => sum + (project.apiCallsAnalytics.totalCalls),
       );
 
       emit(
@@ -65,7 +65,7 @@ class ProjectsBloc extends Bloc<ProjectsEvent, ProjectsState> {
       );
       final totalApiCalls = projects.fold<int>(
         0,
-        (sum, project) => sum + (project.apiCallsAnalytics?.totalCalls ?? 0),
+        (sum, project) => sum + (project.apiCallsAnalytics.totalCalls),
       );
 
       emit(

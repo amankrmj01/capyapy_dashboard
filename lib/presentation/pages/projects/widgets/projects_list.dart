@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/models.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
@@ -171,15 +172,7 @@ class ProjectsList extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BlocProvider<ProjectDetailsBloc>(
-                  create: (_) => ProjectDetailsBloc(),
-                  child: ProjectDetailsPage(project: project),
-                ),
-              ),
-            );
+            context.go('/project/${project.id}', extra: project);
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
@@ -304,7 +297,7 @@ class ProjectsList extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  project.description ?? 'No description',
+                  project.description,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     color: AppColors.textSecondary(context),
