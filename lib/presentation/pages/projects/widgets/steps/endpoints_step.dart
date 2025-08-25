@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../bloc/project_builder/project_builder_bloc.dart';
 import '../../../../bloc/project_builder/project_builder_event.dart';
 import '../../../../bloc/project_builder/project_builder_state.dart';
+import '../../../../bloc/project_builder/project_builder_bloc.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../data/models/project_model.dart';
 
@@ -133,7 +133,7 @@ class _EndpointsStepState extends State<EndpointsStep> {
 
   Widget _buildEndpointCard(
     BuildContext context,
-    Endpoint endpoint,
+    ProjectEndpoint endpoint,
     int index,
   ) {
     return Container(
@@ -260,8 +260,8 @@ class _EndpointsStepState extends State<EndpointsStep> {
             children: [
               _buildInfoChip(
                 context,
-                'Status: ${endpoint.response.status}',
-                endpoint.response.status < 300 ? Colors.green : Colors.red,
+                'Status: ${endpoint.response.statusCode}',
+                endpoint.response.statusCode < 300 ? Colors.green : Colors.red,
               ),
               const SizedBox(width: 8),
               _buildInfoChip(
@@ -580,7 +580,7 @@ class _EndpointsStepState extends State<EndpointsStep> {
 
   void _showEndpointEditor(
     BuildContext context,
-    Endpoint? endpoint,
+    ProjectEndpoint? endpoint,
     int? index,
   ) {
     // TODO: Implement endpoint editor dialog
@@ -594,19 +594,21 @@ class _EndpointsStepState extends State<EndpointsStep> {
   }
 
   void _addCrudEndpoint(
-    DataModel model,
+    ProjectDataModel model,
     HttpMethod method,
     String path,
     String description,
   ) {
-    final endpoint = Endpoint(
+    final endpoint = ProjectEndpoint(
+      id: 'endpoint_${DateTime.now().millisecondsSinceEpoch}',
       path: path,
       method: method,
       description: description,
       authRequired: method != HttpMethod.get && widget.state.hasAuth,
       response: ResponseConfig(
-        status: method == HttpMethod.post ? 201 : 200,
-        body: method == HttpMethod.delete
+        statusCode: method == HttpMethod.post ? 201 : 200,
+        contentType: 'application/json',
+        schema: method == HttpMethod.delete
             ? {
                 'message': '${model.modelName} deleted successfully',
                 'deletedId': 'auto',
@@ -621,7 +623,7 @@ class _EndpointsStepState extends State<EndpointsStep> {
                 'message': '${model.modelName} updated successfully',
                 'updatedId': 'auto',
               }
-            : 'auto',
+            : _generateSchemaFromModel(model),
       ),
       pathParams: path.contains(':id') ? {'id': 'string'} : null,
       request: (method == HttpMethod.post || method == HttpMethod.put)
@@ -630,12 +632,19 @@ class _EndpointsStepState extends State<EndpointsStep> {
               bodySchema: _generateSchemaFromModel(model),
             )
           : null,
+      analytics: EndpointAnalytics(
+        totalCalls: 0,
+        averageResponseTime: 0,
+        lastCalledAt: DateTime.now(),
+      ),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
     context.read<ProjectBuilderBloc>().add(AddEndpoint(endpoint));
   }
 
-  Map<String, dynamic> _generateSchemaFromModel(DataModel model) {
+  Map<String, dynamic> _generateSchemaFromModel(ProjectDataModel model) {
     final schema = <String, dynamic>{};
     for (final field in model.fields) {
       if (field.name != 'id' && field.name != 'createdAt') {

@@ -17,6 +17,40 @@ class ProjectsPage extends StatefulWidget {
 
 class _ProjectsPageState extends State<ProjectsPage> {
   bool _showCreateProjectWizard = false;
+  final ScrollController _scrollController = ScrollController();
+  double _scrollOffset = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    setState(() {
+      _scrollOffset = _scrollController.offset.clamp(0.0, 100.0);
+    });
+  }
+
+  // Calculate progress from 0.0 to 1.0 based on scroll
+  double get _transitionProgress => (_scrollOffset / 100.0).clamp(0.0, 1.0);
+
+  // Calculate header height (120 -> 70)
+  double get _headerHeight => 120.0 - (50.0 * _transitionProgress);
+
+  // Calculate if we should show collapsed layout (starts fading in at 40% progress)
+  double get _collapsedOpacity =>
+      ((_transitionProgress - 0.4) / 0.6).clamp(0.0, 1.0);
+
+  // Calculate expanded layout opacity (starts fading out at 20% progress)
+  double get _expandedOpacity =>
+      (1.0 - (_transitionProgress / 0.5)).clamp(0.0, 1.0);
 
   @override
   Widget build(BuildContext context) {
@@ -64,164 +98,177 @@ class _ProjectsPageState extends State<ProjectsPage> {
   }
 
   Widget _buildProjectsOverview(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        _buildHeader(context),
-        _buildQuickStats(context),
-        _buildProjectsList(context),
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            children: [
+              SizedBox(height: _headerHeight + 20),
+              // Dynamic space for floating header
+              _buildQuickStats(context),
+              _buildProjectsList(context),
+              const SizedBox(height: 32),
+              // Bottom padding
+            ],
+          ),
+        ),
+        _buildFloatingHeader(context),
       ],
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return SliverAppBar(
-      pinned: true,
-      floating: false,
-      expandedHeight: 120,
-      collapsedHeight: 70,
-      backgroundColor: Colors.transparent,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      automaticallyImplyLeading: false,
-      flexibleSpace: LayoutBuilder(
-        builder: (context, constraints) {
-          final isCollapsed = constraints.maxHeight <= 80;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            margin: isCollapsed
-                ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
-                : EdgeInsets.zero,
-            decoration: BoxDecoration(
-              color: isCollapsed
-                  ? AppColors.surface(context)
-                  : Colors.transparent,
-              borderRadius: isCollapsed
-                  ? BorderRadius.circular(16)
-                  : BorderRadius.zero,
-              boxShadow: isCollapsed
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: FlexibleSpaceBar(
-              background: Container(color: Colors.transparent),
-              titlePadding: EdgeInsets.only(
-                left: isCollapsed ? 20 : 24,
-                bottom: isCollapsed ? 20 : 16,
-                right: isCollapsed ? 20 : 24,
-              ),
-              title: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                child: isCollapsed
-                    ? Row(
-                        children: [
-                          Text('🗂️', style: GoogleFonts.inter(fontSize: 20)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Projects',
+  Widget _buildFloatingHeader(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeOut,
+      margin: EdgeInsets.lerp(
+        const EdgeInsets.only(left: 24, right: 24, top: 16),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        _transitionProgress,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surface(context),
+        borderRadius: BorderRadius.lerp(
+          BorderRadius.circular(12),
+          BorderRadius.circular(20),
+          _transitionProgress,
+        ),
+        boxShadow: _transitionProgress > 0.3
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(
+                    alpha: 0.1 * _transitionProgress,
+                  ),
+                  blurRadius: 12 * _transitionProgress,
+                  offset: Offset(0, 4 * _transitionProgress),
+                ),
+              ]
+            : null,
+      ),
+      child: Container(
+        height: _headerHeight,
+        padding: EdgeInsets.lerp(
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          _transitionProgress,
+        ),
+        child: Stack(
+          alignment: AlignmentGeometry.centerLeft,
+          children: [
+            // Expanded layout (fades out early)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 100),
+              opacity: _expandedOpacity,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              '🗂️ Projects',
                               style: GoogleFonts.inter(
                                 color: AppColors.textPrimary(context),
                                 fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                                fontSize: 28,
                               ),
                             ),
+                            const SizedBox(width: 8),
+                            Text('🚀', style: TextStyle(fontSize: 24)),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Create and manage your mock API services',
+                          style: GoogleFonts.inter(
+                            color: AppColors.textSecondary(context),
+                            fontSize: 14,
                           ),
-                          ElevatedButton.icon(
-                            onPressed: () => _startProjectCreation(context),
-                            icon: Icon(Icons.add, size: 16),
-                            label: Text('New'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              minimumSize: Size(0, 32),
-                            ),
-                          ),
-                        ],
-                      )
-                    : Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      '🗂️ Projects',
-                                      style: GoogleFonts.inter(
-                                        color: AppColors.textPrimary(context),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 28,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text('🚀', style: TextStyle(fontSize: 24)),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Create and manage your mock API services',
-                                  style: GoogleFonts.inter(
-                                    color: AppColors.textSecondary(context),
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () => _startProjectCreation(context),
-                            icon: Icon(Icons.add),
-                            label: Text('Create New Project'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _startProjectCreation(context),
+                    icon: Icon(Icons.add),
+                    label: Text('Create New Project'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
                       ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          );
-        },
+
+            // Collapsed layout (fades in later)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 100),
+              opacity: _collapsedOpacity,
+              child: Row(
+                children: [
+                  Text('🗂️', style: GoogleFonts.inter(fontSize: 20)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Projects',
+                      style: GoogleFonts.inter(
+                        color: AppColors.textPrimary(context),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _startProjectCreation(context),
+                    icon: Icon(Icons.add, size: 16),
+                    label: Text('New'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      minimumSize: Size(0, 32),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildQuickStats(BuildContext context) {
-    return SliverPadding(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      sliver: SliverGrid(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: MediaQuery.of(context).size.width > 1300 ? 4 : 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1.4,
-        ),
-        delegate: SliverChildListDelegate([
+      child: GridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: MediaQuery.of(context).size.width > 1300 ? 4 : 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 1.4,
+        children: [
           _buildStatCard(
             context,
             icon: '📊',
@@ -254,7 +301,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
             subtitle: 'This month',
             color: Colors.purple,
           ),
-        ]),
+        ],
       ),
     );
   }
@@ -335,11 +382,9 @@ class _ProjectsPageState extends State<ProjectsPage> {
   }
 
   Widget _buildProjectsList(BuildContext context) {
-    return SliverPadding(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      sliver: SliverToBoxAdapter(
-        child: ProjectsList(onCreateProject: _startProjectCreation),
-      ),
+      child: ProjectsList(onCreateProject: _startProjectCreation),
     );
   }
 

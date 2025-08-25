@@ -214,18 +214,15 @@ class ProjectBuilderBloc
   }
 
   DataModel _createDefaultUserModel() {
-    return const DataModel(
+    final now = DateTime.now();
+    return DataModel(
+      id: 'user_model_default',
       modelName: 'User',
       collectionName: 'users',
-      fields: [
+      description: 'Default user model with authentication fields',
+      fields: const [
         ModelField(
           name: 'id',
-          type: FieldType.string,
-          required: true,
-          unique: true,
-        ),
-        ModelField(
-          name: 'username',
           type: FieldType.string,
           required: true,
           unique: true,
@@ -243,6 +240,8 @@ class ProjectBuilderBloc
           defaultValue: 'now',
         ),
       ],
+      createdAt: now,
+      updatedAt: now,
     );
   }
 

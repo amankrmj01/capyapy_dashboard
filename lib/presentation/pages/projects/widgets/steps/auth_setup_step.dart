@@ -127,7 +127,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
                   });
                   _updateAuthSettings();
                 },
-                activeColor: Colors.blue,
+                activeThumbColor: Colors.blue,
               ),
             ],
           ),
@@ -136,9 +136,9 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
+                color: Colors.green.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.green.withOpacity(0.2)),
+                border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
@@ -233,7 +233,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? Colors.blue.withOpacity(0.1)
+              ? Colors.blue.withValues(alpha: 0.1)
               : AppColors.surface(context),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
@@ -350,9 +350,9 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.05),
+        color: Colors.orange.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.withOpacity(0.2)),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,9 +388,28 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
   void _updateAuthSettings() {
     AuthStrategy? strategy;
     if (_hasAuth) {
+      // Map the selected strategy to AuthType enum
+      AuthType authType;
+      switch (_selectedStrategy) {
+        case 'oauth2':
+          authType = AuthType.oauth2;
+          break;
+        case 'jwt':
+          authType = AuthType.bearer;
+          break;
+        case 'apikey':
+          authType = AuthType.apiKey;
+          break;
+        case 'basic':
+          authType = AuthType.basic;
+          break;
+        default:
+          authType = AuthType.bearer;
+      }
+
       strategy = AuthStrategy(
-        strategy: _selectedStrategy,
-        scopes: _selectedScopes,
+        type: authType,
+        config: {'strategy': _selectedStrategy, 'scopes': _selectedScopes},
       );
     }
 

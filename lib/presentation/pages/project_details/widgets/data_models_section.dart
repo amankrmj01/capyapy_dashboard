@@ -1,0 +1,443 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../data/models/project_model.dart';
+import '../../../bloc/project_details/project_details_bloc.dart';
+import '../../../bloc/project_details/project_details_event.dart';
+import 'data_model_editor_dialog.dart';
+
+class DataModelsSection extends StatefulWidget {
+  final Project project;
+  final Function(Project) onProjectUpdated;
+
+  const DataModelsSection({
+    super.key,
+    required this.project,
+    required this.onProjectUpdated,
+  });
+
+  @override
+  State<DataModelsSection> createState() => _DataModelsSectionState();
+}
+
+class _DataModelsSectionState extends State<DataModelsSection> {
+  void _addNewDataModel() {
+    showDialog(
+      context: context,
+      builder: (context) => DataModelEditorDialog(
+        onSave: (dataModel) {
+          context.read<ProjectDetailsBloc>().add(AddDataModel(dataModel));
+        },
+      ),
+    );
+  }
+
+  void _editDataModel(int index, DataModel dataModel) {
+    showDialog(
+      context: context,
+      builder: (context) => DataModelEditorDialog(
+        dataModel: dataModel,
+        onSave: (updatedDataModel) {
+          context.read<ProjectDetailsBloc>().add(
+            UpdateDataModel(index, updatedDataModel),
+          );
+        },
+      ),
+    );
+  }
+
+  void _deleteDataModel(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Delete Data Model',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${widget.project.dataModels[index].modelName}"? This action cannot be undone.',
+          style: GoogleFonts.inter(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.inter(color: AppColors.textSecondary(context)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<ProjectDetailsBloc>().add(DeleteDataModel(index));
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Delete', style: GoogleFonts.inter()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _buildHeader(),
+        Expanded(
+          child: widget.project.dataModels.isEmpty
+              ? _buildEmptyState()
+              : _buildDataModelsList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.surface(context),
+        border: Border(bottom: BorderSide(color: AppColors.border(context))),
+      ),
+      child: Row(
+        children: [
+          Text(
+            'Data Models',
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary(context),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.primary(context).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '${widget.project.dataModels.length}',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: AppColors.primary(context),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const Spacer(),
+          ElevatedButton.icon(
+            onPressed: _addNewDataModel,
+            icon: const Icon(Icons.add, size: 18),
+            label: Text('Add Model', style: GoogleFonts.inter(fontSize: 14)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary(context),
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.table_chart,
+            size: 64,
+            color: AppColors.textSecondary(context).withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No Data Models',
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary(context),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Create your first data model to define the structure of your data.',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: AppColors.textSecondary(context).withOpacity(0.7),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _addNewDataModel,
+            icon: const Icon(Icons.add),
+            label: Text('Create Data Model', style: GoogleFonts.inter()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary(context),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataModelsList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(24),
+      itemCount: widget.project.dataModels.length,
+      itemBuilder: (context, index) {
+        final dataModel = widget.project.dataModels[index];
+        return _buildDataModelCard(index, dataModel);
+      },
+    );
+  }
+
+  Widget _buildDataModelCard(int index, DataModel dataModel) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: AppColors.surface(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary(context).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.table_chart,
+                    color: AppColors.primary(context),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        dataModel.modelName,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary(context),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Collection: ${dataModel.collectionName}',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: AppColors.textSecondary(context),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${dataModel.fields.length} fields',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: AppColors.textSecondary(
+                            context,
+                          ).withOpacity(0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuButton(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: AppColors.textSecondary(context),
+                  ),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.edit,
+                            size: 16,
+                            color: AppColors.textPrimary(context),
+                          ),
+                          const SizedBox(width: 8),
+                          Text('Edit', style: GoogleFonts.inter()),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete, size: 16, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Delete',
+                            style: GoogleFonts.inter(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _editDataModel(index, dataModel);
+                    } else if (value == 'delete') {
+                      _deleteDataModel(index);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          if (dataModel.fields.isNotEmpty) _buildFieldsList(dataModel.fields),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFieldsList(List<ModelField> fields) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: AppColors.border(context))),
+      ),
+      child: Column(
+        children: fields.take(5).map((field) => _buildFieldRow(field)).toList()
+          ..addAll([
+            if (fields.length > 5)
+              Container(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  '... and ${fields.length - 5} more fields',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppColors.textSecondary(context),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+          ]),
+      ),
+    );
+  }
+
+  Widget _buildFieldRow(ModelField field) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.border(context).withValues(alpha: 0.3),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _getFieldTypeColor(field.type).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              field.type.displayName,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                color: _getFieldTypeColor(field.type),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              field.name,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: AppColors.textPrimary(context),
+              ),
+            ),
+          ),
+          if (field.required)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: Text(
+                'Required',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  color: Colors.orange,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          if (field.unique) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: Text(
+                'Unique',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  color: Colors.blue,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Color _getFieldTypeColor(MongoDbFieldType type) {
+    switch (type) {
+      case MongoDbFieldType.string:
+        return Colors.blue;
+      case MongoDbFieldType.number:
+        return Colors.green;
+      case MongoDbFieldType.boolean:
+        return Colors.orange;
+      case MongoDbFieldType.date:
+        return Colors.purple;
+      case MongoDbFieldType.objectId:
+        return Colors.red;
+      case MongoDbFieldType.array:
+        return Colors.teal;
+      case MongoDbFieldType.object:
+        return Colors.indigo;
+      case MongoDbFieldType.buffer:
+        return Colors.brown;
+      case MongoDbFieldType.decimal:
+        return Colors.cyan;
+      case MongoDbFieldType.mixed:
+        return Colors.grey;
+      case MongoDbFieldType.map:
+        return Colors.amber;
+    }
+  }
+}

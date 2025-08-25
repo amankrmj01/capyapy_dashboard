@@ -88,24 +88,31 @@ class ProjectBuilderInProgress extends ProjectBuilderState {
   }
 
   Project toProject() {
+    final now = DateTime.now();
     return Project(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       projectName: projectName,
-      basePath: basePath,
+      description: '',
+      apiBasePath: basePath,
+      isActive: true,
       hasAuth: hasAuth,
       authStrategy: authStrategy,
-      dataModels: dataModels,
+      mongoDbDataModels: dataModels,
       endpoints: endpoints,
-      storage: const StorageConfig(
-        enabled: true,
-        type: 'mongodb',
-        persist: true,
+      storage: StorageConfig(
+        type: StorageType.mongodb,
+        connectionString: 'mongodb://localhost:27017',
+        databaseName: 'database',
+        options: const {'useUnifiedTopology': true},
       ),
       metadata: ProjectMetadata(
-        createdBy: 'Current User',
-        createdAt: DateTime.now(),
-        tags: ['mock', 'api', 'development'],
+        version: '1.0.0',
+        author: 'Current User',
+        tags: const ['mock', 'api', 'development'],
       ),
+      apiCallsAnalytics: ApiCallsAnalytics(lastUpdated: now),
+      createdAt: now,
+      updatedAt: now,
     );
   }
 }

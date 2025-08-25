@@ -18,342 +18,375 @@ class _SettingsPageState extends State<SettingsPage> {
   final TextEditingController _emailController = TextEditingController(
     text: 'alex.johnson@example.com',
   );
+  final ScrollController _scrollController = ScrollController();
+  double _scrollOffset = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    setState(() {
+      _scrollOffset = _scrollController.offset.clamp(0.0, 100.0);
+    });
+  }
+
+  // Calculate progress from 0.0 to 1.0 based on scroll
+  double get _transitionProgress => (_scrollOffset / 100.0).clamp(0.0, 1.0);
+
+  // Calculate header height (120 -> 70)
+  double get _headerHeight => 120.0 - (50.0 * _transitionProgress);
+
+  // Calculate if we should show collapsed layout (starts fading in at 40% progress)
+  double get _collapsedOpacity =>
+      ((_transitionProgress - 0.4) / 0.6).clamp(0.0, 1.0);
+
+  // Calculate expanded layout opacity (starts fading out at 20% progress)
+  double get _expandedOpacity =>
+      (1.0 - (_transitionProgress / 0.5)).clamp(0.0, 1.0);
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        _buildHeader(context),
-        _buildPersonalDetails(context),
-        _buildThemeSettings(context),
-        _buildBillingDetails(context),
-        _buildDocumentationHelp(context),
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            children: [
+              SizedBox(height: _headerHeight + 20),
+              // Dynamic space for floating header
+              _buildPersonalDetails(context),
+              _buildThemeSettings(context),
+              _buildBillingDetails(context),
+              _buildDocumentationHelp(context),
+              const SizedBox(height: 32),
+              // Bottom padding
+            ],
+          ),
+        ),
+        _buildFloatingHeader(context),
       ],
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return SliverAppBar(
-      pinned: true,
-      floating: false,
-      expandedHeight: 120,
-      collapsedHeight: 70,
-      backgroundColor: Colors.transparent,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      shadowColor: Colors.transparent,
-      automaticallyImplyLeading: false,
-      flexibleSpace: LayoutBuilder(
-        builder: (context, constraints) {
-          final isCollapsed = constraints.maxHeight <= 80;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            margin: isCollapsed
-                ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
-                : EdgeInsets.zero,
-            decoration: BoxDecoration(
-              color: isCollapsed
-                  ? AppColors.surface(context)
-                  : Colors.transparent,
-              borderRadius: isCollapsed
-                  ? BorderRadius.circular(16)
-                  : BorderRadius.zero,
-              boxShadow: isCollapsed
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+  Widget _buildFloatingHeader(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 100),
+      // Faster for smoother scroll
+      curve: Curves.easeOut,
+      margin: EdgeInsets.lerp(
+        const EdgeInsets.only(left: 24, right: 24, top: 16),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        _transitionProgress,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surface(context),
+        borderRadius: BorderRadius.lerp(
+          BorderRadius.circular(12),
+          BorderRadius.circular(20),
+          _transitionProgress,
+        ),
+        boxShadow: _transitionProgress > 0.3
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(
+                    alpha: 0.1 * _transitionProgress,
+                  ),
+                  blurRadius: 12 * _transitionProgress,
+                  offset: Offset(0, 4 * _transitionProgress),
+                ),
+              ]
+            : null,
+      ),
+      child: Container(
+        height: _headerHeight,
+        padding: EdgeInsets.lerp(
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          _transitionProgress,
+        ),
+        child: Stack(
+          alignment: AlignmentGeometry.centerLeft,
+          children: [
+            // Expanded layout (fades out early)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 100),
+              opacity: _expandedOpacity,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '⚙️ Settings',
+                      style: GoogleFonts.inter(
+                        color: AppColors.textPrimary(context),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 28,
                       ),
-                    ]
-                  : null,
-            ),
-            child: FlexibleSpaceBar(
-              background: Container(color: Colors.transparent),
-              titlePadding: EdgeInsets.only(
-                left: isCollapsed ? 20 : 24,
-                bottom: isCollapsed ? 20 : 16,
-                right: isCollapsed ? 20 : 24,
-              ),
-              title: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                child: isCollapsed
-                    ? Row(
-                        children: [
-                          Text('⚙️', style: GoogleFonts.inter(fontSize: 20)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Settings',
-                              style: GoogleFonts.inter(
-                                color: AppColors.textPrimary(context),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                          AnimatedOpacity(
-                            duration: const Duration(milliseconds: 200),
-                            opacity: isCollapsed ? 1.0 : 0.0,
-                            child: Text(
-                              'Tune CapyAPY to Your Vibe',
-                              style: GoogleFonts.inter(
-                                color: AppColors.textSecondary(context),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.bottomLeft,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '⚙️ Settings',
-                              style: GoogleFonts.inter(
-                                color: AppColors.textPrimary(context),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 28,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Tune CapyAPY to Your Vibe',
-                              style: GoogleFonts.inter(
-                                color: AppColors.textSecondary(context),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Tune CapyAPY to Your Vibe',
+                      style: GoogleFonts.inter(
+                        color: AppColors.textSecondary(context),
+                        fontSize: 14,
                       ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          );
-        },
+
+            // Collapsed layout (fades in later)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 100),
+              opacity: _collapsedOpacity,
+              child: Row(
+                children: [
+                  Text('⚙️', style: GoogleFonts.inter(fontSize: 20)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Settings',
+                      style: GoogleFonts.inter(
+                        color: AppColors.textPrimary(context),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    'Tune CapyAPY to Your Vibe',
+                    style: GoogleFonts.inter(
+                      color: AppColors.textSecondary(context),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildPersonalDetails(BuildContext context) {
-    return SliverPadding(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      sliver: SliverToBoxAdapter(
-        child: _buildSettingsCard(
-          context,
-          title: '🧑 Personal Details',
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.blue.withValues(alpha: 0.1),
-                    child: Text('🐹', style: TextStyle(fontSize: 32)),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Profile Picture',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary(context),
-                          ),
+      child: _buildSettingsCard(
+        context,
+        title: '🧑 Personal Details',
+        child: Column(
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                  child: Text('🐹', style: TextStyle(fontSize: 32)),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Profile Picture',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary(context),
                         ),
-                        const SizedBox(height: 8),
-                        OutlinedButton.icon(
-                          onPressed: _changeAvatar,
-                          icon: const Icon(Icons.camera_alt, size: 18),
-                          label: const Text('Change Avatar'),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: _changeAvatar,
+                        icon: const Icon(Icons.camera_alt, size: 18),
+                        label: const Text('Change Avatar'),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              _buildTextField(
-                context,
-                controller: _nameController,
-                label: 'Full Name',
-                icon: Icons.person,
-              ),
-              const SizedBox(height: 16),
-              _buildTextField(
-                context,
-                controller: _emailController,
-                label: 'Email Address',
-                icon: Icons.email,
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _updatePersonalInfo,
-                  icon: const Icon(Icons.save),
-                  label: const Text('Update Info'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildTextField(
+              context,
+              controller: _nameController,
+              label: 'Full Name',
+              icon: Icons.person,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              context,
+              controller: _emailController,
+              label: 'Email Address',
+              icon: Icons.email,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _updatePersonalInfo,
+                icon: const Icon(Icons.save),
+                label: const Text('Update Info'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildThemeSettings(BuildContext context) {
-    return SliverPadding(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      sliver: SliverToBoxAdapter(
-        child: _buildSettingsCard(
-          context,
-          title: '🎨 Theme Settings',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Appearance',
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary(context),
-                ),
+      child: _buildSettingsCard(
+        context,
+        title: '🎨 Theme Settings',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Appearance',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary(context),
               ),
-              const SizedBox(height: 12),
-              BlocBuilder<ThemeCubit, AppThemeMode>(
-                builder: (context, themeMode) {
-                  return Row(
-                    children: [
-                      Expanded(
-                        child: _buildThemeTile(
-                          context,
-                          AppThemeMode.light,
-                          'Light',
-                          '☀️',
-                        ),
+            ),
+            const SizedBox(height: 12),
+            BlocBuilder<ThemeCubit, AppThemeMode>(
+              builder: (context, themeMode) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: _buildThemeTile(
+                        context,
+                        AppThemeMode.light,
+                        'Light',
+                        '☀️',
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildThemeTile(
-                          context,
-                          AppThemeMode.dark,
-                          'Dark',
-                          '🌙',
-                        ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildThemeTile(
+                        context,
+                        AppThemeMode.dark,
+                        'Dark',
+                        '🌙',
                       ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildBillingDetails(BuildContext context) {
-    return SliverPadding(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      sliver: SliverToBoxAdapter(
-        child: _buildSettingsCard(
-          context,
-          title: '💳 Billing Details',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildBillingItem(
-                context,
-                icon: Icons.credit_card,
-                title: 'Payment Methods',
-                subtitle: '•••• •••• •••• 4242',
-                onTap: _managePaymentMethods,
-              ),
-              const Divider(height: 32),
-              _buildBillingItem(
-                context,
-                icon: Icons.location_on,
-                title: 'Billing Address',
-                subtitle: '123 Developer St, Tech City, TC 12345',
-                onTap: _updateBillingAddress,
-              ),
-              const Divider(height: 32),
-              _buildBillingItem(
-                context,
-                icon: Icons.receipt,
-                title: 'Download Invoices',
-                subtitle: 'Get your billing history',
-                onTap: _downloadInvoices,
-              ),
-            ],
-          ),
+      child: _buildSettingsCard(
+        context,
+        title: '💳 Billing Details',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildBillingItem(
+              context,
+              icon: Icons.credit_card,
+              title: 'Payment Methods',
+              subtitle: '•••• •••• •••• 4242',
+              onTap: _managePaymentMethods,
+            ),
+            const Divider(height: 32),
+            _buildBillingItem(
+              context,
+              icon: Icons.location_on,
+              title: 'Billing Address',
+              subtitle: '123 Developer St, Tech City, TC 12345',
+              onTap: _updateBillingAddress,
+            ),
+            const Divider(height: 32),
+            _buildBillingItem(
+              context,
+              icon: Icons.receipt,
+              title: 'Download Invoices',
+              subtitle: 'Get your billing history',
+              onTap: _downloadInvoices,
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildDocumentationHelp(BuildContext context) {
-    return SliverPadding(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      sliver: SliverToBoxAdapter(
-        child: _buildSettingsCard(
-          context,
-          title: '📚 Documentation & Help',
-          child: Column(
-            children: [
-              _buildHelpItem(
-                context,
-                icon: '📖',
-                title: 'CapyAPY Documentation',
-                subtitle: 'Learn how to use all features',
-                onTap: _openDocumentation,
-              ),
-              const Divider(height: 24),
-              _buildHelpItem(
-                context,
-                icon: '❓',
-                title: 'Frequently Asked Questions',
-                subtitle: 'Quick answers to common questions',
-                onTap: _openFAQ,
-              ),
-              const Divider(height: 24),
-              _buildHelpItem(
-                context,
-                icon: '💬',
-                title: 'Contact Support',
-                subtitle: 'Capy\'s here to help! 🐹',
-                onTap: _contactSupport,
-              ),
-              const Divider(height: 24),
-              _buildHelpItem(
-                context,
-                icon: '🌟',
-                title: 'Rate CapyAPY',
-                subtitle: 'Help us improve with your feedback',
-                onTap: _rateApp,
-              ),
-            ],
-          ),
+      child: _buildSettingsCard(
+        context,
+        title: '📚 Documentation & Help',
+        child: Column(
+          children: [
+            _buildHelpItem(
+              context,
+              icon: '📖',
+              title: 'CapyAPY Documentation',
+              subtitle: 'Learn how to use all features',
+              onTap: _openDocumentation,
+            ),
+            const Divider(height: 24),
+            _buildHelpItem(
+              context,
+              icon: '❓',
+              title: 'Frequently Asked Questions',
+              subtitle: 'Quick answers to common questions',
+              onTap: _openFAQ,
+            ),
+            const Divider(height: 24),
+            _buildHelpItem(
+              context,
+              icon: '💬',
+              title: 'Contact Support',
+              subtitle: 'Capy\'s here to help! 🐹',
+              onTap: _contactSupport,
+            ),
+            const Divider(height: 24),
+            _buildHelpItem(
+              context,
+              icon: '🌟',
+              title: 'Rate CapyAPY',
+              subtitle: 'Help us improve with your feedback',
+              onTap: _rateApp,
+            ),
+          ],
         ),
       ),
     );

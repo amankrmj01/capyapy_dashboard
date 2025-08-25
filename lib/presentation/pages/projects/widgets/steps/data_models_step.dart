@@ -131,7 +131,11 @@ class _DataModelsStepState extends State<DataModelsStep> {
     );
   }
 
-  Widget _buildModelCard(BuildContext context, DataModel model, int index) {
+  Widget _buildModelCard(
+    BuildContext context,
+    ProjectDataModel model,
+    int index,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -155,7 +159,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
@@ -237,10 +241,12 @@ class _DataModelsStepState extends State<DataModelsStep> {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _getFieldTypeColor(field.type).withOpacity(0.1),
+                  color: _getFieldTypeColor(field.type).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: _getFieldTypeColor(field.type).withOpacity(0.3),
+                    color: _getFieldTypeColor(
+                      field.type,
+                    ).withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -286,10 +292,10 @@ class _DataModelsStepState extends State<DataModelsStep> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.05),
+          color: Colors.blue.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withValues(alpha: 0.3),
             style: BorderStyle.solid,
           ),
         ),
@@ -299,7 +305,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
@@ -342,105 +348,129 @@ class _DataModelsStepState extends State<DataModelsStep> {
         name: 'User Profile',
         icon: '👤',
         description: 'Basic user information',
-        model: DataModel(
+        model: ProjectDataModel(
+          id: 'user_profile_${DateTime.now().millisecondsSinceEpoch}',
           modelName: 'UserProfile',
           collectionName: 'user_profiles',
+          description: 'Basic user information',
           fields: [
-            ModelField(
+            MongoDbField(
               name: 'id',
-              type: FieldType.string,
+              type: MongoDbFieldType.objectId,
               required: true,
               unique: true,
             ),
-            ModelField(
+            MongoDbField(
               name: 'firstName',
-              type: FieldType.string,
+              type: MongoDbFieldType.string,
               required: true,
             ),
-            ModelField(
+            MongoDbField(
               name: 'lastName',
-              type: FieldType.string,
+              type: MongoDbFieldType.string,
               required: true,
             ),
-            ModelField(name: 'avatar', type: FieldType.string),
-            ModelField(name: 'bio', type: FieldType.string),
-            ModelField(
+            MongoDbField(name: 'avatar', type: MongoDbFieldType.string),
+            MongoDbField(name: 'bio', type: MongoDbFieldType.string),
+            MongoDbField(
               name: 'createdAt',
-              type: FieldType.date,
+              type: MongoDbFieldType.date,
               defaultValue: 'now',
             ),
           ],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         ),
       ),
       _ModelTemplate(
         name: 'Product',
         icon: '🛍️',
         description: 'E-commerce product',
-        model: DataModel(
+        model: ProjectDataModel(
+          id: 'product_${DateTime.now().millisecondsSinceEpoch}',
           modelName: 'Product',
           collectionName: 'products',
+          description: 'E-commerce product',
           fields: [
-            ModelField(
+            MongoDbField(
               name: 'id',
-              type: FieldType.string,
+              type: MongoDbFieldType.objectId,
               required: true,
               unique: true,
             ),
-            ModelField(name: 'name', type: FieldType.string, required: true),
-            ModelField(name: 'price', type: FieldType.number, required: true),
-            ModelField(name: 'description', type: FieldType.string),
-            ModelField(
+            MongoDbField(
+              name: 'name',
+              type: MongoDbFieldType.string,
+              required: true,
+            ),
+            MongoDbField(
+              name: 'price',
+              type: MongoDbFieldType.number,
+              required: true,
+            ),
+            MongoDbField(name: 'description', type: MongoDbFieldType.string),
+            MongoDbField(
               name: 'inStock',
-              type: FieldType.boolean,
+              type: MongoDbFieldType.boolean,
               defaultValue: true,
             ),
-            ModelField(
-              name: 'tags',
-              type: FieldType.array,
-              itemsType: 'String',
-            ),
-            ModelField(
+            MongoDbField(name: 'tags', type: MongoDbFieldType.array),
+            MongoDbField(
               name: 'createdAt',
-              type: FieldType.date,
+              type: MongoDbFieldType.date,
               defaultValue: 'now',
             ),
           ],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         ),
       ),
       _ModelTemplate(
         name: 'Blog Post',
         icon: '📝',
         description: 'Blog content structure',
-        model: DataModel(
+        model: ProjectDataModel(
+          id: 'blog_post_${DateTime.now().millisecondsSinceEpoch}',
           modelName: 'BlogPost',
           collectionName: 'blog_posts',
+          description: 'Blog content structure',
           fields: [
-            ModelField(
+            MongoDbField(
               name: 'id',
-              type: FieldType.string,
+              type: MongoDbFieldType.objectId,
               required: true,
               unique: true,
             ),
-            ModelField(name: 'title', type: FieldType.string, required: true),
-            ModelField(name: 'content', type: FieldType.string, required: true),
-            ModelField(name: 'author', type: FieldType.string, required: true),
-            ModelField(
+            MongoDbField(
+              name: 'title',
+              type: MongoDbFieldType.string,
+              required: true,
+            ),
+            MongoDbField(
+              name: 'content',
+              type: MongoDbFieldType.string,
+              required: true,
+            ),
+            MongoDbField(
+              name: 'author',
+              type: MongoDbFieldType.string,
+              required: true,
+            ),
+            MongoDbField(
               name: 'published',
-              type: FieldType.boolean,
+              type: MongoDbFieldType.boolean,
               defaultValue: false,
             ),
-            ModelField(
-              name: 'tags',
-              type: FieldType.array,
-              itemsType: 'String',
-            ),
-            ModelField(name: 'publishedAt', type: FieldType.date),
-            ModelField(
+            MongoDbField(name: 'tags', type: MongoDbFieldType.array),
+            MongoDbField(name: 'publishedAt', type: MongoDbFieldType.date),
+            MongoDbField(
               name: 'createdAt',
-              type: FieldType.date,
+              type: MongoDbFieldType.date,
               defaultValue: 'now',
             ),
           ],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         ),
       ),
     ];
@@ -518,24 +548,38 @@ class _DataModelsStepState extends State<DataModelsStep> {
     );
   }
 
-  Color _getFieldTypeColor(FieldType type) {
+  Color _getFieldTypeColor(MongoDbFieldType type) {
     switch (type) {
-      case FieldType.string:
+      case MongoDbFieldType.string:
         return Colors.blue;
-      case FieldType.number:
+      case MongoDbFieldType.number:
         return Colors.green;
-      case FieldType.boolean:
+      case MongoDbFieldType.boolean:
         return Colors.orange;
-      case FieldType.date:
+      case MongoDbFieldType.date:
         return Colors.purple;
-      case FieldType.array:
+      case MongoDbFieldType.array:
         return Colors.teal;
-      case FieldType.object:
+      case MongoDbFieldType.object:
         return Colors.red;
+      case MongoDbFieldType.objectId:
+        return Colors.indigo;
+      case MongoDbFieldType.buffer:
+        return Colors.amber;
+      case MongoDbFieldType.decimal:
+        return Colors.cyan;
+      case MongoDbFieldType.mixed:
+        return Colors.grey;
+      case MongoDbFieldType.map:
+        return Colors.deepPurple;
     }
   }
 
-  void _showModelEditor(BuildContext context, DataModel? model, int? index) {
+  void _showModelEditor(
+    BuildContext context,
+    ProjectDataModel? model,
+    int? index,
+  ) {
     // TODO: Implement model editor dialog
     ScaffoldMessenger.of(
       context,
@@ -546,7 +590,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
     context.read<ProjectBuilderBloc>().add(RemoveDataModel(index));
   }
 
-  void _addTemplateModel(DataModel model) {
+  void _addTemplateModel(ProjectDataModel model) {
     context.read<ProjectBuilderBloc>().add(AddDataModel(model));
   }
 }
@@ -555,7 +599,7 @@ class _ModelTemplate {
   final String name;
   final String icon;
   final String description;
-  final DataModel model;
+  final ProjectDataModel model;
 
   const _ModelTemplate({
     required this.name,
