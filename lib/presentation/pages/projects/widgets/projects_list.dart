@@ -172,7 +172,7 @@ class ProjectsList extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            context.go('/project/${project.id}', extra: project);
+            context.go('/dashboard/project/${project.id}', extra: project);
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(

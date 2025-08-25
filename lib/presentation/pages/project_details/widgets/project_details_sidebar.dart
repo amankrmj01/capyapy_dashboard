@@ -38,7 +38,7 @@ class ProjectDetailsSidebar extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () {
-                      context.go("/");
+                      context.go("/dashboard/project");
                     },
                     icon: const Icon(Icons.arrow_back_rounded),
                   ),
