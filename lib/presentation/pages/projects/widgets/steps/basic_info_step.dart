@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../bloc/project_creation/project_creation_bloc.dart';
+import '../../../../bloc/project_creation/project_creation_event.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../bloc/project_creation/project_creation_state.dart';
 
@@ -22,11 +23,9 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
   void initState() {
     super.initState();
     _projectNameController = TextEditingController(
-      text: widget.state.formData['name'] ?? '',
+      text: widget.state.projectName,
     );
-    _basePathController = TextEditingController(
-      text: widget.state.formData['basePath'] ?? '',
-    );
+    _basePathController = TextEditingController(text: widget.state.basePath);
   }
 
   @override
@@ -38,10 +37,10 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
 
   void _updateProjectInfo() {
     context.read<ProjectCreationBloc>().add(
-      ProjectCreationFieldUpdated('name', _projectNameController.text),
-    );
-    context.read<ProjectCreationBloc>().add(
-      ProjectCreationFieldUpdated('basePath', _basePathController.text),
+      UpdateProjectBasicInfo(
+        projectName: _projectNameController.text,
+        basePath: _basePathController.text,
+      ),
     );
   }
 

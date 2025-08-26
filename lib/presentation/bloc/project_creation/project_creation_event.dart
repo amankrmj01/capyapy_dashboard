@@ -94,21 +94,12 @@ class RemoveEndpoint extends ProjectCreationEvent {
   List<Object> get props => [index];
 }
 
-class NextStep extends ProjectCreationEvent {
-  const NextStep();
-}
-
 class PreviousStep extends ProjectCreationEvent {
   const PreviousStep();
 }
 
-class GoToStep extends ProjectCreationEvent {
-  final int step;
-
-  const GoToStep(this.step);
-
-  @override
-  List<Object> get props => [step];
+class NextStep extends ProjectCreationEvent {
+  const NextStep();
 }
 
 class CreateProject extends ProjectCreationEvent {

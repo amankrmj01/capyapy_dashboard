@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../bloc/project_creation/project_creation_bloc.dart';
-import '../../../../../data/models/auth_strategy.dart';
-import '../../../../bloc/project_builder/project_builder_bloc.dart';
-import '../../../../bloc/project_builder/project_builder_event.dart';
-import '../../../../bloc/project_builder/project_builder_state.dart';
+import '../../../../bloc/project_creation/project_creation_event.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../data/models/project_model.dart';
 import '../../../../bloc/project_creation/project_creation_state.dart';
+import '../../../../../data/models/auth_strategy.dart';
 
 class AuthSetupStep extends StatefulWidget {
   final ProjectCreationInitial state;
@@ -29,33 +26,68 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
   @override
   void initState() {
     super.initState();
-    _hasAuth = widget.state.formData['hasAuth'] ?? false;
-    _selectedStrategy = widget.state.formData['authStrategy'] ?? 'oauth2';
-    _selectedScopes = List<String>.from(
-      widget.state.formData['authScopes'] ?? [],
-    );
-    _customStrategyName = widget.state.formData['customStrategyName'] ?? '';
-    _customConfigFields = List<Map<String, String>>.from(
-      widget.state.formData['customConfigFields'] ?? [],
+    _hasAuth = widget.state.hasAuth;
+    // Create a basic auth strategy if one exists
+    if (widget.state.authStrategy != null) {
+      _selectedStrategy = widget.state.authStrategy!.type.name;
+    }
+  }
+
+  void _updateAuthSettings() {
+    AuthStrategy? authStrategy;
+
+    if (_hasAuth) {
+      authStrategy = AuthStrategy(
+        type: AuthStrategyType.values.firstWhere(
+          (e) => e.name == _selectedStrategy,
+          orElse: () => AuthStrategyType.oauth2,
+        ),
+        configuration: _getDefaultConfig(_selectedStrategy),
+        requiredFields: _getRequiredFields(_selectedStrategy),
+      );
+    }
+
+    context.read<ProjectCreationBloc>().add(
+      UpdateAuthSettings(hasAuth: _hasAuth, authStrategy: authStrategy),
     );
   }
 
-  void _updateAuthFields() {
-    context.read<ProjectCreationBloc>().add(
-      ProjectCreationFieldUpdated('hasAuth', _hasAuth),
-    );
-    context.read<ProjectCreationBloc>().add(
-      ProjectCreationFieldUpdated('authStrategy', _selectedStrategy),
-    );
-    context.read<ProjectCreationBloc>().add(
-      ProjectCreationFieldUpdated('authScopes', _selectedScopes),
-    );
-    context.read<ProjectCreationBloc>().add(
-      ProjectCreationFieldUpdated('customStrategyName', _customStrategyName),
-    );
-    context.read<ProjectCreationBloc>().add(
-      ProjectCreationFieldUpdated('customConfigFields', _customConfigFields),
-    );
+  Map<String, dynamic> _getDefaultConfig(String strategy) {
+    switch (strategy) {
+      case 'jwt':
+        return {'algorithm': 'HS256', 'expiresIn': '1h', 'issuer': 'mock-api'};
+      case 'apiKey':
+        return {'header': 'X-API-Key', 'location': 'header'};
+      case 'oauth2':
+        return {
+          'authorizationUrl': 'https://example.com/oauth/authorize',
+          'tokenUrl': 'https://example.com/oauth/token',
+          'scopes': _selectedScopes,
+        };
+      case 'bearer':
+        return {'tokenType': 'Bearer', 'location': 'header'};
+      case 'custom':
+        return {'name': _customStrategyName, 'fields': _customConfigFields};
+      default:
+        return {};
+    }
+  }
+
+  List<String> _getRequiredFields(String strategy) {
+    switch (strategy) {
+      case 'jwt':
+        return ['secret', 'algorithm'];
+      case 'apiKey':
+        return ['apiKey'];
+      case 'oauth2':
+        return ['clientId', 'clientSecret'];
+      case 'bearer':
+        return ['token'];
+      case 'custom':
+        return _customConfigFields.map((field) => field['key'] ?? '').toList();
+      default:
+        return [];
+    }
   }
 
   @override
@@ -157,7 +189,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
                   setState(() {
                     _hasAuth = value;
                   });
-                  _updateAuthFields();
+                  _updateAuthSettings();
                 },
                 activeThumbColor: Colors.blue,
               ),
@@ -195,103 +227,164 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
   }
 
   Widget _buildAuthStrategy(BuildContext context) {
-    final strategies = ['oauth2', 'bearer', 'apiKey', 'custom'];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Auth Strategy',
-          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 8),
-        DropdownButton<String>(
-          value: _selectedStrategy,
-          items: strategies
-              .map(
-                (s) => DropdownMenuItem(
-                  value: s,
-                  child: Text(s == 'custom' ? 'Custom...' : s),
-                ),
-              )
-              .toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedStrategy = value!;
-              if (value == 'custom') {
-                _customStrategyName = '';
-                _customConfigFields = [];
-              }
-            });
-            _updateAuthFields();
-          },
-        ),
-        if (_selectedStrategy == 'custom') ...[
+    final strategies = ['oauth2', 'bearer', 'apiKey', 'jwt', 'custom'];
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Auth Strategy',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary(context),
+            ),
+          ),
           const SizedBox(height: 16),
-          TextField(
-            decoration: InputDecoration(labelText: 'Custom Strategy Name'),
-            onChanged: (val) {
+          DropdownButtonFormField<String>(
+            value: _selectedStrategy,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+            ),
+            items: strategies
+                .map(
+                  (s) => DropdownMenuItem(
+                    value: s,
+                    child: Text(
+                      s == 'custom' ? 'Custom...' : s.toUpperCase(),
+                      style: GoogleFonts.inter(),
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
               setState(() {
-                _customStrategyName = val;
+                _selectedStrategy = value!;
+                if (value == 'custom') {
+                  _customStrategyName = '';
+                  _customConfigFields = [];
+                }
               });
-              _updateAuthFields();
+              _updateAuthSettings();
             },
           ),
-          const SizedBox(height: 8),
-          Text('Custom Config Fields', style: GoogleFonts.inter(fontSize: 14)),
-          ..._customConfigFields.asMap().entries.map((entry) {
-            final idx = entry.key;
-            final field = entry.value;
-            return Row(
+          if (_selectedStrategy == 'custom') ...[
+            const SizedBox(height: 16),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Custom Strategy Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onChanged: (val) {
+                setState(() {
+                  _customStrategyName = val;
+                });
+                _updateAuthSettings();
+              },
+            ),
+            const SizedBox(height: 16),
+            Row(
               children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(hintText: 'Key'),
-                    controller: TextEditingController(text: field['key']),
-                    onChanged: (val) {
-                      setState(() {
-                        _customConfigFields[idx]['key'] = val;
-                      });
-                      _updateAuthFields();
-                    },
+                Text(
+                  'Custom Config Fields',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(hintText: 'Value'),
-                    controller: TextEditingController(text: field['value']),
-                    onChanged: (val) {
-                      setState(() {
-                        _customConfigFields[idx]['value'] = val;
-                      });
-                      _updateAuthFields();
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete),
+                const Spacer(),
+                TextButton.icon(
+                  icon: Icon(Icons.add, size: 16),
+                  label: Text('Add Field'),
                   onPressed: () {
                     setState(() {
-                      _customConfigFields.removeAt(idx);
+                      _customConfigFields.add({'key': '', 'value': ''});
                     });
-                    _updateAuthFields();
+                    _updateAuthSettings();
                   },
                 ),
               ],
-            );
-          }),
-          TextButton.icon(
-            icon: Icon(Icons.add),
-            label: Text('Add Config Field'),
-            onPressed: () {
-              setState(() {
-                _customConfigFields.add({'key': '', 'value': ''});
-              });
-              _updateAuthFields();
-            },
-          ),
+            ),
+            ..._customConfigFields.asMap().entries.map((entry) {
+              final idx = entry.key;
+              final field = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          hintText: 'Key',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                        initialValue: field['key'],
+                        onChanged: (val) {
+                          setState(() {
+                            _customConfigFields[idx]['key'] = val;
+                          });
+                          _updateAuthSettings();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextFormField(
+                        decoration: InputDecoration(
+                          hintText: 'Value',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                        initialValue: field['value'],
+                        onChanged: (val) {
+                          setState(() {
+                            _customConfigFields[idx]['value'] = val;
+                          });
+                          _updateAuthSettings();
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          _customConfigFields.removeAt(idx);
+                        });
+                        _updateAuthSettings();
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
         ],
-      ],
+      ),
     );
   }
 
@@ -339,7 +432,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
                     _selectedScopes.add(scope);
                   }
                 });
-                _updateAuthFields();
+                _updateAuthSettings();
               },
               borderRadius: BorderRadius.circular(20),
               child: Container(

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../bloc/project_builder/project_builder_event.dart';
 import '../../../bloc/project_creation/project_creation_bloc.dart';
+import '../../../bloc/project_creation/project_creation_event.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../bloc/project_creation/project_creation_state.dart';
 import 'steps/basic_info_step.dart';
@@ -23,6 +23,7 @@ class ProjectCreationWizard extends StatelessWidget {
       builder: (context, state) {
         if (state is ProjectCreationLoading) {
           return _DelayedLoadingView(
+            key: const ValueKey('_delayedLoadingView'),
             onComplete: () async {
               debugPrint('Project creation started, waiting 2 seconds...');
               await Future.delayed(const Duration(seconds: 2));
