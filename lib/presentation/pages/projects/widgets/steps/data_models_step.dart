@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../data/models/mongodb_field.dart';
 import '../../../../../data/models/mongodb_index.dart';
-import '../../../../../data/models/project_data_model.dart';
+import '../../../../../data/models/resources_model.dart';
 import '../../../../bloc/project_builder/project_builder_bloc.dart';
 import '../../../../bloc/project_builder/project_builder_event.dart';
 import '../../../../bloc/project_builder/project_builder_state.dart';
@@ -135,7 +135,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
 
   Widget _buildModelCard(
     BuildContext context,
-    ProjectDataModel model,
+    ResourcesModel model,
     int index,
   ) {
     return Container(
@@ -350,7 +350,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
         name: 'User Profile',
         icon: '👤',
         description: 'Basic user information',
-        model: ProjectDataModel(
+        model: ResourcesModel(
           id: 'user_profile_${DateTime.now().millisecondsSinceEpoch}',
           modelName: 'UserProfile',
           collectionName: 'user_profiles',
@@ -388,7 +388,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
         name: 'Product',
         icon: '🛍️',
         description: 'E-commerce product',
-        model: ProjectDataModel(
+        model: ResourcesModel(
           id: 'product_${DateTime.now().millisecondsSinceEpoch}',
           modelName: 'Product',
           collectionName: 'products',
@@ -431,7 +431,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
         name: 'Blog Post',
         icon: '📝',
         description: 'Blog content structure',
-        model: ProjectDataModel(
+        model: ResourcesModel(
           id: 'blog_post_${DateTime.now().millisecondsSinceEpoch}',
           modelName: 'BlogPost',
           collectionName: 'blog_posts',
@@ -579,7 +579,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
 
   void _showModelEditor(
     BuildContext context,
-    ProjectDataModel? model,
+    ResourcesModel? model,
     int? index,
   ) {
     // TODO: Implement model editor dialog
@@ -592,7 +592,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
     context.read<ProjectBuilderBloc>().add(RemoveDataModel(index));
   }
 
-  void _addTemplateModel(ProjectDataModel model) {
+  void _addTemplateModel(ResourcesModel model) {
     context.read<ProjectBuilderBloc>().add(AddDataModel(model));
   }
 }
@@ -601,7 +601,7 @@ class _ModelTemplate {
   final String name;
   final String icon;
   final String description;
-  final ProjectDataModel model;
+  final ResourcesModel model;
 
   const _ModelTemplate({
     required this.name,

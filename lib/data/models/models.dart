@@ -4,7 +4,7 @@
 // Project-related models
 export 'project_model.dart';
 export 'auth_strategy.dart';
-export 'project_data_model.dart';
+export 'resources_model.dart';
 export 'project_endpoint.dart';
 export 'storage_config.dart';
 export 'project_metadata.dart';

@@ -79,7 +79,7 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
       return;
     }
 
-    final dataModel = ProjectDataModel(
+    final dataModel = ResourcesModel(
       id:
           widget.dataModel?.id ??
           DateTime.now().millisecondsSinceEpoch.toString(),

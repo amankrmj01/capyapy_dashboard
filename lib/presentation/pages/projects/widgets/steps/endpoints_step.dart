@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../data/models/endpoint_analytics.dart';
 import '../../../../../data/models/http_config.dart';
-import '../../../../../data/models/project_data_model.dart';
+import '../../../../../data/models/resources_model.dart';
 import '../../../../../data/models/project_endpoint.dart';
 import '../../../../bloc/project_builder/project_builder_event.dart';
 import '../../../../bloc/project_builder/project_builder_state.dart';
@@ -597,7 +597,7 @@ class _EndpointsStepState extends State<EndpointsStep> {
   }
 
   void _addCrudEndpoint(
-    ProjectDataModel model,
+    ResourcesModel model,
     HttpMethod method,
     String path,
     String description,
@@ -647,7 +647,7 @@ class _EndpointsStepState extends State<EndpointsStep> {
     context.read<ProjectBuilderBloc>().add(AddEndpoint(endpoint));
   }
 
-  Map<String, dynamic> _generateSchemaFromModel(ProjectDataModel model) {
+  Map<String, dynamic> _generateSchemaFromModel(ResourcesModel model) {
     final schema = <String, dynamic>{};
     for (final field in model.fields) {
       if (field.name != 'id' && field.name != 'createdAt') {
