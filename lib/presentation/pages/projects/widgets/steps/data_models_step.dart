@@ -6,6 +6,7 @@ import '../../../../../data/models/mongodb_field.dart';
 import '../../../../../data/models/mongodb_index.dart';
 import '../../../../../data/models/resources_model.dart';
 import '../../../../bloc/project_creation/project_creation_state.dart';
+import '../../../../bloc/project_creation/project_creation_event.dart';
 import '../../../project_details/widgets/data_model_editor_dialog.dart';
 import '../../../../bloc/project_creation/project_creation_bloc.dart';
 
@@ -19,8 +20,7 @@ class DataModelsStep extends StatefulWidget {
 }
 
 class _DataModelsStepState extends State<DataModelsStep> {
-  List<ResourcesModel> get models =>
-      List<ResourcesModel>.from(widget.state.formData['dataModels'] ?? []);
+  List<ResourcesModel> get models => widget.state.dataModels;
 
   void _showCustomModelDialog({ResourcesModel? model, int? editIndex}) {
     showDialog(
@@ -28,19 +28,15 @@ class _DataModelsStepState extends State<DataModelsStep> {
       builder: (dialogContext) => DataModelEditorDialog(
         dataModel: model,
         onSave: (updatedDataModel) {
-          // Use the step's context which has access to ProjectCreationBloc
           final bloc = context.read<ProjectCreationBloc>();
-          final currentState = bloc.state;
-          if (currentState is ProjectCreationInitial) {
-            final updatedModels = List<ResourcesModel>.from(
-              currentState.formData['dataModels'] ?? [],
+          if (editIndex != null) {
+            // Update existing model
+            bloc.add(
+              UpdateDataModel(index: editIndex, dataModel: updatedDataModel),
             );
-            if (editIndex != null) {
-              updatedModels[editIndex] = updatedDataModel;
-            } else {
-              updatedModels.add(updatedDataModel);
-            }
-            bloc.add(ProjectCreationFieldUpdated('dataModels', updatedModels));
+          } else {
+            // Add new model
+            bloc.add(AddDataModel(updatedDataModel));
           }
           Navigator.of(dialogContext).pop(); // Close dialog
         },
@@ -53,16 +49,8 @@ class _DataModelsStepState extends State<DataModelsStep> {
       context: context,
       builder: (dialogContext) => DataModelEditorDialog(
         onSave: (dataModel) {
-          // Use the step's context which has access to ProjectCreationBloc
           final bloc = context.read<ProjectCreationBloc>();
-          final currentState = bloc.state;
-          if (currentState is ProjectCreationInitial) {
-            final updatedModels = List<ResourcesModel>.from(
-              currentState.formData['dataModels'] ?? [],
-            );
-            updatedModels.add(dataModel);
-            bloc.add(ProjectCreationFieldUpdated('dataModels', updatedModels));
-          }
+          bloc.add(AddDataModel(dataModel));
           Navigator.of(dialogContext).pop(); // Close dialog
         },
       ),
@@ -71,26 +59,12 @@ class _DataModelsStepState extends State<DataModelsStep> {
 
   void _deleteModel(int index) {
     final bloc = context.read<ProjectCreationBloc>();
-    final currentState = bloc.state;
-    if (currentState is ProjectCreationInitial) {
-      final updatedModels = List<ResourcesModel>.from(
-        currentState.formData['dataModels'] ?? [],
-      );
-      updatedModels.removeAt(index);
-      bloc.add(ProjectCreationFieldUpdated('dataModels', updatedModels));
-    }
+    bloc.add(RemoveDataModel(index));
   }
 
   void _addTemplateModel(ResourcesModel model) {
     final bloc = context.read<ProjectCreationBloc>();
-    final currentState = bloc.state;
-    if (currentState is ProjectCreationInitial) {
-      final updatedModels = List<ResourcesModel>.from(
-        currentState.formData['dataModels'] ?? [],
-      );
-      updatedModels.add(model);
-      bloc.add(ProjectCreationFieldUpdated('dataModels', updatedModels));
-    }
+    bloc.add(AddDataModel(model));
   }
 
   @override

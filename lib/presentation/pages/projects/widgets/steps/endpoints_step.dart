@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../../../../data/models/endpoint_analytics.dart';
 import '../../../../../data/models/http_config.dart';
-
 import '../../../../../data/models/project_endpoint.dart';
 import '../../../../../core/constants/app_colors.dart';
 import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/endpoint_editor_dialog.dart';
 import '../../../../bloc/project_creation/project_creation_bloc.dart';
 import '../../../../bloc/project_creation/project_creation_state.dart';
+import '../../../../bloc/project_creation/project_creation_event.dart';
 
 class EndpointsStep extends StatefulWidget {
   final ProjectCreationInitial state;
@@ -21,26 +20,15 @@ class EndpointsStep extends StatefulWidget {
 }
 
 class _EndpointsStepState extends State<EndpointsStep> {
-  List<ProjectEndpoint> get endpoints =>
-      List<ProjectEndpoint>.from(widget.state.formData['endpoints'] ?? []);
+  List<ProjectEndpoint> get endpoints => widget.state.endpoints;
 
   void _addNewEndpoint() {
     showDialog(
       context: context,
       builder: (dialogContext) => EndpointEditorDialog(
         onSave: (endpoint) {
-          // Use the step's context which has access to ProjectCreationBloc
           final bloc = context.read<ProjectCreationBloc>();
-          final currentState = bloc.state;
-          if (currentState is ProjectCreationInitial) {
-            final updatedEndpoints = List<ProjectEndpoint>.from(
-              currentState.formData['endpoints'] ?? [],
-            );
-            updatedEndpoints.add(endpoint);
-            bloc.add(
-              ProjectCreationFieldUpdated('endpoints', updatedEndpoints),
-            );
-          }
+          bloc.add(AddEndpoint(endpoint));
           Navigator.of(dialogContext).pop(); // Close dialog
         },
       ),
@@ -53,18 +41,8 @@ class _EndpointsStepState extends State<EndpointsStep> {
       builder: (dialogContext) => EndpointEditorDialog(
         endpoint: endpoint,
         onSave: (updatedEndpoint) {
-          // Use the step's context which has access to ProjectCreationBloc
           final bloc = context.read<ProjectCreationBloc>();
-          final currentState = bloc.state;
-          if (currentState is ProjectCreationInitial) {
-            final updatedEndpoints = List<ProjectEndpoint>.from(
-              currentState.formData['endpoints'] ?? [],
-            );
-            updatedEndpoints[index] = updatedEndpoint;
-            bloc.add(
-              ProjectCreationFieldUpdated('endpoints', updatedEndpoints),
-            );
-          }
+          bloc.add(UpdateEndpoint(index: index, endpoint: updatedEndpoint));
           Navigator.of(dialogContext).pop(); // Close dialog
         },
       ),
@@ -73,26 +51,12 @@ class _EndpointsStepState extends State<EndpointsStep> {
 
   void _deleteEndpoint(int index) {
     final bloc = context.read<ProjectCreationBloc>();
-    final currentState = bloc.state;
-    if (currentState is ProjectCreationInitial) {
-      final updatedEndpoints = List<ProjectEndpoint>.from(
-        currentState.formData['endpoints'] ?? [],
-      );
-      updatedEndpoints.removeAt(index);
-      bloc.add(ProjectCreationFieldUpdated('endpoints', updatedEndpoints));
-    }
+    bloc.add(RemoveEndpoint(index));
   }
 
   void _addTemplateEndpoint(ProjectEndpoint endpoint) {
     final bloc = context.read<ProjectCreationBloc>();
-    final currentState = bloc.state;
-    if (currentState is ProjectCreationInitial) {
-      final updatedEndpoints = List<ProjectEndpoint>.from(
-        currentState.formData['endpoints'] ?? [],
-      );
-      updatedEndpoints.add(endpoint);
-      bloc.add(ProjectCreationFieldUpdated('endpoints', updatedEndpoints));
-    }
+    bloc.add(AddEndpoint(endpoint));
   }
 
   @override

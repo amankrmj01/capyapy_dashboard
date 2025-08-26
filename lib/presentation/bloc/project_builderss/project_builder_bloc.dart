@@ -4,11 +4,11 @@ import '../../../domain/usecases/project_usecases.dart';
 import 'project_builder_event.dart';
 import 'project_builder_state.dart';
 
-class ProjectBuilderBloc
+class ProjectBuilderBlocs
     extends Bloc<ProjectBuilderEvent, ProjectBuilderState> {
   final CreateProjectUseCase createProjectUseCase;
 
-  ProjectBuilderBloc({required this.createProjectUseCase})
+  ProjectBuilderBlocs({required this.createProjectUseCase})
     : super(const ProjectBuilderInitial()) {
     on<StartProjectCreation>(_onStartProjectCreation);
     on<UpdateProjectBasicInfo>(_onUpdateProjectBasicInfo);

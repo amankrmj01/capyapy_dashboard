@@ -1,3 +1,5 @@
+import 'package:capyapy_dashboard/presentation/bloc/project_creation/project_creation_bloc.dart';
+import 'package:capyapy_dashboard/presentation/bloc/project_creation/project_creation_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,12 +8,11 @@ import 'widgets/projects_list.dart';
 import '../../../data/datasources/mock_project_data_source.dart';
 import '../../../data/repositories/project_repository_impl.dart';
 import '../../../domain/usecases/project_usecases.dart';
-import '../../bloc/project_builder/project_builder_bloc.dart';
-import '../../bloc/project_builder/project_builder_state.dart';
 import '../../bloc/projects/projects_bloc.dart';
 import '../../bloc/projects/projects_event.dart';
 import '../../bloc/projects/projects_state.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/di/services/service_locator.dart';
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
@@ -23,6 +24,7 @@ class ProjectsPage extends StatefulWidget {
 class _ProjectsPageState extends State<ProjectsPage> {
   final ScrollController _scrollController = ScrollController();
   double _scrollOffset = 0.0;
+  bool _hasRefreshed = false;
 
   @override
   void initState() {
@@ -59,23 +61,33 @@ class _ProjectsPageState extends State<ProjectsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final dataSource = MockProjectDataSource();
+    final dataSource = sl<MockProjectDataSource>();
+    // Check for refresh flag in GoRouter extra
+    final router = GoRouter.of(context);
+    final refreshFlag = router.routerDelegate.currentConfiguration.extra;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_hasRefreshed &&
+          refreshFlag is Map &&
+          refreshFlag['refresh'] == true) {
+        context.read<ProjectsBloc>().add(const RefreshProjects());
+        _hasRefreshed = true;
+      }
+    });
     return BlocProvider(
       create: (_) => ProjectsBloc(
         projectRepository: ProjectRepositoryImpl(dataSource: dataSource),
       )..add(const LoadProjects()),
-      // Load projects immediately when bloc is created
       child: BlocProvider(
-        create: (_) => ProjectBuilderBloc(
+        create: (_) => ProjectCreationBloc(
           createProjectUseCase: CreateProjectUseCase(
             repository: ProjectRepositoryImpl(dataSource: dataSource),
           ),
         ),
         child: Builder(
           builder: (context) =>
-              BlocListener<ProjectBuilderBloc, ProjectBuilderState>(
+              BlocListener<ProjectCreationBloc, ProjectCreationState>(
                 listener: (context, state) {
-                  if (state is ProjectBuilderSuccess) {
+                  if (state is ProjectCreationSuccess) {
                     // Refresh projects after creating a new one
                     context.read<ProjectsBloc>().add(const RefreshProjects());
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -86,7 +98,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                         backgroundColor: Colors.green,
                       ),
                     );
-                  } else if (state is ProjectBuilderError) {
+                  } else if (state is ProjectCreationError) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Error: ${state.message}'),

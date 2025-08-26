@@ -38,11 +38,11 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
 
     if (_hasAuth) {
       authStrategy = AuthStrategy(
-        type: AuthStrategyType.values.firstWhere(
+        type: AuthType.values.firstWhere(
           (e) => e.name == _selectedStrategy,
-          orElse: () => AuthStrategyType.oauth2,
+          orElse: () => AuthType.oauth2,
         ),
-        configuration: _getDefaultConfig(_selectedStrategy),
+        config: _getDefaultConfig(_selectedStrategy),
         requiredFields: _getRequiredFields(_selectedStrategy),
       );
     }
@@ -248,7 +248,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _selectedStrategy,
+            initialValue: _selectedStrategy,
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),

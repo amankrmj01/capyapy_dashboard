@@ -3,12 +3,15 @@ import 'package:capyapy_dashboard/presentation/bloc/project_creation/project_cre
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/models.dart';
+import '../../../domain/usecases/project_usecases.dart';
 
 class ProjectCreationBloc
     extends Bloc<ProjectCreationEvent, ProjectCreationState> {
   final uuid = Uuid();
+  final CreateProjectUseCase createProjectUseCase;
 
-  ProjectCreationBloc() : super(const ProjectCreationInitial()) {
+  ProjectCreationBloc({required this.createProjectUseCase})
+    : super(const ProjectCreationInitial()) {
     // Register all event handlers
     on<StartProjectCreation>(_onStartProjectCreation);
     on<UpdateProjectBasicInfo>(_onUpdateProjectBasicInfo);
@@ -21,7 +24,6 @@ class ProjectCreationBloc
     on<RemoveEndpoint>(_onRemoveEndpoint);
     on<NextStep>(_onNextStep);
     on<PreviousStep>(_onPreviousStep);
-    on<GoToStep>(_onGoToStep);
     on<CreateProject>(_onCreateProject);
     on<ResetBuilder>(_onResetBuilder);
   }
@@ -179,15 +181,6 @@ class ProjectCreationBloc
     }
   }
 
-  void _onGoToStep(GoToStep event, Emitter<ProjectCreationState> emit) {
-    if (state is ProjectCreationInitial) {
-      final currentState = state as ProjectCreationInitial;
-      if (event.step >= 0 && event.step <= 3) {
-        emit(currentState.copyWith(step: event.step));
-      }
-    }
-  }
-
   void _onCreateProject(
     CreateProject event,
     Emitter<ProjectCreationState> emit,
@@ -195,10 +188,10 @@ class ProjectCreationBloc
     if (state is ProjectCreationInitial) {
       final currentState = state as ProjectCreationInitial;
       emit(const ProjectCreationLoading());
-
       try {
         final project = _buildProjectFromState(currentState);
-        emit(ProjectCreationSuccess(project));
+        final createdProject = await createProjectUseCase(project);
+        emit(ProjectCreationSuccess(createdProject));
       } catch (error, stackTrace) {
         print('Error creating project: $error');
         print('Stack trace: $stackTrace');
@@ -211,7 +204,6 @@ class ProjectCreationBloc
     emit(const ProjectCreationInitial());
   }
 
-  // Helper method to build project from current state (similar to toProject())
   Project _buildProjectFromState(ProjectCreationInitial state) {
     final now = DateTime.now();
 

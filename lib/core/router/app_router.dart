@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/project_model.dart';
 import '../../data/repositories/project_repository_impl.dart';
-import '../../data/datasources/mock_project_data_source.dart';
+import '../../../data/datasources/mock_project_data_source.dart';
+import '../../domain/usecases/project_usecases.dart';
 import '../../presentation/bloc/project_creation/project_creation_bloc.dart';
 import '../../presentation/pages/billings/billing_page.dart';
 import '../../presentation/pages/main_page.dart';
@@ -16,6 +17,7 @@ import '../../presentation/pages/projects/projects_page.dart';
 import '../../presentation/pages/dashboard/dashboard_page.dart';
 import '../../presentation/pages/projects/widgets/project_creation_wizard.dart';
 import '../../presentation/pages/settings/settings_page.dart';
+import '../di/services/service_locator.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/dashboard',
@@ -39,7 +41,13 @@ final GoRouter appRouter = GoRouter(
               path: 'new',
               pageBuilder: (context, state) => NoTransitionPage(
                 child: BlocProvider(
-                  create: (_) => ProjectCreationBloc(),
+                  create: (_) => ProjectCreationBloc(
+                    createProjectUseCase: CreateProjectUseCase(
+                      repository: ProjectRepositoryImpl(
+                        dataSource: sl<MockProjectDataSource>(), // Use DI
+                      ),
+                    ),
+                  ),
                   child: ProjectCreationWizard(
                     onClose: () {
                       context.go('/dashboard/project');
@@ -88,7 +96,7 @@ final GoRouter appRouter = GoRouter(
         final project = state.extra as Project?;
         return BlocProvider<ProjectDetailsBloc>(
           create: (_) => ProjectDetailsBloc(
-            ProjectRepositoryImpl(dataSource: MockProjectDataSource()),
+            ProjectRepositoryImpl(dataSource: sl<MockProjectDataSource>()),
           ),
           child: ProjectDetailsPage(project: project!),
         );

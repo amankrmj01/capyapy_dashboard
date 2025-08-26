@@ -51,7 +51,8 @@ class ProjectsList extends StatelessWidget {
         }
 
         if (state is ProjectsLoaded) {
-          final projects = state.projects;
+          final projects = List<Project>.from(state.projects)
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
           return GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

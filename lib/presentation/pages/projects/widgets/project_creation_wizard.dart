@@ -28,9 +28,9 @@ class ProjectCreationWizard extends StatelessWidget {
               debugPrint('Project creation started, waiting 2 seconds...');
               await Future.delayed(const Duration(seconds: 2));
               debugPrint('Navigating to /dashboard/project...');
-              GoRouter.of(context).go('/dashboard/project');
-              // Removed: context.read<ProjectsBloc>().add(const RefreshProjects());
+              // Navigation is now handled by the widget itself.
             },
+            navigateTo: '/dashboard/project',
           );
         }
         if (state is ProjectCreationInitial) {
@@ -300,18 +300,35 @@ class ProjectCreationWizard extends StatelessWidget {
   }
 }
 
-class _DelayedLoadingView extends StatelessWidget {
+class _DelayedLoadingView extends StatefulWidget {
   final Future<void> Function() onComplete;
+  final String? navigateTo;
 
-  const _DelayedLoadingView({super.key, required this.onComplete});
+  const _DelayedLoadingView({
+    super.key,
+    required this.onComplete,
+    this.navigateTo,
+  });
+
+  @override
+  State<_DelayedLoadingView> createState() => _DelayedLoadingViewState();
+}
+
+class _DelayedLoadingViewState extends State<_DelayedLoadingView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await widget.onComplete();
+      if (!mounted) return;
+      if (widget.navigateTo != null) {
+        GoRouter.of(context).go(widget.navigateTo!, extra: {'refresh': true});
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Start the delayed operation as soon as the widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await onComplete();
-    });
-
     return Container(
       color: AppColors.background(context),
       child: Center(

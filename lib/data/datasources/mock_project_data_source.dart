@@ -253,6 +253,13 @@ class MockProjectDataSource implements ProjectDataSource {
       updatedAt: DateTime.now(),
     );
     _projects.add(newProject);
+    // Debug print: print all projects in the data source
+    print('MockProjectDataSource: All projects after creation:');
+    for (final p in _projects) {
+      print(
+        'ID: \\${p.id}, Name: \\${p.projectName}, Created: \\${p.createdAt}',
+      );
+    }
     return newProject;
   }
 
