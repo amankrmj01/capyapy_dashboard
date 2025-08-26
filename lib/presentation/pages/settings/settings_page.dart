@@ -190,101 +190,50 @@ class _SettingsPageState extends State<SettingsPage> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: _buildSettingsCard(
         context,
-        title: '', // Title handled below
-        child: Column(
+        title: 'Personal Details',
+        editButton: IconButton(
+          icon: const Icon(Icons.edit, size: 20),
+          tooltip: 'Edit Profile',
+          onPressed: () {
+            GoRouter.of(context).go(
+              '/dashboard/settings/edit-profile',
+              extra: {
+                'nameController': _nameController,
+                'emailController': _emailController,
+                'onUpdate': _updatePersonalInfo,
+              },
+            );
+          },
+        ),
+        child: Row(
           children: [
-            Row(
-              children: [
-                // Edit button at top left
-                IconButton(
-                  icon: const Icon(Icons.edit, size: 20),
-                  tooltip: 'Edit Profile',
-                  onPressed: () {
-                    GoRouter.of(context).go(
-                      '/dashboard/settings/edit-profile',
-                      extra: {
-                        'nameController': _nameController,
-                        'emailController': _emailController,
-                        'onUpdate': _updatePersonalInfo,
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '🧑 Personal Details',
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary(context),
-                  ),
-                ),
-              ],
+            CircleAvatar(
+              radius: 40,
+              backgroundColor: Colors.blue.withValues(alpha: 0.1),
+              child: Text('🐹', style: TextStyle(fontSize: 32)),
             ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundColor: Colors.blue.withValues(alpha: 0.1),
-                  child: Text('🐹', style: TextStyle(fontSize: 32)),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Profile Picture',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary(context),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      OutlinedButton.icon(
-                        onPressed: _changeAvatar,
-                        icon: const Icon(Icons.camera_alt, size: 18),
-                        label: const Text('Change Avatar'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            // Show name and email as non-editable
-            Row(
-              children: [
-                Icon(Icons.person, color: Colors.grey),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
                     _nameController.text,
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       color: AppColors.textPrimary(context),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Icon(Icons.email, color: Colors.grey),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
+                  const SizedBox(height: 16),
+                  Text(
                     _emailController.text,
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       color: AppColors.textPrimary(context),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -428,6 +377,7 @@ class _SettingsPageState extends State<SettingsPage> {
     BuildContext context, {
     required String title,
     required Widget child,
+    IconButton? editButton,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -446,13 +396,20 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary(context),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary(context),
+                  ),
+                ),
+                if (editButton != null) ...[editButton],
+              ],
             ),
             const SizedBox(height: 20),
             child,

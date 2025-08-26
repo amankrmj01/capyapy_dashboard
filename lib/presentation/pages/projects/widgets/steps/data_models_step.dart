@@ -180,13 +180,13 @@ class _DataModelsStepState extends State<DataModelsStep> {
                       updatedAt: now,
                     );
                     if (editIndex != null) {
-                      context.read<ProjectBuilderBloc>().add(
+                      BlocProvider.of<ProjectBuilderBloc>(this.context).add(
                         UpdateDataModel(index: editIndex, dataModel: newModel),
                       );
                     } else {
-                      context.read<ProjectBuilderBloc>().add(
-                        AddDataModel(newModel),
-                      );
+                      BlocProvider.of<ProjectBuilderBloc>(
+                        this.context,
+                      ).add(AddDataModel(newModel));
                     }
                     Navigator.pop(ctx);
                   },
@@ -277,9 +277,9 @@ class _DataModelsStepState extends State<DataModelsStep> {
                 ),
                 IconButton(
                   icon: Icon(Icons.delete),
-                  onPressed: () => context.read<ProjectBuilderBloc>().add(
-                    RemoveDataModel(idx),
-                  ),
+                  onPressed: () => BlocProvider.of<ProjectBuilderBloc>(
+                    this.context,
+                  ).add(RemoveDataModel(idx)),
                 ),
               ],
             ),
@@ -790,11 +790,13 @@ class _DataModelsStepState extends State<DataModelsStep> {
   }
 
   void _deleteModel(int index) {
-    context.read<ProjectBuilderBloc>().add(RemoveDataModel(index));
+    BlocProvider.of<ProjectBuilderBloc>(
+      this.context,
+    ).add(RemoveDataModel(index));
   }
 
   void _addTemplateModel(ResourcesModel model) {
-    context.read<ProjectBuilderBloc>().add(AddDataModel(model));
+    BlocProvider.of<ProjectBuilderBloc>(this.context).add(AddDataModel(model));
   }
 }
 

@@ -20,58 +20,48 @@ class ProjectCreationWizard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ProjectBuilderBloc>(
-      create: (_) {
-        final dataSource = MockProjectDataSource();
-        final repository = ProjectRepositoryImpl(dataSource: dataSource);
-        final createProjectUseCase = CreateProjectUseCase(
-          repository: repository,
-        );
-        return ProjectBuilderBloc(createProjectUseCase: createProjectUseCase);
-      },
-      child: BlocBuilder<ProjectBuilderBloc, ProjectBuilderState>(
-        builder: (context, state) {
-          if (state is ProjectBuilderCreating) {
-            return _buildLoadingView(context);
-          }
+    return BlocBuilder<ProjectBuilderBloc, ProjectBuilderState>(
+      builder: (context, state) {
+        if (state is ProjectBuilderCreating) {
+          return _buildLoadingView(context);
+        }
 
-          if (state is ProjectBuilderInProgress) {
-            return _buildWizardView(context, state);
-          }
+        if (state is ProjectBuilderInProgress) {
+          return _buildWizardView(context, state);
+        }
 
-          // Handle initial state - show loading until wizard is ready
-          if (state is ProjectBuilderInitial) {
-            return Container(
-              color: AppColors.background(context),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
+        // Handle initial state - show loading until wizard is ready
+        if (state is ProjectBuilderInitial) {
+          return Container(
+            color: AppColors.background(context),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-          // Handle error state
-          if (state is ProjectBuilderError) {
-            return Container(
-              color: AppColors.background(context),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error: ${state.message}',
-                      style: GoogleFonts.inter(fontSize: 16, color: Colors.red),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(onPressed: onClose, child: Text('Close')),
-                  ],
-                ),
+        // Handle error state
+        if (state is ProjectBuilderError) {
+          return Container(
+            color: AppColors.background(context),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${state.message}',
+                    style: GoogleFonts.inter(fontSize: 16, color: Colors.red),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(onPressed: onClose, child: Text('Close')),
+                ],
               ),
-            );
-          }
+            ),
+          );
+        }
 
-          return Container();
-        },
-      ),
+        return Container();
+      },
     );
   }
 

@@ -93,13 +93,13 @@ class _EndpointsStepState extends State<EndpointsStep> {
                       updatedAt: now,
                     );
                     if (editIndex != null) {
-                      context.read<ProjectBuilderBloc>().add(
+                      BlocProvider.of<ProjectBuilderBloc>(this.context).add(
                         UpdateEndpoint(index: editIndex, endpoint: newEndpoint),
                       );
                     } else {
-                      context.read<ProjectBuilderBloc>().add(
-                        AddEndpoint(newEndpoint),
-                      );
+                      BlocProvider.of<ProjectBuilderBloc>(
+                        this.context,
+                      ).add(AddEndpoint(newEndpoint));
                     }
                     Navigator.pop(ctx);
                   },

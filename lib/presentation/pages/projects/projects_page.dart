@@ -60,21 +60,17 @@ class _ProjectsPageState extends State<ProjectsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final dataSource = MockProjectDataSource();
     return BlocProvider(
       create: (_) => ProjectsBloc(
-        projectRepository: ProjectRepositoryImpl(
-          dataSource: MockProjectDataSource(),
-        ),
+        projectRepository: ProjectRepositoryImpl(dataSource: dataSource),
       )..add(const LoadProjects()),
       child: BlocProvider(
-        create: (_) {
-          final dataSource = MockProjectDataSource();
-          final repository = ProjectRepositoryImpl(dataSource: dataSource);
-          final createProjectUseCase = CreateProjectUseCase(
-            repository: repository,
-          );
-          return ProjectBuilderBloc(createProjectUseCase: createProjectUseCase);
-        },
+        create: (_) => ProjectBuilderBloc(
+          createProjectUseCase: CreateProjectUseCase(
+            repository: ProjectRepositoryImpl(dataSource: dataSource),
+          ),
+        ),
         child: Builder(
           builder: (context) =>
               BlocListener<ProjectBuilderBloc, ProjectBuilderState>(
