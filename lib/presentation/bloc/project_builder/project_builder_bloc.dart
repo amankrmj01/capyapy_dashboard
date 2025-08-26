@@ -1,11 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/backward_compatibility.dart';
+import '../../../domain/usecases/project_usecases.dart';
 import 'project_builder_event.dart';
 import 'project_builder_state.dart';
 
 class ProjectBuilderBloc
     extends Bloc<ProjectBuilderEvent, ProjectBuilderState> {
-  ProjectBuilderBloc() : super(const ProjectBuilderInitial()) {
+  final CreateProjectUseCase createProjectUseCase;
+
+  ProjectBuilderBloc({required this.createProjectUseCase})
+    : super(const ProjectBuilderInitial()) {
     on<StartProjectCreation>(_onStartProjectCreation);
     on<UpdateProjectBasicInfo>(_onUpdateProjectBasicInfo);
     on<UpdateAuthSettings>(_onUpdateAuthSettings);
@@ -196,13 +200,10 @@ class ProjectBuilderBloc
     if (state is ProjectBuilderInProgress) {
       final currentState = state as ProjectBuilderInProgress;
       emit(const ProjectBuilderCreating());
-
       try {
-        // Simulate project creation
-        await Future.delayed(const Duration(seconds: 2));
-
         final project = currentState.toProject();
-        emit(ProjectBuilderSuccess(project));
+        final createdProject = await createProjectUseCase(project);
+        emit(ProjectBuilderSuccess(createdProject));
       } catch (error) {
         emit(ProjectBuilderError(error.toString()));
       }

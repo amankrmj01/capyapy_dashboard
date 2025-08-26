@@ -9,6 +9,9 @@ import 'steps/basic_info_step.dart';
 import 'steps/auth_setup_step.dart';
 import 'steps/data_models_step.dart';
 import 'steps/endpoints_step.dart';
+import '../../../../data/datasources/mock_project_data_source.dart';
+import '../../../../data/repositories/project_repository_impl.dart';
+import '../../../../domain/usecases/project_usecases.dart';
 
 class ProjectCreationWizard extends StatelessWidget {
   final VoidCallback onClose;
@@ -17,48 +20,58 @@ class ProjectCreationWizard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProjectBuilderBloc, ProjectBuilderState>(
-      builder: (context, state) {
-        if (state is ProjectBuilderCreating) {
-          return _buildLoadingView(context);
-        }
-
-        if (state is ProjectBuilderInProgress) {
-          return _buildWizardView(context, state);
-        }
-
-        // Handle initial state - show loading until wizard is ready
-        if (state is ProjectBuilderInitial) {
-          return Container(
-            color: AppColors.background(context),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        // Handle error state
-        if (state is ProjectBuilderError) {
-          return Container(
-            color: AppColors.background(context),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error: ${state.message}',
-                    style: GoogleFonts.inter(fontSize: 16, color: Colors.red),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(onPressed: onClose, child: Text('Close')),
-                ],
-              ),
-            ),
-          );
-        }
-
-        return Container();
+    return BlocProvider<ProjectBuilderBloc>(
+      create: (_) {
+        final dataSource = MockProjectDataSource();
+        final repository = ProjectRepositoryImpl(dataSource: dataSource);
+        final createProjectUseCase = CreateProjectUseCase(
+          repository: repository,
+        );
+        return ProjectBuilderBloc(createProjectUseCase: createProjectUseCase);
       },
+      child: BlocBuilder<ProjectBuilderBloc, ProjectBuilderState>(
+        builder: (context, state) {
+          if (state is ProjectBuilderCreating) {
+            return _buildLoadingView(context);
+          }
+
+          if (state is ProjectBuilderInProgress) {
+            return _buildWizardView(context, state);
+          }
+
+          // Handle initial state - show loading until wizard is ready
+          if (state is ProjectBuilderInitial) {
+            return Container(
+              color: AppColors.background(context),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          // Handle error state
+          if (state is ProjectBuilderError) {
+            return Container(
+              color: AppColors.background(context),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error: ${state.message}',
+                      style: GoogleFonts.inter(fontSize: 16, color: Colors.red),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(onPressed: onClose, child: Text('Close')),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return Container();
+        },
+      ),
     );
   }
 

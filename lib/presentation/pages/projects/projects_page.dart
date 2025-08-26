@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'widgets/project_creation_wizard.dart';
+import 'widgets/projects_list.dart';
+import '../../../data/datasources/mock_project_data_source.dart';
+import '../../../data/repositories/project_repository_impl.dart';
+import '../../../domain/usecases/project_usecases.dart';
 import '../../bloc/project_builder/project_builder_bloc.dart';
 import '../../bloc/project_builder/project_builder_event.dart';
 import '../../bloc/project_builder/project_builder_state.dart';
@@ -8,10 +13,6 @@ import '../../bloc/projects/projects_bloc.dart';
 import '../../bloc/projects/projects_event.dart';
 import '../../bloc/projects/projects_state.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../data/repositories/project_repository_impl.dart';
-import '../../../data/datasources/mock_project_data_source.dart';
-import 'widgets/project_creation_wizard.dart';
-import 'widgets/projects_list.dart';
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
@@ -66,7 +67,14 @@ class _ProjectsPageState extends State<ProjectsPage> {
         ),
       )..add(const LoadProjects()),
       child: BlocProvider(
-        create: (_) => ProjectBuilderBloc(),
+        create: (_) {
+          final dataSource = MockProjectDataSource();
+          final repository = ProjectRepositoryImpl(dataSource: dataSource);
+          final createProjectUseCase = CreateProjectUseCase(
+            repository: repository,
+          );
+          return ProjectBuilderBloc(createProjectUseCase: createProjectUseCase);
+        },
         child: Builder(
           builder: (context) =>
               BlocListener<ProjectBuilderBloc, ProjectBuilderState>(
@@ -408,7 +416,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
         border: Border.all(color: AppColors.border(context), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -423,7 +431,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
