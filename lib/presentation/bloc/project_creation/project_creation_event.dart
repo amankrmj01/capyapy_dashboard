@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../../../data/models/auth_strategy.dart';
 import '../../../data/models/project_endpoint.dart';
 import '../../../data/models/project_data_model.dart';
+import '../../../data/models/storage_config.dart';
 
 abstract class ProjectCreationEvent extends Equatable {
   const ProjectCreationEvent();
@@ -108,4 +109,13 @@ class CreateProject extends ProjectCreationEvent {
 
 class ResetBuilder extends ProjectCreationEvent {
   const ResetBuilder();
+}
+
+class UpdateStorageSettings extends ProjectCreationEvent {
+  final StorageConfig? storageConfig;
+
+  const UpdateStorageSettings({required this.storageConfig});
+
+  @override
+  List<Object?> get props => [storageConfig];
 }

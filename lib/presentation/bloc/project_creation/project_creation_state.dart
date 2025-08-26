@@ -3,6 +3,7 @@ import '../../../data/models/auth_strategy.dart';
 import '../../../data/models/project_endpoint.dart';
 import '../../../data/models/project_model.dart';
 import '../../../data/models/project_data_model.dart';
+import '../../../data/models/storage_config.dart';
 
 abstract class ProjectCreationState extends Equatable {
   const ProjectCreationState();
@@ -19,6 +20,8 @@ class ProjectCreationInitial extends ProjectCreationState {
   final AuthStrategy? authStrategy;
   final List<ProjectDataModel> dataModels;
   final List<ProjectEndpoint> endpoints;
+  final bool hasStorage;
+  final StorageConfig? storageConfig;
 
   const ProjectCreationInitial({
     this.step = 0,
@@ -28,6 +31,8 @@ class ProjectCreationInitial extends ProjectCreationState {
     this.authStrategy,
     this.dataModels = const [],
     this.endpoints = const [],
+    this.hasStorage = false,
+    this.storageConfig,
   });
 
   @override
@@ -39,6 +44,8 @@ class ProjectCreationInitial extends ProjectCreationState {
     authStrategy,
     dataModels,
     endpoints,
+    hasStorage,
+    storageConfig,
   ];
 
   ProjectCreationInitial copyWith({
@@ -49,6 +56,8 @@ class ProjectCreationInitial extends ProjectCreationState {
     AuthStrategy? authStrategy,
     List<ProjectDataModel>? dataModels,
     List<ProjectEndpoint>? endpoints,
+    bool? hasStorage,
+    StorageConfig? storageConfig,
   }) {
     return ProjectCreationInitial(
       step: step ?? this.step,
@@ -58,6 +67,8 @@ class ProjectCreationInitial extends ProjectCreationState {
       authStrategy: authStrategy ?? this.authStrategy,
       dataModels: dataModels ?? this.dataModels,
       endpoints: endpoints ?? this.endpoints,
+      hasStorage: hasStorage ?? this.hasStorage,
+      storageConfig: storageConfig ?? this.storageConfig,
     );
   }
 
@@ -67,9 +78,14 @@ class ProjectCreationInitial extends ProjectCreationState {
         return projectName.isNotEmpty && basePath.isNotEmpty;
       case 1: // Auth Settings
         return true;
-      case 2: // Data Models
+      case 2: // Storage
+        if (!hasStorage) return true;
+        return storageConfig != null &&
+            storageConfig!.connectionString.isNotEmpty &&
+            storageConfig!.databaseName.isNotEmpty;
+      case 3: // Data Models
         return dataModels.isNotEmpty;
-      case 3: // Endpoints
+      case 4: // Endpoints
         return endpoints.isNotEmpty;
       default:
         return false;

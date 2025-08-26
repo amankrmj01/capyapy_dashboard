@@ -20,8 +20,6 @@ class DataModelsStep extends StatefulWidget {
 }
 
 class _DataModelsStepState extends State<DataModelsStep> {
-  List<ProjectDataModel> get models => widget.state.dataModels;
-
   void _showCustomModelDialog({ProjectDataModel? model, int? editIndex}) {
     showDialog(
       context: context,
@@ -69,6 +67,8 @@ class _DataModelsStepState extends State<DataModelsStep> {
 
   @override
   Widget build(BuildContext context) {
+    final models = widget.state.dataModels;
+
     if (widget.state.runtimeType != ProjectCreationInitial) {
       return Container();
     }
@@ -79,7 +79,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
         children: [
           _buildHeader(context),
           const SizedBox(height: 24),
-          _buildModelsList(context),
+          _buildModelsList(context, models),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             icon: Icon(Icons.add),
@@ -100,7 +100,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
     );
   }
 
-  Widget _buildModelsList(BuildContext context) {
+  Widget _buildModelsList(BuildContext context, List<ProjectDataModel> models) {
     if (models.isEmpty) {
       return _buildEmptyState(context);
     }

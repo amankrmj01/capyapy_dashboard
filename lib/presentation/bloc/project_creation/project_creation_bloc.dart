@@ -26,6 +26,7 @@ class ProjectCreationBloc
     on<PreviousStep>(_onPreviousStep);
     on<CreateProject>(_onCreateProject);
     on<ResetBuilder>(_onResetBuilder);
+    on<UpdateStorageSettings>(_onUpdateStorageSettings);
   }
 
   void _onStartProjectCreation(
@@ -170,7 +171,7 @@ class ProjectCreationBloc
   void _onNextStep(NextStep event, Emitter<ProjectCreationState> emit) {
     if (state is ProjectCreationInitial) {
       final currentState = state as ProjectCreationInitial;
-      if (currentState.canProceedToNext && currentState.step < 3) {
+      if (currentState.canProceedToNext && currentState.step < 4) {
         emit(currentState.copyWith(step: currentState.step + 1));
       }
     }
@@ -204,6 +205,21 @@ class ProjectCreationBloc
 
   void _onResetBuilder(ResetBuilder event, Emitter<ProjectCreationState> emit) {
     emit(const ProjectCreationInitial());
+  }
+
+  void _onUpdateStorageSettings(
+    UpdateStorageSettings event,
+    Emitter<ProjectCreationState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is ProjectCreationInitial) {
+      emit(
+        currentState.copyWith(
+          storageConfig: event.storageConfig,
+          hasStorage: event.storageConfig != null,
+        ),
+      );
+    }
   }
 
   Project _buildProjectFromState(ProjectCreationInitial state) {

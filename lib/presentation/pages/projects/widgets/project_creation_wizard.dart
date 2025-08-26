@@ -8,6 +8,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../bloc/project_creation/project_creation_state.dart';
 import 'steps/basic_info_step.dart';
 import 'steps/auth_setup_step.dart';
+import 'steps/storage_step.dart';
 import 'steps/data_models_step.dart';
 import 'steps/endpoints_step.dart';
 import '../../../../data/datasources/mock_project_data_source.dart';
@@ -151,13 +152,13 @@ class ProjectCreationWizard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
-        children: List.generate(4, (index) {
+        children: List.generate(5, (index) {
           final isActive = index == state.step;
           final isCompleted = index < state.step;
 
           return Expanded(
             child: Container(
-              margin: EdgeInsets.only(right: index < 3 ? 8 : 0),
+              margin: EdgeInsets.only(right: index < 4 ? 8 : 0),
               child: Column(
                 children: [
                   Container(
@@ -197,9 +198,11 @@ class ProjectCreationWizard extends StatelessWidget {
       case 1:
         return AuthSetupStep(key: ValueKey('step1'), state: state);
       case 2:
-        return DataModelsStep(key: ValueKey('step2'), state: state);
+        return StorageStep(key: ValueKey('step2'), state: state);
       case 3:
-        return EndpointsStep(key: ValueKey('step3'), state: state);
+        return DataModelsStep(key: ValueKey('step3'), state: state);
+      case 4:
+        return EndpointsStep(key: ValueKey('step4'), state: state);
       default:
         return Container();
     }
@@ -232,7 +235,7 @@ class ProjectCreationWizard extends StatelessWidget {
               ),
             ),
           const Spacer(),
-          if (state.step < 3)
+          if (state.step < 4)
             ElevatedButton.icon(
               onPressed: state.canProceedToNext
                   ? () {
@@ -276,9 +279,11 @@ class ProjectCreationWizard extends StatelessWidget {
       case 1:
         return 'Step 2: Authentication Setup';
       case 2:
-        return 'Step 3: Data Models';
+        return 'Step 3: Storage Setup';
       case 3:
-        return 'Step 4: API Endpoints';
+        return 'Step 4: Data Models';
+      case 4:
+        return 'Step 5: API Endpoints';
       default:
         return '';
     }
@@ -291,8 +296,10 @@ class ProjectCreationWizard extends StatelessWidget {
       case 1:
         return 'Auth Setup';
       case 2:
-        return 'Data Models';
+        return 'Storage';
       case 3:
+        return 'Data Models';
+      case 4:
         return 'Endpoints';
       default:
         return '';
