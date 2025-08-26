@@ -3,9 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/project_model.dart';
+import '../../../bloc/build/build_event.dart';
+import '../../../bloc/build/build_state.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
 import '../../../bloc/project_details/project_details_state.dart';
 import '../../../bloc/project_details/project_details_event.dart';
+import '../../../bloc/build/build_bloc.dart';
+import 'dart:convert';
 
 class ProjectOverviewSection extends StatefulWidget {
   final Project project;
@@ -65,68 +69,91 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
-      builder: (context, state) {
-        if (state is ProjectDetailsInitial || state is ProjectDetailsLoading) {
-          return Center(child: CircularProgressIndicator());
-        } else if (state is ProjectDetailsError) {
-          return Center(child: Text('Error: ${state.message}'));
-        } else if (state is ProjectDetailsLoaded ||
-            state is ProjectDetailsUpdating) {
-          final project = (state is ProjectDetailsLoaded)
-              ? state.project
-              : (state as ProjectDetailsUpdating).project;
-          _updateControllers(project);
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildOverviewCards(project),
-                const SizedBox(height: 32),
-                _buildProjectBasics(project),
-                const SizedBox(height: 32),
-                _buildProjectStats(project),
-              ],
+    return BlocProvider<BuildBloc>(
+      create: (_) => BuildBloc(),
+      child: Builder(
+        builder: (context) {
+          return BlocListener<BuildBloc, BuildState>(
+            listener: (context, state) {
+              if (state is BuildSuccess) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Successfully built!')));
+              }
+            },
+            child: BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
+              builder: (context, state) {
+                if (state is ProjectDetailsInitial ||
+                    state is ProjectDetailsLoading) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (state is ProjectDetailsError) {
+                  return Center(child: Text('Error: ${state.message}'));
+                } else if (state is ProjectDetailsLoaded ||
+                    state is ProjectDetailsUpdating) {
+                  final project = (state is ProjectDetailsLoaded)
+                      ? state.project
+                      : (state as ProjectDetailsUpdating).project;
+                  _updateControllers(project);
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildOverviewCards(project),
+                        const SizedBox(height: 32),
+                        _buildProjectBasics(project),
+                        const SizedBox(height: 32),
+                        _buildProjectStats(project),
+                      ],
+                    ),
+                  );
+                } else {
+                  return Center(child: Text('Unknown state'));
+                }
+              },
             ),
           );
-        } else {
-          return Center(child: Text('Unknown state'));
-        }
-      },
+        },
+      ),
     );
   }
 
   Widget _buildOverviewCards(Project project) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildInfoCard(
-            'Data Models',
-            project.dataModels.length.toString(),
-            Icons.table_chart,
-            AppColors.primary(context),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildInfoCard(
-            'Endpoints',
-            project.endpoints.length.toString(),
-            Icons.api,
-            Colors.orange,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildInfoCard(
-            'Auth Required',
-            project.hasAuth ? 'Yes' : 'No',
-            Icons.security,
-            project.hasAuth ? Colors.green : Colors.grey,
-          ),
-        ),
-      ],
+    return BlocBuilder<BuildBloc, BuildState>(
+      builder: (context, buildState) {
+        return Row(
+          children: [
+            Expanded(
+              child: _buildInfoCard(
+                'Data Models',
+                project.dataModels.length.toString(),
+                Icons.table_chart,
+                AppColors.primary(context),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildInfoCard(
+                'Endpoints',
+                project.endpoints.length.toString(),
+                Icons.api,
+                Colors.orange,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildInfoCard(
+                'Auth Required',
+                project.hasAuth ? 'Yes' : 'No',
+                Icons.security,
+                project.hasAuth ? Colors.green : Colors.grey,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(child: _buildDownloadBuildCard(project)),
+          ],
+        );
+      },
     );
   }
 
@@ -398,6 +425,109 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDownloadBuildCard(Project project) {
+    return SizedBox(
+      height: 110, // Match info card height
+      child: AspectRatio(
+        aspectRatio: 1.8, // Match info card width ratio
+        child: BlocProvider<BuildBloc>(
+          create: (_) => BuildBloc(),
+          child: BlocConsumer<BuildBloc, BuildState>(
+            listener: (context, state) {
+              if (state is BuildSuccess) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Successfully built!')));
+              }
+            },
+            builder: (context, buildState) {
+              return InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: buildState is BuildInProgress
+                    ? null
+                    : () {
+                        context.read<BuildBloc>().add(StartBuild(project));
+                      },
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: buildState is BuildSuccess
+                              ? [Colors.green.shade400, Colors.green.shade700]
+                              : [Colors.blue.shade400, Colors.blue.shade700],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.blue.withValues(alpha: 51),
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  buildState is BuildSuccess
+                                      ? Icons.check_circle
+                                      : Icons.download,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Download Build',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              buildState is BuildSuccess
+                                  ? 'Build Ready!'
+                                  : buildState is BuildInProgress
+                                  ? 'Building...'
+                                  : 'Tap to Download',
+                              style: GoogleFonts.inter(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (buildState is BuildInProgress)
+                      const Positioned.fill(
+                        child: Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
