@@ -23,31 +23,32 @@ class DataModelsSection extends StatefulWidget {
 
 class _DataModelsSectionState extends State<DataModelsSection> {
   void _addNewDataModel() {
+    final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
       builder: (context) => DataModelEditorDialog(
         onSave: (dataModel) {
-          context.read<ProjectDetailsBloc>().add(AddDataModel(dataModel));
+          bloc.add(AddDataModel(dataModel));
         },
       ),
     );
   }
 
   void _editDataModel(int index, DataModel dataModel) {
+    final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
       builder: (context) => DataModelEditorDialog(
         dataModel: dataModel,
         onSave: (updatedDataModel) {
-          context.read<ProjectDetailsBloc>().add(
-            UpdateDataModel(index, updatedDataModel),
-          );
+          bloc.add(UpdateDataModel(index, updatedDataModel));
         },
       ),
     );
   }
 
   void _deleteDataModel(int index) {
+    final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -69,7 +70,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
           ),
           ElevatedButton(
             onPressed: () {
-              context.read<ProjectDetailsBloc>().add(DeleteDataModel(index));
+              bloc.add(DeleteDataModel(index));
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
