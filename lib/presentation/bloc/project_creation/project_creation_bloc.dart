@@ -75,7 +75,7 @@ class ProjectCreationBloc
   void _onAddDataModel(AddDataModel event, Emitter<ProjectCreationState> emit) {
     if (state is ProjectCreationInitial) {
       final currentState = state as ProjectCreationInitial;
-      final updatedModels = List<ResourcesModel>.from(currentState.dataModels)
+      final updatedModels = List<ProjectDataModel>.from(currentState.dataModels)
         ..add(event.dataModel);
 
       final newState = currentState.copyWith(dataModels: updatedModels);
@@ -89,7 +89,9 @@ class ProjectCreationBloc
   ) {
     if (state is ProjectCreationInitial) {
       final currentState = state as ProjectCreationInitial;
-      final updatedModels = List<ResourcesModel>.from(currentState.dataModels);
+      final updatedModels = List<ProjectDataModel>.from(
+        currentState.dataModels,
+      );
 
       if (event.index >= 0 && event.index < updatedModels.length) {
         updatedModels[event.index] = event.dataModel;
@@ -105,7 +107,9 @@ class ProjectCreationBloc
   ) {
     if (state is ProjectCreationInitial) {
       final currentState = state as ProjectCreationInitial;
-      final updatedModels = List<ResourcesModel>.from(currentState.dataModels);
+      final updatedModels = List<ProjectDataModel>.from(
+        currentState.dataModels,
+      );
 
       if (event.index >= 0 && event.index < updatedModels.length) {
         updatedModels.removeAt(event.index);

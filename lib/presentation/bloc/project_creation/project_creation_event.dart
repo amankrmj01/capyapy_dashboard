@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../data/models/auth_strategy.dart';
 import '../../../data/models/project_endpoint.dart';
-import '../../../data/models/resources_model.dart';
+import '../../../data/models/project_data_model.dart';
 
 abstract class ProjectCreationEvent extends Equatable {
   const ProjectCreationEvent();
@@ -39,7 +39,7 @@ class UpdateAuthSettings extends ProjectCreationEvent {
 }
 
 class AddDataModel extends ProjectCreationEvent {
-  final ResourcesModel dataModel;
+  final ProjectDataModel dataModel;
 
   const AddDataModel(this.dataModel);
 
@@ -49,7 +49,7 @@ class AddDataModel extends ProjectCreationEvent {
 
 class UpdateDataModel extends ProjectCreationEvent {
   final int index;
-  final ResourcesModel dataModel;
+  final ProjectDataModel dataModel;
 
   const UpdateDataModel({required this.index, required this.dataModel});
 

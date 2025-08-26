@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../data/models/mongodb_field.dart';
 import '../../../../../data/models/mongodb_index.dart';
-import '../../../../../data/models/resources_model.dart';
+import '../../../../../data/models/project_data_model.dart';
 import '../../../../bloc/project_creation/project_creation_state.dart';
 import '../../../../bloc/project_creation/project_creation_event.dart';
 import '../../../project_details/widgets/data_model_editor_dialog.dart';
@@ -20,9 +20,9 @@ class DataModelsStep extends StatefulWidget {
 }
 
 class _DataModelsStepState extends State<DataModelsStep> {
-  List<ResourcesModel> get models => widget.state.dataModels;
+  List<ProjectDataModel> get models => widget.state.dataModels;
 
-  void _showCustomModelDialog({ResourcesModel? model, int? editIndex}) {
+  void _showCustomModelDialog({ProjectDataModel? model, int? editIndex}) {
     showDialog(
       context: context,
       builder: (dialogContext) => DataModelEditorDialog(
@@ -62,7 +62,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
     bloc.add(RemoveDataModel(index));
   }
 
-  void _addTemplateModel(ResourcesModel model) {
+  void _addTemplateModel(ProjectDataModel model) {
     final bloc = context.read<ProjectCreationBloc>();
     bloc.add(AddDataModel(model));
   }
@@ -148,7 +148,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
         name: 'User Profile',
         icon: '👤',
         description: 'Basic user information',
-        model: ResourcesModel(
+        model: ProjectDataModel(
           id: 'user_profile_${DateTime.now().millisecondsSinceEpoch}',
           modelName: 'UserProfile',
           collectionName: 'user_profiles',
@@ -186,7 +186,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
         name: 'Product',
         icon: '🛍️',
         description: 'E-commerce product',
-        model: ResourcesModel(
+        model: ProjectDataModel(
           id: 'product_${DateTime.now().millisecondsSinceEpoch}',
           modelName: 'Product',
           collectionName: 'products',
@@ -229,7 +229,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
         name: 'Blog Post',
         icon: '📝',
         description: 'Blog content structure',
-        model: ResourcesModel(
+        model: ProjectDataModel(
           id: 'blog_post_${DateTime.now().millisecondsSinceEpoch}',
           modelName: 'BlogPost',
           collectionName: 'blog_posts',
@@ -353,7 +353,7 @@ class _ModelTemplate {
   final String name;
   final String icon;
   final String description;
-  final ResourcesModel model;
+  final ProjectDataModel model;
 
   const _ModelTemplate({
     required this.name,

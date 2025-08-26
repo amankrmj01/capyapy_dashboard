@@ -22,12 +22,12 @@ abstract class ProjectRepository {
   Future<List<Project>> getProjectsByStatus(bool isActive);
 
   // Data Models operations
-  Future<Project> addDataModel(String projectId, ResourcesModel dataModel);
+  Future<Project> addDataModel(String projectId, ProjectDataModel dataModel);
 
   Future<Project> updateDataModel(
     String projectId,
     int index,
-    ResourcesModel dataModel,
+    ProjectDataModel dataModel,
   );
 
   Future<Project> removeDataModel(String projectId, int index);

@@ -1,6 +1,6 @@
 import 'models.dart';
 
-class ResourcesModel {
+class ProjectDataModel {
   final String id;
   final String modelName;
   final String collectionName;
@@ -11,7 +11,7 @@ class ResourcesModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  const ResourcesModel({
+  const ProjectDataModel({
     required this.id,
     required this.modelName,
     required this.collectionName,
@@ -35,27 +35,28 @@ class ResourcesModel {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
-  factory ResourcesModel.fromJson(Map<String, dynamic> json) => ResourcesModel(
-    id: json['id'] ?? '',
-    modelName: json['modelName'] ?? '',
-    collectionName: json['collectionName'] ?? '',
-    description: json['description'] ?? '',
-    fields: (json['fields'] as List? ?? [])
-        .map((e) => MongoDbField.fromJson(e))
-        .toList(),
-    indexes: (json['indexes'] as List? ?? [])
-        .map((e) => MongoDbIndex.fromJson(e))
-        .toList(),
-    mongoDbOptions: Map<String, dynamic>.from(json['mongoDbOptions'] ?? {}),
-    createdAt: DateTime.parse(
-      json['createdAt'] ?? DateTime.now().toIso8601String(),
-    ),
-    updatedAt: DateTime.parse(
-      json['updatedAt'] ?? DateTime.now().toIso8601String(),
-    ),
-  );
+  factory ProjectDataModel.fromJson(Map<String, dynamic> json) =>
+      ProjectDataModel(
+        id: json['id'] ?? '',
+        modelName: json['modelName'] ?? '',
+        collectionName: json['collectionName'] ?? '',
+        description: json['description'] ?? '',
+        fields: (json['fields'] as List? ?? [])
+            .map((e) => MongoDbField.fromJson(e))
+            .toList(),
+        indexes: (json['indexes'] as List? ?? [])
+            .map((e) => MongoDbIndex.fromJson(e))
+            .toList(),
+        mongoDbOptions: Map<String, dynamic>.from(json['mongoDbOptions'] ?? {}),
+        createdAt: DateTime.parse(
+          json['createdAt'] ?? DateTime.now().toIso8601String(),
+        ),
+        updatedAt: DateTime.parse(
+          json['updatedAt'] ?? DateTime.now().toIso8601String(),
+        ),
+      );
 
-  ResourcesModel copyWith({
+  ProjectDataModel copyWith({
     String? id,
     String? modelName,
     String? collectionName,
@@ -66,7 +67,7 @@ class ResourcesModel {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return ResourcesModel(
+    return ProjectDataModel(
       id: id ?? this.id,
       modelName: modelName ?? this.modelName,
       collectionName: collectionName ?? this.collectionName,

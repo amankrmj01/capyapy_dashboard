@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import '../../../data/models/auth_strategy.dart';
 import '../../../data/models/project_endpoint.dart';
 import '../../../data/models/project_model.dart';
-import '../../../data/models/resources_model.dart';
+import '../../../data/models/project_data_model.dart';
 
 abstract class ProjectCreationState extends Equatable {
   const ProjectCreationState();
@@ -17,7 +17,7 @@ class ProjectCreationInitial extends ProjectCreationState {
   final String basePath;
   final bool hasAuth;
   final AuthStrategy? authStrategy;
-  final List<ResourcesModel> dataModels;
+  final List<ProjectDataModel> dataModels;
   final List<ProjectEndpoint> endpoints;
 
   const ProjectCreationInitial({
@@ -47,7 +47,7 @@ class ProjectCreationInitial extends ProjectCreationState {
     String? basePath,
     bool? hasAuth,
     AuthStrategy? authStrategy,
-    List<ResourcesModel>? dataModels,
+    List<ProjectDataModel>? dataModels,
     List<ProjectEndpoint>? endpoints,
   }) {
     return ProjectCreationInitial(

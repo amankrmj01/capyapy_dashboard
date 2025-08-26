@@ -117,7 +117,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<Project> addDataModel(
     String projectId,
-    ResourcesModel dataModel,
+    ProjectDataModel dataModel,
   ) async {
     try {
       final project = await dataSource.getProjectById(projectId);
@@ -140,7 +140,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   Future<Project> updateDataModel(
     String projectId,
     int index,
-    ResourcesModel dataModel,
+    ProjectDataModel dataModel,
   ) async {
     try {
       final project = await dataSource.getProjectById(projectId);
@@ -152,7 +152,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
         throw Exception('Data model index out of bounds');
       }
 
-      final updatedDataModels = List<ResourcesModel>.from(
+      final updatedDataModels = List<ProjectDataModel>.from(
         project.mongoDbDataModels,
       );
       updatedDataModels[index] = dataModel.copyWith(updatedAt: DateTime.now());
@@ -180,7 +180,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
         throw Exception('Data model index out of bounds');
       }
 
-      final updatedDataModels = List<ResourcesModel>.from(
+      final updatedDataModels = List<ProjectDataModel>.from(
         project.mongoDbDataModels,
       );
       updatedDataModels.removeAt(index);

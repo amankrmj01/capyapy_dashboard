@@ -4,7 +4,7 @@
 // Project-related models
 export 'project_model.dart';
 export 'auth_strategy.dart';
-export 'resources_model.dart';
+export 'project_data_model.dart';
 export 'project_endpoint.dart';
 export 'storage_config.dart';
 export 'project_metadata.dart';
@@ -22,7 +22,6 @@ export 'endpoint_analytics.dart';
 
 // Dashboard models
 export 'dashboard_overview.dart';
-export 'overview_card.dart';
 export 'analytics_data.dart';
 export 'chart_data.dart';
 export 'recent_activity.dart';

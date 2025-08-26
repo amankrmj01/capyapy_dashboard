@@ -27,7 +27,7 @@ class MockProjectDataSource implements ProjectDataSource {
           requiredFields: ['token'],
         ),
         mongoDbDataModels: [
-          ResourcesModel(
+          ProjectDataModel(
             id: 'model_1',
             modelName: 'Product',
             collectionName: 'products',
@@ -109,7 +109,7 @@ class MockProjectDataSource implements ProjectDataSource {
           requiredFields: ['x-api-key'],
         ),
         mongoDbDataModels: [
-          ResourcesModel(
+          ProjectDataModel(
             id: 'model_2',
             modelName: 'Post',
             collectionName: 'posts',

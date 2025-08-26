@@ -99,7 +99,7 @@ class AddDataModelUseCase {
 
   AddDataModelUseCase({required this.repository});
 
-  Future<Project> call(String projectId, ResourcesModel dataModel) async {
+  Future<Project> call(String projectId, ProjectDataModel dataModel) async {
     return await repository.addDataModel(projectId, dataModel);
   }
 }
@@ -112,7 +112,7 @@ class UpdateDataModelUseCase {
   Future<Project> call(
     String projectId,
     int index,
-    ResourcesModel dataModel,
+    ProjectDataModel dataModel,
   ) async {
     return await repository.updateDataModel(projectId, index, dataModel);
   }
@@ -304,7 +304,10 @@ class CreateProjectWithDataModelsUseCase {
 
   CreateProjectWithDataModelsUseCase({required this.repository});
 
-  Future<Project> call(Project project, List<ResourcesModel> dataModels) async {
+  Future<Project> call(
+    Project project,
+    List<ProjectDataModel> dataModels,
+  ) async {
     // Create the project first
     final createdProject = await repository.createProject(project);
 

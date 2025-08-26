@@ -63,10 +63,10 @@ class ProjectModelExample {
   }
 
   /// Sample User data model for MongoDB
-  static ResourcesModel _createUserModel() {
+  static ProjectDataModel _createUserModel() {
     final now = DateTime.now();
 
-    return ResourcesModel(
+    return ProjectDataModel(
       id: 'model_user_001',
       modelName: 'User',
       collectionName: 'users',
@@ -150,10 +150,10 @@ class ProjectModelExample {
   }
 
   /// Sample Product data model
-  static ResourcesModel _createProductModel() {
+  static ProjectDataModel _createProductModel() {
     final now = DateTime.now();
 
-    return ResourcesModel(
+    return ProjectDataModel(
       id: 'model_product_001',
       modelName: 'Product',
       collectionName: 'products',
@@ -234,10 +234,10 @@ class ProjectModelExample {
   }
 
   /// Sample Order data model
-  static ResourcesModel _createOrderModel() {
+  static ProjectDataModel _createOrderModel() {
     final now = DateTime.now();
 
-    return ResourcesModel(
+    return ProjectDataModel(
       id: 'model_order_001',
       modelName: 'Order',
       collectionName: 'orders',

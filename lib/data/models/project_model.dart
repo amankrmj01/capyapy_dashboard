@@ -8,7 +8,7 @@ class Project {
   final bool isActive;
   final bool hasAuth;
   final AuthStrategy? authStrategy;
-  final List<ResourcesModel> mongoDbDataModels;
+  final List<ProjectDataModel> mongoDbDataModels;
   final List<ProjectEndpoint> endpoints;
   final StorageConfig storage;
   final ProjectMetadata metadata;
@@ -64,7 +64,7 @@ class Project {
         (json['mongoDbDataModels'] as List? ??
                 json['dataModels'] as List? ??
                 [])
-            .map((e) => ResourcesModel.fromJson(e))
+            .map((e) => ProjectDataModel.fromJson(e))
             .toList(),
     endpoints: (json['endpoints'] as List? ?? [])
         .map((e) => ProjectEndpoint.fromJson(e))
@@ -97,7 +97,7 @@ class Project {
     bool? isActive,
     bool? hasAuth,
     AuthStrategy? authStrategy,
-    List<ResourcesModel>? mongoDbDataModels,
+    List<ProjectDataModel>? mongoDbDataModels,
     List<ProjectEndpoint>? endpoints,
     StorageConfig? storage,
     ProjectMetadata? metadata,
@@ -129,7 +129,7 @@ extension ProjectBackwardCompatibility on Project {
   // Getter for backward compatibility
   String get basePath => apiBasePath;
 
-  List<ResourcesModel> get dataModels => mongoDbDataModels;
+  List<ProjectDataModel> get dataModels => mongoDbDataModels;
 
   // Static factory method for backward compatibility
   static Project createLegacy({
