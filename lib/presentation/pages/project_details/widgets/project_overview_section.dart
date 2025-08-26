@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../data/models/models.dart';
+import '../../../../data/models/project_model.dart';
+import '../../../bloc/project_details/project_details_bloc.dart';
+import '../../../bloc/project_details/project_details_state.dart';
+import '../../../bloc/project_details/project_details_event.dart';
 
 class ProjectOverviewSection extends StatefulWidget {
   final Project project;
-  final Function(Project) onProjectUpdated;
+  final Function(Project)? onProjectUpdated;
 
   const ProjectOverviewSection({
     super.key,
@@ -26,12 +30,19 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.project.projectName);
-    _basePathController = TextEditingController(
-      text: widget.project.apiBasePath,
+    context.read<ProjectDetailsBloc>().add(
+      LoadProjectDetails(widget.project.id),
     );
+    _nameController = TextEditingController();
+    _basePathController = TextEditingController();
     _descriptionController = TextEditingController();
-    _hasAuth = widget.project.hasAuth;
+  }
+
+  void _updateControllers(Project project) {
+    _nameController.text = project.projectName;
+    _basePathController.text = project.apiBasePath;
+    _descriptionController.text = project.description;
+    _hasAuth = project.hasAuth;
   }
 
   @override
@@ -42,40 +53,57 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     super.dispose();
   }
 
-  void _saveChanges() {
-    final updatedProject = widget.project.copyWith(
+  void _saveChanges(Project project) {
+    final updatedProject = project.copyWith(
       projectName: _nameController.text,
       apiBasePath: _basePathController.text,
       hasAuth: _hasAuth,
       updatedAt: DateTime.now(),
     );
-    widget.onProjectUpdated(updatedProject);
+    widget.onProjectUpdated!(updatedProject);
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildOverviewCards(),
-          const SizedBox(height: 32),
-          _buildProjectBasics(),
-          const SizedBox(height: 32),
-          _buildProjectStats(),
-        ],
-      ),
+    return BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
+      builder: (context, state) {
+        if (state is ProjectDetailsInitial || state is ProjectDetailsLoading) {
+          return Center(child: CircularProgressIndicator());
+        } else if (state is ProjectDetailsError) {
+          return Center(child: Text('Error: ${state.message}'));
+        } else if (state is ProjectDetailsLoaded ||
+            state is ProjectDetailsUpdating) {
+          final project = (state is ProjectDetailsLoaded)
+              ? state.project
+              : (state as ProjectDetailsUpdating).project;
+          _updateControllers(project);
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildOverviewCards(project),
+                const SizedBox(height: 32),
+                _buildProjectBasics(project),
+                const SizedBox(height: 32),
+                _buildProjectStats(project),
+              ],
+            ),
+          );
+        } else {
+          return Center(child: Text('Unknown state'));
+        }
+      },
     );
   }
 
-  Widget _buildOverviewCards() {
+  Widget _buildOverviewCards(Project project) {
     return Row(
       children: [
         Expanded(
           child: _buildInfoCard(
             'Data Models',
-            widget.project.dataModels.length.toString(),
+            project.dataModels.length.toString(),
             Icons.table_chart,
             AppColors.primary(context),
           ),
@@ -84,7 +112,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
         Expanded(
           child: _buildInfoCard(
             'Endpoints',
-            widget.project.endpoints.length.toString(),
+            project.endpoints.length.toString(),
             Icons.api,
             Colors.orange,
           ),
@@ -93,9 +121,9 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
         Expanded(
           child: _buildInfoCard(
             'Auth Required',
-            widget.project.hasAuth ? 'Yes' : 'No',
+            project.hasAuth ? 'Yes' : 'No',
             Icons.security,
-            widget.project.hasAuth ? Colors.green : Colors.grey,
+            project.hasAuth ? Colors.green : Colors.grey,
           ),
         ),
       ],
@@ -145,7 +173,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     );
   }
 
-  Widget _buildProjectBasics() {
+  Widget _buildProjectBasics(Project project) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -201,9 +229,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
                 onPressed: () {
                   // Reset to original values
                   setState(() {
-                    _nameController.text = widget.project.projectName;
-                    _basePathController.text = widget.project.apiBasePath;
-                    _hasAuth = widget.project.hasAuth;
+                    _updateControllers(project);
                   });
                 },
                 child: Text(
@@ -215,7 +241,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
               ),
               const SizedBox(width: 12),
               ElevatedButton(
-                onPressed: _saveChanges,
+                onPressed: () => _saveChanges(project),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary(context),
                   foregroundColor: Colors.white,
@@ -264,7 +290,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     );
   }
 
-  Widget _buildProjectStats() {
+  Widget _buildProjectStats(Project project) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -284,13 +310,13 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildMetadataRow('Created By', widget.project.metadata.createdBy),
+          _buildMetadataRow('Created By', project.metadata.createdBy),
           _buildMetadataRow(
             'Created At',
-            '${widget.project.metadata.createdAt.day}/${widget.project.metadata.createdAt.month}/${widget.project.metadata.createdAt.year}',
+            '${project.metadata.createdAt.day}/${project.metadata.createdAt.month}/${project.metadata.createdAt.year}',
           ),
-          _buildMetadataRow('Project ID', widget.project.id),
-          if (widget.project.metadata.tags.isNotEmpty) _buildTagsRow(),
+          _buildMetadataRow('Project ID', project.id),
+          if (project.metadata.tags.isNotEmpty) _buildTagsRow(project),
         ],
       ),
     );
@@ -326,7 +352,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     );
   }
 
-  Widget _buildTagsRow() {
+  Widget _buildTagsRow(Project project) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -346,7 +372,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: widget.project.metadata.tags
+              children: project.metadata.tags
                   .map(
                     (tag) => Container(
                       padding: const EdgeInsets.symmetric(

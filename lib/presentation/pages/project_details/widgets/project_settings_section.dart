@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../bloc/project_details/project_details_bloc.dart';
+import '../../../bloc/project_details/project_details_state.dart';
+import '../../../bloc/project_details/project_details_event.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/auth_strategy.dart';
-import '../../../../data/models/project_metadata.dart';
-import '../../../../data/models/project_model.dart';
 import '../../../../data/models/storage_config.dart';
+import '../../../../data/models/project_model.dart';
+import '../project_provider.dart';
 
 class ProjectSettingsSection extends StatefulWidget {
   final Project project;
-  final Function(Project) onProjectUpdated;
+  final Function(Project)? onProjectUpdated;
 
   const ProjectSettingsSection({
     super.key,
     required this.project,
-    required this.onProjectUpdated,
+    this.onProjectUpdated,
   });
 
   @override
@@ -29,12 +33,20 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
   @override
   void initState() {
     super.initState();
-    _tagsController = TextEditingController(
-      text: widget.project.metadata.tags.join(', '),
+    context.read<ProjectDetailsBloc>().add(
+      LoadProjectDetails(widget.project.id),
     );
+    _tagsController = TextEditingController();
     _storageType = widget.project.storage.type;
     _authType = widget.project.authStrategy?.type ?? AuthType.bearer;
     _authRequiredFields = widget.project.authStrategy?.requiredFields ?? [];
+  }
+
+  void _updateControllers(Project project) {
+    _tagsController.text = project.metadata.tags.join(', ');
+    _storageType = project.storage.type;
+    _authType = project.authStrategy?.type ?? AuthType.bearer;
+    _authRequiredFields = project.authStrategy?.requiredFields ?? [];
   }
 
   @override
@@ -43,47 +55,28 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
     super.dispose();
   }
 
-  void _saveSettings() {
-    final tags = _tagsController.text
+  void _saveSettings(Project project) {
+    _tagsController.text
         .split(',')
         .map((tag) => tag.trim())
         .where((tag) => tag.isNotEmpty)
         .toList();
-
-    final updatedProject = widget.project.copyWith(
-      authStrategy: widget.project.hasAuth
+    final updatedProject = project.copyWith(
+      authStrategy: project.hasAuth
           ? AuthStrategy(
               type: _authType,
-              config: widget.project.authStrategy?.config ?? {},
+              config: project.authStrategy?.config ?? {},
               requiredFields: _authRequiredFields,
             )
           : null,
       storage: StorageConfig(
         type: _storageType,
-        connectionString: widget.project.storage.connectionString,
-        databaseName: widget.project.storage.databaseName,
-        options: widget.project.storage.options,
+        connectionString: project.storage.connectionString,
+        databaseName: project.storage.databaseName,
       ),
-      metadata: ProjectMetadata(
-        version: widget.project.metadata.version,
-        author: widget.project.metadata.author,
-        tags: tags,
-        documentation: widget.project.metadata.documentation,
-        customFields: widget.project.metadata.customFields,
-      ),
-      updatedAt: DateTime.now(),
+      metadata: project.metadata,
     );
-
-    widget.onProjectUpdated(updatedProject);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Project settings updated successfully',
-          style: GoogleFonts.inter(),
-        ),
-        backgroundColor: Colors.green,
-      ),
-    );
+    widget.onProjectUpdated?.call(updatedProject);
   }
 
   void _addAuthRequiredField() {
@@ -146,22 +139,39 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildAuthenticationSettings(),
-          const SizedBox(height: 32),
-          _buildStorageSettings(),
-          const SizedBox(height: 32),
-          _buildProjectTags(),
-          const SizedBox(height: 32),
-          _buildDangerZone(),
-          const SizedBox(height: 32),
-          _buildSaveButton(),
-        ],
-      ),
+    return BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
+      builder: (context, state) {
+        if (state is ProjectDetailsInitial || state is ProjectDetailsLoading) {
+          return Center(child: CircularProgressIndicator());
+        } else if (state is ProjectDetailsError) {
+          return Center(child: Text('Error: ${state.message}'));
+        } else if (state is ProjectDetailsLoaded ||
+            state is ProjectDetailsUpdating) {
+          final project = (state is ProjectDetailsLoaded)
+              ? state.project
+              : (state as ProjectDetailsUpdating).project;
+          _updateControllers(project);
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildAuthenticationSettings(),
+                const SizedBox(height: 32),
+                _buildStorageSettings(),
+                const SizedBox(height: 32),
+                _buildProjectTags(),
+                const SizedBox(height: 32),
+                _buildDangerZone(),
+                const SizedBox(height: 32),
+                _buildSaveButton(project),
+              ],
+            ),
+          );
+        } else {
+          return Center(child: Text('Unknown state'));
+        }
+      },
     );
   }
 
@@ -191,7 +201,7 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
             ],
           ),
           const SizedBox(height: 20),
-          if (!widget.project.hasAuth)
+          if (!(ProjectProvider.of(context)?.project.hasAuth ?? false))
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -420,7 +430,11 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
                   suffixIcon: const Icon(Icons.lock_outline),
                 ),
                 controller: TextEditingController(
-                  text: widget.project.storage.connectionString.isEmpty
+                  text:
+                      ProjectProvider.of(
+                            context,
+                          )?.project.storage.connectionString.isEmpty ??
+                          true
                       ? 'Not configured'
                       : '••••••••••••••••',
                 ),
@@ -446,9 +460,15 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
                   suffixIcon: const Icon(Icons.lock_outline),
                 ),
                 controller: TextEditingController(
-                  text: widget.project.storage.databaseName.isEmpty
+                  text:
+                      ProjectProvider.of(
+                            context,
+                          )?.project.storage.databaseName.isEmpty ??
+                          true
                       ? 'Not configured'
-                      : widget.project.storage.databaseName,
+                      : ProjectProvider.of(
+                          context,
+                        )?.project.storage.databaseName,
                 ),
                 style: GoogleFonts.inter(),
               ),
@@ -576,7 +596,7 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Are you absolutely sure you want to delete "${widget.project.projectName}"?',
+                            'Are you absolutely sure you want to delete "${ProjectProvider.of(context)?.project.projectName}"?',
                             style: GoogleFonts.inter(),
                           ),
                           const SizedBox(height: 16),
@@ -588,11 +608,11 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '• ${widget.project.mongoDbDataModels.length} data models',
+                            '• ${ProjectProvider.of(context)?.project.mongoDbDataModels.length} data models',
                             style: GoogleFonts.inter(fontSize: 14),
                           ),
                           Text(
-                            '• ${widget.project.endpoints.length} endpoints',
+                            '• ${ProjectProvider.of(context)?.project.endpoints.length} endpoints',
                             style: GoogleFonts.inter(fontSize: 14),
                           ),
                           Text(
@@ -626,7 +646,7 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Project "${widget.project.projectName}" deleted',
+                                  'Project "${ProjectProvider.of(context)?.project.projectName}" deleted',
                                   style: GoogleFonts.inter(),
                                 ),
                                 backgroundColor: Colors.red,
@@ -659,11 +679,11 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(Project project) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _saveSettings,
+        onPressed: () => _saveSettings(project),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary(context),
           foregroundColor: Colors.white,

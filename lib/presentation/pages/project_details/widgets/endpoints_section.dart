@@ -6,17 +6,19 @@ import '../../../../core/utils/k.showBlurredBackgroundGeneralDialog.dart';
 import '../../../../data/models/models.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
 import '../../../bloc/project_details/project_details_event.dart';
+import '../../../bloc/project_details/project_details_state.dart';
 import 'endpoint_editor_dialog.dart';
 import 'endpoint_stats.dart';
+import '../../project_details/project_provider.dart';
 
 class EndpointsSection extends StatefulWidget {
   final Project project;
-  final Function(Project) onProjectUpdated;
+  final Function(Project)? onProjectUpdated;
 
   const EndpointsSection({
     super.key,
     required this.project,
-    required this.onProjectUpdated,
+    this.onProjectUpdated,
   });
 
   @override
@@ -26,13 +28,20 @@ class EndpointsSection extends StatefulWidget {
 class _EndpointsSectionState extends State<EndpointsSection> {
   String _selectedMethod = 'all';
 
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProjectDetailsBloc>().add(
+      LoadProjectDetails(widget.project.id),
+    );
+  }
+
   void _addNewEndpoint() {
     final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
       builder: (dialogContext) => EndpointEditorDialog(
         onSave: (endpoint) {
-          // Use the section's context which has access to ProjectDetailsBloc
           bloc.add(AddEndpoint(endpoint));
           Navigator.of(dialogContext).pop(); // Close dialog
         },
@@ -47,7 +56,6 @@ class _EndpointsSectionState extends State<EndpointsSection> {
       builder: (dialogContext) => EndpointEditorDialog(
         endpoint: endpoint,
         onSave: (updatedEndpoint) {
-          // Use the section's context which has access to ProjectDetailsBloc
           bloc.add(UpdateEndpoint(index, updatedEndpoint));
           Navigator.of(dialogContext).pop(); // Close dialog
         },
@@ -94,9 +102,9 @@ class _EndpointsSectionState extends State<EndpointsSection> {
 
   List<Endpoint> get _filteredEndpoints {
     if (_selectedMethod == 'all') {
-      return widget.project.endpoints;
+      return ProjectProvider.of(context)?.project.endpoints ?? [];
     }
-    return widget.project.endpoints
+    return (ProjectProvider.of(context)?.project.endpoints ?? [])
         .where(
           (endpoint) => endpoint.method.name.toLowerCase() == _selectedMethod,
         )
@@ -105,20 +113,36 @@ class _EndpointsSectionState extends State<EndpointsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildHeader(),
-        _buildMethodFilter(),
-        Expanded(
-          child: _filteredEndpoints.isEmpty
-              ? _buildEmptyState()
-              : _buildEndpointsList(),
-        ),
-      ],
+    return BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
+      builder: (context, state) {
+        if (state is ProjectDetailsInitial || state is ProjectDetailsLoading) {
+          return Center(child: CircularProgressIndicator());
+        } else if (state is ProjectDetailsError) {
+          return Center(child: Text('Error: ${state.message}'));
+        } else if (state is ProjectDetailsLoaded ||
+            state is ProjectDetailsUpdating) {
+          final project = (state is ProjectDetailsLoaded)
+              ? state.project
+              : (state as ProjectDetailsUpdating).project;
+          return Column(
+            children: [
+              _buildHeader(project),
+              _buildMethodFilter(),
+              Expanded(
+                child: _filteredEndpoints.isEmpty
+                    ? _buildEmptyState()
+                    : _buildEndpointsList(),
+              ),
+            ],
+          );
+        } else {
+          return Center(child: Text('Unknown state'));
+        }
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(Project project) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -143,7 +167,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '${widget.project.endpoints.length}',
+              '${project.endpoints.length}',
               style: GoogleFonts.inter(
                 fontSize: 12,
                 color: AppColors.primary(context),
@@ -264,7 +288,9 @@ class _EndpointsSectionState extends State<EndpointsSection> {
       itemCount: _filteredEndpoints.length,
       itemBuilder: (context, index) {
         final endpoint = _filteredEndpoints[index];
-        final originalIndex = widget.project.endpoints.indexOf(endpoint);
+        final originalIndex =
+            ProjectProvider.of(context)?.project.endpoints.indexOf(endpoint) ??
+            -1;
         return _buildEndpointCard(originalIndex, endpoint);
       },
     );
@@ -311,7 +337,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${widget.project.basePath}${endpoint.path}',
+                        '${ProjectProvider.of(context)?.project.basePath}${endpoint.path}',
                         style: GoogleFonts.sourceCodePro(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -404,7 +430,8 @@ class _EndpointsSectionState extends State<EndpointsSection> {
                       context: context,
                       builder: (dialogContext) => EndpointStatsDialog(
                         endpoint: endpoint,
-                        basePath: widget.project.basePath,
+                        basePath:
+                            ProjectProvider.of(context)?.project.basePath ?? '',
                       ),
                     );
                   },

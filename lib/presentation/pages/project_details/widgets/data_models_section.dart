@@ -5,16 +5,18 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/models.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
 import '../../../bloc/project_details/project_details_event.dart';
+import '../../../bloc/project_details/project_details_state.dart';
 import 'data_model_editor_dialog.dart';
+import '../../project_details/project_provider.dart';
 
 class DataModelsSection extends StatefulWidget {
   final Project project;
-  final Function(Project) onProjectUpdated;
+  final Function(Project)? onProjectUpdated;
 
   const DataModelsSection({
     super.key,
     required this.project,
-    required this.onProjectUpdated,
+    this.onProjectUpdated,
   });
 
   @override
@@ -22,6 +24,14 @@ class DataModelsSection extends StatefulWidget {
 }
 
 class _DataModelsSectionState extends State<DataModelsSection> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProjectDetailsBloc>().add(
+      LoadProjectDetails(widget.project.id),
+    );
+  }
+
   void _addNewDataModel() {
     final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
@@ -60,7 +70,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'Are you sure you want to delete "${widget.project.dataModels[index].modelName}"? This action cannot be undone.',
+          'Are you sure you want to delete "${ProjectProvider.of(context)?.project.dataModels[index].modelName}"? This action cannot be undone.',
           style: GoogleFonts.inter(),
         ),
         actions: [
@@ -89,19 +99,35 @@ class _DataModelsSectionState extends State<DataModelsSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildHeader(),
-        Expanded(
-          child: widget.project.dataModels.isEmpty
-              ? _buildEmptyState()
-              : _buildDataModelsList(),
-        ),
-      ],
+    return BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
+      builder: (context, state) {
+        if (state is ProjectDetailsInitial || state is ProjectDetailsLoading) {
+          return Center(child: CircularProgressIndicator());
+        } else if (state is ProjectDetailsError) {
+          return Center(child: Text('Error: ${state.message}'));
+        } else if (state is ProjectDetailsLoaded ||
+            state is ProjectDetailsUpdating) {
+          final project = (state is ProjectDetailsLoaded)
+              ? state.project
+              : (state as ProjectDetailsUpdating).project;
+          return Column(
+            children: [
+              _buildHeader(project),
+              Expanded(
+                child: project.dataModels.isEmpty
+                    ? _buildEmptyState()
+                    : _buildDataModelsList(project.dataModels),
+              ),
+            ],
+          );
+        } else {
+          return Center(child: Text('Unknown state'));
+        }
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(Project project) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -126,7 +152,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '${widget.project.dataModels.length}',
+              '${project.dataModels.length}',
               style: GoogleFonts.inter(
                 fontSize: 12,
                 color: AppColors.primary(context),
@@ -157,7 +183,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
           Icon(
             Icons.table_chart,
             size: 64,
-            color: AppColors.textSecondary(context).withOpacity(0.5),
+            color: AppColors.textSecondary(context).withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -173,7 +199,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
             'Create your first data model to define the structure of your data.',
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: AppColors.textSecondary(context).withOpacity(0.7),
+              color: AppColors.textSecondary(context).withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -193,12 +219,12 @@ class _DataModelsSectionState extends State<DataModelsSection> {
     );
   }
 
-  Widget _buildDataModelsList() {
+  Widget _buildDataModelsList(List<DataModel> dataModels) {
     return ListView.builder(
       padding: const EdgeInsets.all(24),
-      itemCount: widget.project.dataModels.length,
+      itemCount: dataModels.length,
       itemBuilder: (context, index) {
-        final dataModel = widget.project.dataModels[index];
+        final dataModel = dataModels[index];
         return _buildDataModelCard(index, dataModel);
       },
     );
@@ -223,7 +249,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.primary(context).withOpacity(0.1),
+                    color: AppColors.primary(context).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -260,7 +286,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
                           fontSize: 12,
                           color: AppColors.textSecondary(
                             context,
-                          ).withOpacity(0.7),
+                          ).withValues(alpha: 0.7),
                         ),
                       ),
                     ],

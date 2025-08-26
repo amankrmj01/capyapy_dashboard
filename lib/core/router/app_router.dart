@@ -7,10 +7,15 @@ import '../../data/repositories/project_repository_impl.dart';
 import '../../../data/datasources/mock_project_data_source.dart';
 import '../../domain/usecases/project_usecases.dart';
 import '../../presentation/bloc/project_creation/project_creation_bloc.dart';
+import '../../presentation/bloc/project_details/project_details_bloc.dart';
+import '../../presentation/bloc/project_details/project_details_event.dart';
 import '../../presentation/pages/billings/billing_page.dart';
 import '../../presentation/pages/main_page.dart';
-import '../../presentation/pages/project_details/project_details_page.dart';
-import '../../presentation/bloc/project_details/project_details_bloc.dart';
+import '../../presentation/pages/project_details/project_shell_page.dart';
+import '../../presentation/pages/project_details/widgets/data_models_section.dart';
+import '../../presentation/pages/project_details/widgets/endpoints_section.dart';
+import '../../presentation/pages/project_details/widgets/project_overview_section.dart';
+import '../../presentation/pages/project_details/widgets/project_settings_section.dart';
 import '../../presentation/pages/projects/projects_page.dart';
 import '../../presentation/pages/dashboard/dashboard_page.dart';
 import '../../presentation/pages/projects/widgets/project_creation_wizard.dart';
@@ -88,21 +93,112 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
-    GoRoute(
-      path: '/dashboard/project/:id',
-      builder: (context, state) {
-        final project = state.extra as Project?;
-        final repository = ProjectRepositoryImpl(
-          dataSource: sl<MockProjectDataSource>(),
-        );
-        return BlocProvider<ProjectDetailsBloc>(
-          create: (_) => ProjectDetailsBloc(
-            repository,
-            ProjectDetailsUseCases(repository),
-          ),
-          child: ProjectDetailsPage(project: project!),
-        );
-      },
+    ShellRoute(
+      builder: (context, state, child) => ProjectShellPage(child: child),
+      routes: [
+        GoRoute(
+          path: '/dashboard/project/:id',
+          pageBuilder: (context, state) {
+            final project = state.extra as Project;
+            final repository = ProjectRepositoryImpl(
+              dataSource: sl<MockProjectDataSource>(),
+            );
+            return NoTransitionPage(
+              child: BlocProvider<ProjectDetailsBloc>(
+                create: (_) => ProjectDetailsBloc(
+                  repository,
+                  ProjectDetailsUseCases(repository),
+                )..add(LoadProjectDetails(project.id)),
+                child: ProjectOverviewSection(
+                  project: project,
+                  onProjectUpdated: (updatedProject) {
+                    context.read<ProjectDetailsBloc>().add(
+                      UpdateProject(updatedProject),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+          routes: [
+            GoRoute(
+              path: 'data-models',
+              pageBuilder: (context, state) {
+                final project = state.extra as Project;
+                final repository = ProjectRepositoryImpl(
+                  dataSource: sl<MockProjectDataSource>(),
+                );
+                return NoTransitionPage(
+                  child: BlocProvider<ProjectDetailsBloc>(
+                    create: (_) => ProjectDetailsBloc(
+                      repository,
+                      ProjectDetailsUseCases(repository),
+                    )..add(LoadProjectDetails(project.id)),
+                    child: DataModelsSection(
+                      project: project,
+                      onProjectUpdated: (updatedProject) {
+                        context.read<ProjectDetailsBloc>().add(
+                          UpdateProject(updatedProject),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              path: 'endpoints',
+              pageBuilder: (context, state) {
+                final project = state.extra as Project;
+                final repository = ProjectRepositoryImpl(
+                  dataSource: sl<MockProjectDataSource>(),
+                );
+                return NoTransitionPage(
+                  child: BlocProvider<ProjectDetailsBloc>(
+                    create: (_) => ProjectDetailsBloc(
+                      repository,
+                      ProjectDetailsUseCases(repository),
+                    )..add(LoadProjectDetails(project.id)),
+                    child: EndpointsSection(
+                      project: project,
+                      onProjectUpdated: (updatedProject) {
+                        context.read<ProjectDetailsBloc>().add(
+                          UpdateProject(updatedProject),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+            GoRoute(
+              path: 'settings',
+              pageBuilder: (context, state) {
+                final project = state.extra as Project;
+                final repository = ProjectRepositoryImpl(
+                  dataSource: sl<MockProjectDataSource>(),
+                );
+                return NoTransitionPage(
+                  child: BlocProvider<ProjectDetailsBloc>(
+                    create: (_) => ProjectDetailsBloc(
+                      repository,
+                      ProjectDetailsUseCases(repository),
+                    )..add(LoadProjectDetails(project.id)),
+                    child: ProjectSettingsSection(
+                      project: project,
+                      onProjectUpdated: (updatedProject) {
+                        context.read<ProjectDetailsBloc>().add(
+                          UpdateProject(updatedProject),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ],
     ),
   ],
 );
