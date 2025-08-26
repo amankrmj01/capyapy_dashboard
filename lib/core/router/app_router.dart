@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/models/project_model.dart';
+import '../../data/repositories/project_repository_impl.dart';
+import '../../data/datasources/mock_project_data_source.dart';
 import '../../presentation/pages/billings/billing_page.dart';
 import '../../presentation/pages/main_page.dart';
 import '../../presentation/pages/project_details/project_details_page.dart';
@@ -68,7 +70,9 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final project = state.extra as Project?;
         return BlocProvider<ProjectDetailsBloc>(
-          create: (_) => ProjectDetailsBloc(),
+          create: (_) => ProjectDetailsBloc(
+            ProjectRepositoryImpl(dataSource: MockProjectDataSource()),
+          ),
           child: ProjectDetailsPage(project: project!),
         );
       },

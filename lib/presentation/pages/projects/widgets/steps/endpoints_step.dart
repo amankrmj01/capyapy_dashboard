@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../../data/models/backward_compatibility.dart';
 import '../../../../../data/models/endpoint_analytics.dart';
 import '../../../../../data/models/http_config.dart';
 import '../../../../../data/models/resources_model.dart';
 import '../../../../../data/models/project_endpoint.dart';
+import '../../../../../core/constants/app_colors.dart';
+import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/endpoint_editor_dialog.dart';
+import 'package:capyapy_dashboard/presentation/bloc/project_details/project_details_bloc.dart';
+import 'package:capyapy_dashboard/presentation/bloc/project_details/project_details_event.dart'
+    as details_events;
 import '../../../../bloc/project_builder/project_builder_event.dart';
 import '../../../../bloc/project_builder/project_builder_state.dart';
 import '../../../../bloc/project_builder/project_builder_bloc.dart';
-import '../../../../../core/constants/app_colors.dart';
 
 class EndpointsStep extends StatefulWidget {
   final ProjectBuilderInProgress state;
@@ -20,116 +25,29 @@ class EndpointsStep extends StatefulWidget {
 }
 
 class _EndpointsStepState extends State<EndpointsStep> {
-  void _showCustomEndpointDialog({ProjectEndpoint? endpoint, int? editIndex}) {
-    final pathController = TextEditingController(text: endpoint?.path ?? '');
-    String methodStr = endpoint?.method.name ?? 'GET';
-    final descController = TextEditingController(
-      text: endpoint?.description ?? '',
-    );
+  void _addNewEndpoint() {
+    final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(
-                editIndex == null ? 'Add Custom Endpoint' : 'Edit Endpoint',
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: pathController,
-                      decoration: InputDecoration(labelText: 'Endpoint Path'),
-                    ),
-                    DropdownButton<String>(
-                      value: methodStr,
-                      items: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
-                          .map(
-                            (m) => DropdownMenuItem(value: m, child: Text(m)),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        setState(() {
-                          methodStr = val!;
-                        });
-                      },
-                    ),
-                    TextField(
-                      controller: descController,
-                      decoration: InputDecoration(labelText: 'Description'),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    final now = DateTime.now();
-                    final method = _httpMethodFromString(methodStr);
-                    final newEndpoint = ProjectEndpoint(
-                      id:
-                          endpoint?.id ??
-                          'endpoint_${now.millisecondsSinceEpoch}',
-                      path: pathController.text,
-                      method: method,
-                      description: descController.text,
-                      authRequired: false,
-                      response: ResponseConfig(
-                        statusCode: 200,
-                        contentType: 'application/json',
-                        schema: {},
-                      ),
-                      analytics: EndpointAnalytics(
-                        totalCalls: 0,
-                        averageResponseTime: 0,
-                        lastCalledAt: now,
-                      ),
-                      createdAt: now,
-                      updatedAt: now,
-                    );
-                    if (editIndex != null) {
-                      BlocProvider.of<ProjectBuilderBloc>(this.context).add(
-                        UpdateEndpoint(index: editIndex, endpoint: newEndpoint),
-                      );
-                    } else {
-                      BlocProvider.of<ProjectBuilderBloc>(
-                        this.context,
-                      ).add(AddEndpoint(newEndpoint));
-                    }
-                    Navigator.pop(ctx);
-                  },
-                  child: Text(
-                    editIndex == null ? 'Add Endpoint' : 'Save Changes',
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (context) => EndpointEditorDialog(
+        onSave: (endpoint) {
+          bloc.add(details_events.AddEndpoint(endpoint));
+        },
+      ),
     );
   }
 
-  HttpMethod _httpMethodFromString(String method) {
-    switch (method.toUpperCase()) {
-      case 'GET':
-        return HttpMethod.get;
-      case 'POST':
-        return HttpMethod.post;
-      case 'PUT':
-        return HttpMethod.put;
-      case 'DELETE':
-        return HttpMethod.delete;
-      case 'PATCH':
-        return HttpMethod.patch;
-      default:
-        return HttpMethod.get;
-    }
+  void _editEndpoint(int index, Endpoint endpoint) {
+    final bloc = context.read<ProjectDetailsBloc>();
+    showDialog(
+      context: context,
+      builder: (context) => EndpointEditorDialog(
+        endpoint: endpoint,
+        onSave: (updatedEndpoint) {
+          bloc.add(details_events.UpdateEndpoint(index, updatedEndpoint));
+        },
+      ),
+    );
   }
 
   @override
@@ -146,7 +64,7 @@ class _EndpointsStepState extends State<EndpointsStep> {
           ElevatedButton.icon(
             icon: Icon(Icons.add),
             label: Text('Add Custom Endpoint'),
-            onPressed: () => _showCustomEndpointDialog(),
+            onPressed: _addNewEndpoint,
           ),
           const SizedBox(height: 32),
           _buildQuickEndpoints(context),
@@ -188,18 +106,51 @@ class _EndpointsStepState extends State<EndpointsStep> {
 
   Widget _buildEndpointsList(BuildContext context) {
     final endpoints = widget.state.endpoints;
-
     if (endpoints.isEmpty) {
       return _buildEmptyState(context);
     }
-
     return Column(
       children: endpoints.asMap().entries.map((entry) {
-        final index = entry.key;
+        final idx = entry.key;
         final endpoint = entry.value;
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: _buildEndpointCard(context, endpoint, index),
+        return Card(
+          child: ListTile(
+            title: Text(endpoint.path),
+            subtitle: Text(endpoint.method.name),
+            trailing: PopupMenuButton(
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, size: 16),
+                      const SizedBox(width: 8),
+                      Text('Edit'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, size: 16, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Text('Delete', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                ),
+              ],
+              onSelected: (value) {
+                if (value == 'edit') {
+                  _editEndpoint(idx, endpoint);
+                } else if (value == 'delete') {
+                  BlocProvider.of<ProjectDetailsBloc>(
+                    this.context,
+                  ).add(details_events.DeleteEndpoint(idx));
+                }
+              },
+            ),
+          ),
         );
       }).toList(),
     );
@@ -246,243 +197,6 @@ class _EndpointsStepState extends State<EndpointsStep> {
             textAlign: TextAlign.center,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildEndpointCard(
-    BuildContext context,
-    ProjectEndpoint endpoint,
-    int index,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border(context)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: _getMethodColor(endpoint.method),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  endpoint.method.name.toUpperCase(),
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  '${widget.state.basePath}${endpoint.path}',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary(context),
-                  ).copyWith(fontFeatures: [FontFeature.tabularFigures()]),
-                ),
-              ),
-              if (endpoint.authRequired)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: Colors.orange.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.lock, size: 12, color: Colors.orange),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Auth',
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.orange,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(width: 8),
-              PopupMenuButton(
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit, size: 16),
-                        const SizedBox(width: 8),
-                        Text('Edit'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, size: 16, color: Colors.red),
-                        const SizedBox(width: 8),
-                        Text('Delete', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    _showEndpointEditor(context, endpoint, index);
-                  } else if (value == 'delete') {
-                    _deleteEndpoint(index);
-                  }
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            endpoint.description,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: AppColors.textSecondary(context),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildInfoChip(
-                context,
-                'Status: ${endpoint.response.statusCode}',
-                endpoint.response.statusCode < 300 ? Colors.green : Colors.red,
-              ),
-              const SizedBox(width: 8),
-              _buildInfoChip(
-                context,
-                'Response: ${endpoint.response.contentType}',
-                Colors.blue,
-              ),
-              if (endpoint.pathParams?.isNotEmpty == true) ...[
-                const SizedBox(width: 8),
-                _buildInfoChip(
-                  context,
-                  'Path Params: ${endpoint.pathParams!.length}',
-                  Colors.purple,
-                ),
-              ],
-              if (endpoint.queryParams?.isNotEmpty == true) ...[
-                const SizedBox(width: 8),
-                _buildInfoChip(
-                  context,
-                  'Query Params: ${endpoint.queryParams!.length}',
-                  Colors.orange,
-                ),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoChip(BuildContext context, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 10,
-          fontWeight: FontWeight.w500,
-          color: color,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddEndpointButton(BuildContext context) {
-    return InkWell(
-      onTap: () => _showEndpointEditor(context, null, null),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.green.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.green.withValues(alpha: 0.3),
-            style: BorderStyle.solid,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Icon(Icons.add, color: Colors.green, size: 24),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Add New Endpoint',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green,
-                    ),
-                  ),
-                  Text(
-                    'Create a new API endpoint',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: AppColors.textSecondary(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios, color: Colors.green, size: 16),
-          ],
-        ),
       ),
     );
   }
@@ -695,21 +409,6 @@ class _EndpointsStepState extends State<EndpointsStep> {
       case HttpMethod.patch:
         return Colors.purple;
     }
-  }
-
-  void _showEndpointEditor(
-    BuildContext context,
-    ProjectEndpoint? endpoint,
-    int? index,
-  ) {
-    // TODO: Implement endpoint editor dialog
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Endpoint editor coming soon!')));
-  }
-
-  void _deleteEndpoint(int index) {
-    context.read<ProjectBuilderBloc>().add(RemoveEndpoint(index));
   }
 
   void _addCrudEndpoint(

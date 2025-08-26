@@ -1,12 +1,16 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/backward_compatibility.dart';
 import '../../../data/models/project_model.dart';
+import '../../../data/repositories/project_repository_impl.dart';
+import '../../../domain/repositories/project_repository.dart';
 import 'project_details_event.dart';
 import 'project_details_state.dart';
 
 class ProjectDetailsBloc
     extends Bloc<ProjectDetailsEvent, ProjectDetailsState> {
-  ProjectDetailsBloc() : super(ProjectDetailsInitial()) {
+  final ProjectRepository repository;
+
+  ProjectDetailsBloc(this.repository) : super(ProjectDetailsInitial()) {
     on<LoadProjectDetails>(_onLoadProjectDetails);
     on<UpdateProject>(_onUpdateProject);
     on<AddDataModel>(_onAddDataModel);
@@ -23,13 +27,11 @@ class ProjectDetailsBloc
     Emitter<ProjectDetailsState> emit,
   ) async {
     emit(ProjectDetailsLoading());
-
-    try {
-      // In a real app, you would fetch the project from a repository
-      // For now, we'll emit an error if project is not found
-      emit(const ProjectDetailsError('Project not found'));
-    } catch (e) {
-      emit(ProjectDetailsError('Failed to load project: ${e.toString()}'));
+    final project = await repository.getProjectById(event.projectId);
+    if (project != null) {
+      emit(ProjectDetailsLoaded(project));
+    } else {
+      emit(ProjectDetailsError('Project not found'));
     }
   }
 

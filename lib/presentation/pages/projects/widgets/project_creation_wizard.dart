@@ -5,6 +5,7 @@ import '../../../bloc/project_builder/project_builder_bloc.dart';
 import '../../../bloc/project_builder/project_builder_event.dart';
 import '../../../bloc/project_builder/project_builder_state.dart';
 import '../../../../core/constants/app_colors.dart';
+import 'package:capyapy_dashboard/presentation/bloc/project_details/project_details_bloc.dart';
 import 'steps/basic_info_step.dart';
 import 'steps/auth_setup_step.dart';
 import 'steps/data_models_step.dart';
@@ -200,7 +201,12 @@ class ProjectCreationWizard extends StatelessWidget {
       case 2:
         return DataModelsStep(state: state);
       case 3:
-        return EndpointsStep(state: state);
+        return BlocProvider<ProjectDetailsBloc>(
+          create: (context) => ProjectDetailsBloc(
+            ProjectRepositoryImpl(dataSource: MockProjectDataSource()),
+          ),
+          child: EndpointsStep(state: state),
+        );
       default:
         return Container();
     }

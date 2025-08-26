@@ -103,8 +103,8 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.8,
+        width: MediaQuery.of(context).size.width * 0.9,
+        height: MediaQuery.of(context).size.height * 0.95,
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,33 +269,37 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
 
   Widget _buildEmptyFieldsState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.description,
-            size: 48,
-            color: AppColors.textSecondary(context).withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No Fields Added',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary(context),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          // Prevent overflow by minimizing height
+          children: [
+            Icon(
+              Icons.description,
+              size: 48,
+              color: AppColors.textSecondary(context).withValues(alpha: 0.5),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Add fields to define the structure of your data model.',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: AppColors.textSecondary(context).withValues(alpha: 0.7),
+            const SizedBox(height: 16),
+            Text(
+              'No Fields Added',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary(context),
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              'Add fields to define the structure of your data model.',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: AppColors.textSecondary(context).withValues(alpha: 0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

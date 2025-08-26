@@ -125,8 +125,21 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
       updatedAt: DateTime.now(),
     );
 
-    widget.onSave(endpoint);
-    Navigator.pop(context);
+    try {
+      widget.onSave(endpoint);
+      Navigator.pop(context);
+    } catch (e, stackTrace) {
+      debugPrint(
+        'Error in EndpointEditorDialog onSave:\nException: $e\nStackTrace: $stackTrace',
+      );
+      // Optionally, show a snackbar to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ' + e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Map<String, dynamic> _parseResponseBody(String body) {

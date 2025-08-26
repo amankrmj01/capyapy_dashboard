@@ -8,6 +8,7 @@ import '../../../../bloc/project_builder/project_builder_bloc.dart';
 import '../../../../bloc/project_builder/project_builder_event.dart';
 import '../../../../bloc/project_builder/project_builder_state.dart';
 import '../../../../../core/constants/app_colors.dart';
+import '../../../project_details/widgets/data_model_editor_dialog.dart';
 
 class DataModelsStep extends StatefulWidget {
   final ProjectBuilderInProgress state;
@@ -20,183 +21,35 @@ class DataModelsStep extends StatefulWidget {
 
 class _DataModelsStepState extends State<DataModelsStep> {
   void _showCustomModelDialog({ResourcesModel? model, int? editIndex}) {
-    final nameController = TextEditingController(text: model?.modelName ?? '');
-    final collectionController = TextEditingController(
-      text: model?.collectionName ?? '',
-    );
-    final descController = TextEditingController(
-      text: model?.description ?? '',
-    );
-    List<MongoDbField> fields = List<MongoDbField>.from(model?.fields ?? []);
     showDialog(
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(
-                editIndex == null ? 'Add Custom Model' : 'Edit Model',
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(labelText: 'Model Name'),
-                    ),
-                    TextField(
-                      controller: collectionController,
-                      decoration: InputDecoration(labelText: 'Collection Name'),
-                    ),
-                    TextField(
-                      controller: descController,
-                      decoration: InputDecoration(labelText: 'Description'),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Fields',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                    ),
-                    ...fields.asMap().entries.map((entry) {
-                      final idx = entry.key;
-                      final field = entry.value;
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Field Name',
-                              ),
-                              controller: TextEditingController(
-                                text: field.name,
-                              ),
-                              onChanged: (val) {
-                                setState(() {
-                                  fields[idx] = MongoDbField(
-                                    name: val,
-                                    type: field.type,
-                                    required: field.required,
-                                    unique: field.unique,
-                                    defaultValue: field.defaultValue,
-                                    enumValues: field.enumValues,
-                                    nestedFields: field.nestedFields,
-                                    ref: field.ref,
-                                    validationRules: field.validationRules,
-                                  );
-                                });
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          DropdownButton<MongoDbFieldType>(
-                            value: field.type,
-                            items: MongoDbFieldType.values
-                                .map(
-                                  (t) => DropdownMenuItem(
-                                    value: t,
-                                    child: Text(t.name),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (val) {
-                              setState(() {
-                                fields[idx] = MongoDbField(
-                                  name: field.name,
-                                  type: val!,
-                                  required: field.required,
-                                  unique: field.unique,
-                                  defaultValue: field.defaultValue,
-                                  enumValues: field.enumValues,
-                                  nestedFields: field.nestedFields,
-                                  ref: field.ref,
-                                  validationRules: field.validationRules,
-                                );
-                              });
-                            },
-                          ),
-                          Checkbox(
-                            value: field.required,
-                            onChanged: (val) {
-                              setState(() {
-                                fields[idx] = MongoDbField(
-                                  name: field.name,
-                                  type: field.type,
-                                  required: val!,
-                                  unique: field.unique,
-                                  defaultValue: field.defaultValue,
-                                  enumValues: field.enumValues,
-                                  nestedFields: field.nestedFields,
-                                  ref: field.ref,
-                                  validationRules: field.validationRules,
-                                );
-                              });
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () {
-                              setState(() {
-                                fields.removeAt(idx);
-                              });
-                            },
-                          ),
-                        ],
-                      );
-                    }),
-                    TextButton.icon(
-                      icon: Icon(Icons.add),
-                      label: Text('Add Field'),
-                      onPressed: () {
-                        setState(() {
-                          fields.add(
-                            MongoDbField(
-                              name: '',
-                              type: MongoDbFieldType.string,
-                              required: false,
-                            ),
-                          );
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    final now = DateTime.now();
-                    final newModel = ResourcesModel(
-                      modelName: nameController.text,
-                      collectionName: collectionController.text,
-                      description: descController.text,
-                      fields: fields,
-                      indexes: [],
-                      id: model?.id ?? UniqueKey().toString(),
-                      createdAt: now,
-                      updatedAt: now,
-                    );
-                    if (editIndex != null) {
-                      BlocProvider.of<ProjectBuilderBloc>(this.context).add(
-                        UpdateDataModel(index: editIndex, dataModel: newModel),
-                      );
-                    } else {
-                      BlocProvider.of<ProjectBuilderBloc>(
-                        this.context,
-                      ).add(AddDataModel(newModel));
-                    }
-                    Navigator.pop(ctx);
-                  },
-                  child: Text(editIndex == null ? 'Add Model' : 'Save Changes'),
-                ),
-              ],
+      builder: (context) => DataModelEditorDialog(
+        dataModel: model,
+        onSave: (updatedDataModel) {
+          if (editIndex != null) {
+            context.read<ProjectBuilderBloc>().add(
+              UpdateDataModel(index: editIndex, dataModel: updatedDataModel),
             );
-          },
-        );
-      },
+          } else {
+            context.read<ProjectBuilderBloc>().add(
+              AddDataModel(updatedDataModel),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  void _addNewDataModel() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => DataModelEditorDialog(
+        onSave: (dataModel) {
+          BlocProvider.of<ProjectBuilderBloc>(
+            context,
+          ).add(AddDataModel(dataModel));
+        },
+      ),
     );
   }
 
@@ -214,7 +67,7 @@ class _DataModelsStepState extends State<DataModelsStep> {
           ElevatedButton.icon(
             icon: Icon(Icons.add),
             label: Text('Add Custom Model'),
-            onPressed: () => _showCustomModelDialog(),
+            onPressed: _addNewDataModel,
           ),
           const SizedBox(height: 32),
           _buildQuickTemplates(context),

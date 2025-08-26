@@ -25,31 +25,32 @@ class _EndpointsSectionState extends State<EndpointsSection> {
   String _selectedMethod = 'all';
 
   void _addNewEndpoint() {
+    final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
-      builder: (context) => EndpointEditorDialog(
+      builder: (dialogContext) => EndpointEditorDialog(
         onSave: (endpoint) {
-          context.read<ProjectDetailsBloc>().add(AddEndpoint(endpoint));
+          bloc.add(AddEndpoint(endpoint));
         },
       ),
     );
   }
 
   void _editEndpoint(int index, Endpoint endpoint) {
+    final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
-      builder: (context) => EndpointEditorDialog(
+      builder: (dialogContext) => EndpointEditorDialog(
         endpoint: endpoint,
         onSave: (updatedEndpoint) {
-          context.read<ProjectDetailsBloc>().add(
-            UpdateEndpoint(index, updatedEndpoint),
-          );
+          bloc.add(UpdateEndpoint(index, updatedEndpoint));
         },
       ),
     );
   }
 
   void _deleteEndpoint(int index) {
+    final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -71,7 +72,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
           ),
           ElevatedButton(
             onPressed: () {
-              context.read<ProjectDetailsBloc>().add(DeleteEndpoint(index));
+              bloc.add(DeleteEndpoint(index));
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
@@ -284,7 +285,9 @@ class _EndpointsSectionState extends State<EndpointsSection> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: _getMethodColor(endpoint.method).withOpacity(0.1),
+                    color: _getMethodColor(
+                      endpoint.method,
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -329,7 +332,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.1),
+                                color: Colors.orange.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(3),
                               ),
                               child: Text(
@@ -349,7 +352,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
+                                color: Colors.blue.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(3),
                               ),
                               child: Text(
@@ -370,7 +373,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
+                                color: Colors.green.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(3),
                               ),
                               child: Text(
@@ -452,7 +455,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: AppColors.border(context).withOpacity(0.3),
+                    color: AppColors.border(context).withValues(alpha: 0.3),
                   ),
                 ),
               ),
