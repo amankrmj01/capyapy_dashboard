@@ -20,6 +20,118 @@ class EndpointsStep extends StatefulWidget {
 }
 
 class _EndpointsStepState extends State<EndpointsStep> {
+  void _showCustomEndpointDialog({ProjectEndpoint? endpoint, int? editIndex}) {
+    final pathController = TextEditingController(text: endpoint?.path ?? '');
+    String methodStr = endpoint?.method.name ?? 'GET';
+    final descController = TextEditingController(
+      text: endpoint?.description ?? '',
+    );
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(
+                editIndex == null ? 'Add Custom Endpoint' : 'Edit Endpoint',
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: pathController,
+                      decoration: InputDecoration(labelText: 'Endpoint Path'),
+                    ),
+                    DropdownButton<String>(
+                      value: methodStr,
+                      items: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+                          .map(
+                            (m) => DropdownMenuItem(value: m, child: Text(m)),
+                          )
+                          .toList(),
+                      onChanged: (val) {
+                        setState(() {
+                          methodStr = val!;
+                        });
+                      },
+                    ),
+                    TextField(
+                      controller: descController,
+                      decoration: InputDecoration(labelText: 'Description'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final now = DateTime.now();
+                    final method = _httpMethodFromString(methodStr);
+                    final newEndpoint = ProjectEndpoint(
+                      id:
+                          endpoint?.id ??
+                          'endpoint_${now.millisecondsSinceEpoch}',
+                      path: pathController.text,
+                      method: method,
+                      description: descController.text,
+                      authRequired: false,
+                      response: ResponseConfig(
+                        statusCode: 200,
+                        contentType: 'application/json',
+                        schema: {},
+                      ),
+                      analytics: EndpointAnalytics(
+                        totalCalls: 0,
+                        averageResponseTime: 0,
+                        lastCalledAt: now,
+                      ),
+                      createdAt: now,
+                      updatedAt: now,
+                    );
+                    if (editIndex != null) {
+                      context.read<ProjectBuilderBloc>().add(
+                        UpdateEndpoint(index: editIndex, endpoint: newEndpoint),
+                      );
+                    } else {
+                      context.read<ProjectBuilderBloc>().add(
+                        AddEndpoint(newEndpoint),
+                      );
+                    }
+                    Navigator.pop(ctx);
+                  },
+                  child: Text(
+                    editIndex == null ? 'Add Endpoint' : 'Save Changes',
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  HttpMethod _httpMethodFromString(String method) {
+    switch (method.toUpperCase()) {
+      case 'GET':
+        return HttpMethod.get;
+      case 'POST':
+        return HttpMethod.post;
+      case 'PUT':
+        return HttpMethod.put;
+      case 'DELETE':
+        return HttpMethod.delete;
+      case 'PATCH':
+        return HttpMethod.patch;
+      default:
+        return HttpMethod.get;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -31,7 +143,11 @@ class _EndpointsStepState extends State<EndpointsStep> {
           const SizedBox(height: 24),
           _buildEndpointsList(context),
           const SizedBox(height: 24),
-          _buildAddEndpointButton(context),
+          ElevatedButton.icon(
+            icon: Icon(Icons.add),
+            label: Text('Add Custom Endpoint'),
+            onPressed: () => _showCustomEndpointDialog(),
+          ),
           const SizedBox(height: 32),
           _buildQuickEndpoints(context),
         ],

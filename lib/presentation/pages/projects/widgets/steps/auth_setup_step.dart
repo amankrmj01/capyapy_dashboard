@@ -21,13 +21,17 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
   bool _hasAuth = false;
   String _selectedStrategy = 'oauth2';
   List<String> _selectedScopes = [];
+  String _customStrategyName = '';
+  List<Map<String, String>> _customConfigFields = [];
 
   @override
   void initState() {
     super.initState();
     _hasAuth = widget.state.hasAuth;
-    _selectedStrategy = widget.state.authStrategy?.strategy ?? 'oauth2';
-    _selectedScopes = widget.state.authStrategy?.scopes ?? [];
+    _selectedStrategy = 'oauth2';
+    _selectedScopes = [];
+    _customStrategyName = '';
+    _customConfigFields = [];
   }
 
   @override
@@ -164,109 +168,103 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
   }
 
   Widget _buildAuthStrategy(BuildContext context) {
+    final strategies = ['oauth2', 'bearer', 'apiKey', 'custom'];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Authentication Strategy',
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary(context),
+          'Auth Strategy',
+          style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        DropdownButton<String>(
+          value: _selectedStrategy,
+          items: strategies
+              .map(
+                (s) => DropdownMenuItem(
+                  value: s,
+                  child: Text(s == 'custom' ? 'Custom...' : s),
+                ),
+              )
+              .toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedStrategy = value!;
+              if (value == 'custom') {
+                _customStrategyName = '';
+                _customConfigFields = [];
+              }
+            });
+            _dispatchAuthUpdate();
+          },
+        ),
+        if (_selectedStrategy == 'custom') ...[
+          const SizedBox(height: 16),
+          TextField(
+            decoration: InputDecoration(labelText: 'Custom Strategy Name'),
+            onChanged: (val) {
+              setState(() {
+                _customStrategyName = val;
+              });
+              _dispatchAuthUpdate();
+            },
           ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            _buildStrategyOption(
-              context,
-              'oauth2',
-              '🔑 OAuth 2.0',
-              'Industry standard for secure authorization',
-              isSelected: _selectedStrategy == 'oauth2',
-            ),
-            _buildStrategyOption(
-              context,
-              'jwt',
-              '🎫 JWT Tokens',
-              'JSON Web Tokens for stateless authentication',
-              isSelected: _selectedStrategy == 'jwt',
-            ),
-            _buildStrategyOption(
-              context,
-              'apikey',
-              '🗝️ API Key',
-              'Simple API key-based authentication',
-              isSelected: _selectedStrategy == 'apikey',
-            ),
-            _buildStrategyOption(
-              context,
-              'basic',
-              '🔐 Basic Auth',
-              'Username and password authentication',
-              isSelected: _selectedStrategy == 'basic',
-            ),
-          ],
-        ),
+          const SizedBox(height: 8),
+          Text('Custom Config Fields', style: GoogleFonts.inter(fontSize: 14)),
+          ..._customConfigFields.asMap().entries.map((entry) {
+            final idx = entry.key;
+            final field = entry.value;
+            return Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(hintText: 'Key'),
+                    controller: TextEditingController(text: field['key']),
+                    onChanged: (val) {
+                      setState(() {
+                        _customConfigFields[idx]['key'] = val;
+                      });
+                      _dispatchAuthUpdate();
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(hintText: 'Value'),
+                    controller: TextEditingController(text: field['value']),
+                    onChanged: (val) {
+                      setState(() {
+                        _customConfigFields[idx]['value'] = val;
+                      });
+                      _dispatchAuthUpdate();
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    setState(() {
+                      _customConfigFields.removeAt(idx);
+                    });
+                    _dispatchAuthUpdate();
+                  },
+                ),
+              ],
+            );
+          }),
+          TextButton.icon(
+            icon: Icon(Icons.add),
+            label: Text('Add Config Field'),
+            onPressed: () {
+              setState(() {
+                _customConfigFields.add({'key': '', 'value': ''});
+              });
+              _dispatchAuthUpdate();
+            },
+          ),
+        ],
       ],
-    );
-  }
-
-  Widget _buildStrategyOption(
-    BuildContext context,
-    String strategy,
-    String title,
-    String description, {
-    required bool isSelected,
-  }) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedStrategy = strategy;
-        });
-        _updateAuthSettings();
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.4,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.blue.withValues(alpha: 0.1)
-              : AppColors.surface(context),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? Colors.blue : AppColors.border(context),
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? Colors.blue
-                    : AppColors.textPrimary(context),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              description,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: AppColors.textSecondary(context),
-                height: 1.3,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -417,5 +415,50 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
     context.read<ProjectBuilderBloc>().add(
       UpdateAuthSettings(hasAuth: _hasAuth, authStrategy: strategy),
     );
+  }
+
+  void _dispatchAuthUpdate() {
+    if (_selectedStrategy == 'custom') {
+      context.read<ProjectBuilderBloc>().add(
+        UpdateAuthSettings(
+          hasAuth: _hasAuth,
+          authStrategy: AuthStrategy(
+            type: AuthType.custom,
+            config: {
+              'customName': _customStrategyName,
+              'customConfig': _customConfigFields,
+              'scopes': _selectedScopes,
+            },
+          ),
+        ),
+      );
+    } else {
+      AuthType type;
+      switch (_selectedStrategy) {
+        case 'oauth2':
+          type = AuthType.oauth2;
+          break;
+        case 'bearer':
+          type = AuthType.bearer;
+          break;
+        case 'apiKey':
+          type = AuthType.apiKey;
+          break;
+        case 'basic':
+          type = AuthType.basic;
+          break;
+        default:
+          type = AuthType.bearer;
+      }
+      context.read<ProjectBuilderBloc>().add(
+        UpdateAuthSettings(
+          hasAuth: _hasAuth,
+          authStrategy: AuthStrategy(
+            type: type,
+            config: {'strategy': _selectedStrategy, 'scopes': _selectedScopes},
+          ),
+        ),
+      );
+    }
   }
 }

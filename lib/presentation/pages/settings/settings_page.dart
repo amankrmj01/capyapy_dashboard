@@ -189,9 +189,39 @@ class _SettingsPageState extends State<SettingsPage> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: _buildSettingsCard(
         context,
-        title: '🧑 Personal Details',
+        title: '', // Title handled below
         child: Column(
           children: [
+            Row(
+              children: [
+                // Edit button at top left
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 20),
+                  tooltip: 'Edit Profile',
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ProfileEditPage(
+                          nameController: _nameController,
+                          emailController: _emailController,
+                          onUpdate: _updatePersonalInfo,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '🧑 Personal Details',
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary(context),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
             Row(
               children: [
                 CircleAvatar(
@@ -224,35 +254,37 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
             const SizedBox(height: 24),
-            _buildTextField(
-              context,
-              controller: _nameController,
-              label: 'Full Name',
-              icon: Icons.person,
-            ),
-            const SizedBox(height: 16),
-            _buildTextField(
-              context,
-              controller: _emailController,
-              label: 'Email Address',
-              icon: Icons.email,
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _updatePersonalInfo,
-                icon: const Icon(Icons.save),
-                label: const Text('Update Info'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            // Show name and email as non-editable
+            Row(
+              children: [
+                Icon(Icons.person, color: Colors.grey),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _nameController.text,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: AppColors.textPrimary(context),
+                    ),
                   ),
                 ),
-              ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.email, color: Colors.grey),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _emailController.text,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      color: AppColors.textPrimary(context),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -700,6 +732,120 @@ class _SettingsPageState extends State<SettingsPage> {
             child: const Text('Rate Now'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ProfileEditPage widget
+class ProfileEditPage extends StatelessWidget {
+  final TextEditingController nameController;
+  final TextEditingController emailController;
+  final VoidCallback onUpdate;
+
+  const ProfileEditPage({
+    super.key,
+    required this.nameController,
+    required this.emailController,
+    required this.onUpdate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Edit Profile')),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                  child: Text('🐹', style: TextStyle(fontSize: 32)),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Profile Picture',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary(context),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Avatar change feature coming soon! 🐹',
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.camera_alt, size: 18),
+                        label: const Text('Change Avatar'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Full Name',
+                prefixIcon: const Icon(Icons.person),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: AppColors.background(context),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Email Address',
+                prefixIcon: const Icon(Icons.email),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                filled: true,
+                fillColor: AppColors.background(context),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  onUpdate();
+                  Navigator.of(context).pop();
+                },
+                icon: const Icon(Icons.save),
+                label: const Text('Update Info'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
