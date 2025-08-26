@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'widgets/project_creation_wizard.dart';
+import 'package:go_router/go_router.dart';
 import 'widgets/projects_list.dart';
 import '../../../data/datasources/mock_project_data_source.dart';
 import '../../../data/repositories/project_repository_impl.dart';
 import '../../../domain/usecases/project_usecases.dart';
 import '../../bloc/project_builder/project_builder_bloc.dart';
-import '../../bloc/project_builder/project_builder_event.dart';
 import '../../bloc/project_builder/project_builder_state.dart';
 import '../../bloc/projects/projects_bloc.dart';
 import '../../bloc/projects/projects_event.dart';
@@ -22,7 +21,6 @@ class ProjectsPage extends StatefulWidget {
 }
 
 class _ProjectsPageState extends State<ProjectsPage> {
-  bool _showCreateProjectWizard = false;
   final ScrollController _scrollController = ScrollController();
   double _scrollOffset = 0.0;
 
@@ -30,6 +28,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // Removed the auto-load from here since ProjectsBloc doesn't exist yet
   }
 
   @override
@@ -65,6 +64,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
       create: (_) => ProjectsBloc(
         projectRepository: ProjectRepositoryImpl(dataSource: dataSource),
       )..add(const LoadProjects()),
+      // Load projects immediately when bloc is created
       child: BlocProvider(
         create: (_) => ProjectBuilderBloc(
           createProjectUseCase: CreateProjectUseCase(
@@ -76,9 +76,6 @@ class _ProjectsPageState extends State<ProjectsPage> {
               BlocListener<ProjectBuilderBloc, ProjectBuilderState>(
                 listener: (context, state) {
                   if (state is ProjectBuilderSuccess) {
-                    setState(() {
-                      _showCreateProjectWizard = false;
-                    });
                     // Refresh projects after creating a new one
                     context.read<ProjectsBloc>().add(const RefreshProjects());
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -98,37 +95,67 @@ class _ProjectsPageState extends State<ProjectsPage> {
                     );
                   }
                 },
-                child: _showCreateProjectWizard
-                    ? ProjectCreationWizard(
-                        onClose: () {
-                          setState(() {
-                            _showCreateProjectWizard = false;
-                          });
-                          context.read<ProjectBuilderBloc>().add(
-                            const ResetBuilder(),
-                          );
-                        },
-                      )
-                    : _buildProjectsOverview(context),
+                child: _ProjectsPageContent(
+                  scrollController: _scrollController,
+                  transitionProgress: _transitionProgress,
+                  headerHeight: _headerHeight,
+                  collapsedOpacity: _collapsedOpacity,
+                  expandedOpacity: _expandedOpacity,
+                  startProjectCreation: _startProjectCreation,
+                  formatNumber: _formatNumber,
+                ),
               ),
         ),
       ),
     );
   }
 
-  Widget _buildProjectsOverview(BuildContext context) {
+  void _startProjectCreation(BuildContext context) {
+    context.go('/dashboard/project/new');
+  }
+
+  String _formatNumber(int number) {
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}k';
+    }
+    return number.toString();
+  }
+}
+
+// Separate the content into its own widget to have cleaner code
+class _ProjectsPageContent extends StatelessWidget {
+  final ScrollController scrollController;
+  final double transitionProgress;
+  final double headerHeight;
+  final double collapsedOpacity;
+  final double expandedOpacity;
+  final Function(BuildContext) startProjectCreation;
+  final String Function(int) formatNumber;
+
+  const _ProjectsPageContent({
+    required this.scrollController,
+    required this.transitionProgress,
+    required this.headerHeight,
+    required this.collapsedOpacity,
+    required this.expandedOpacity,
+    required this.startProjectCreation,
+    required this.formatNumber,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         SingleChildScrollView(
-          controller: _scrollController,
+          controller: scrollController,
           child: Column(
             children: [
-              SizedBox(height: _headerHeight + 20),
-              // Dynamic space for floating header
+              SizedBox(height: headerHeight + 20),
               _buildQuickStats(context),
               _buildProjectsList(context),
               const SizedBox(height: 32),
-              // Bottom padding
             ],
           ),
         ),
@@ -144,41 +171,41 @@ class _ProjectsPageState extends State<ProjectsPage> {
       margin: EdgeInsets.lerp(
         const EdgeInsets.only(left: 24, right: 24, top: 16),
         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        _transitionProgress,
+        transitionProgress,
       ),
       decoration: BoxDecoration(
         color: AppColors.surface(context),
         borderRadius: BorderRadius.lerp(
           BorderRadius.circular(12),
           BorderRadius.circular(20),
-          _transitionProgress,
+          transitionProgress,
         ),
-        boxShadow: _transitionProgress > 0.3
+        boxShadow: transitionProgress > 0.3
             ? [
                 BoxShadow(
                   color: Colors.black.withValues(
-                    alpha: 0.1 * _transitionProgress,
+                    alpha: 0.1 * transitionProgress,
                   ),
-                  blurRadius: 12 * _transitionProgress,
-                  offset: Offset(0, 4 * _transitionProgress),
+                  blurRadius: 12 * transitionProgress,
+                  offset: Offset(0, 4 * transitionProgress),
                 ),
               ]
             : null,
       ),
       child: Container(
-        height: _headerHeight,
+        height: headerHeight,
         padding: EdgeInsets.lerp(
           const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
           const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          _transitionProgress,
+          transitionProgress,
         ),
         child: Stack(
           alignment: AlignmentGeometry.centerLeft,
           children: [
-            // Expanded layout (fades out early)
+            // Expanded layout
             AnimatedOpacity(
               duration: const Duration(milliseconds: 100),
-              opacity: _expandedOpacity,
+              opacity: expandedOpacity,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -217,7 +244,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () => _startProjectCreation(context),
+                    onPressed: () => startProjectCreation(context),
                     icon: Icon(Icons.add),
                     label: Text('Create New Project'),
                     style: ElevatedButton.styleFrom(
@@ -236,10 +263,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
               ),
             ),
 
-            // Collapsed layout (fades in later)
+            // Collapsed layout
             AnimatedOpacity(
               duration: const Duration(milliseconds: 100),
-              opacity: _collapsedOpacity,
+              opacity: collapsedOpacity,
               child: Row(
                 children: [
                   Text('🗂️', style: GoogleFonts.inter(fontSize: 20)),
@@ -255,7 +282,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () => _startProjectCreation(context),
+                    onPressed: () => startProjectCreation(context),
                     icon: Icon(Icons.add, size: 16),
                     label: Text('New'),
                     style: ElevatedButton.styleFrom(
@@ -337,7 +364,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                   context,
                   icon: '⚡',
                   title: 'API Calls',
-                  value: _formatNumber(state.totalApiCalls),
+                  value: formatNumber(state.totalApiCalls),
                   subtitle: 'This month',
                   color: Colors.purple,
                 ),
@@ -550,26 +577,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
     );
   }
 
-  String _formatNumber(int number) {
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}k';
-    }
-    return number.toString();
-  }
-
   Widget _buildProjectsList(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: ProjectsList(onCreateProject: _startProjectCreation),
+      child: ProjectsList(onCreateProject: startProjectCreation),
     );
-  }
-
-  void _startProjectCreation(BuildContext blocContext) {
-    setState(() {
-      _showCreateProjectWizard = true;
-    });
-    blocContext.read<ProjectBuilderBloc>().add(const StartProjectCreation());
   }
 }

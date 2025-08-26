@@ -26,9 +26,11 @@ class _DataModelsSectionState extends State<DataModelsSection> {
     final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
-      builder: (context) => DataModelEditorDialog(
+      builder: (dialogContext) => DataModelEditorDialog(
         onSave: (dataModel) {
+          // Use the section's context which has access to ProjectDetailsBloc
           bloc.add(AddDataModel(dataModel));
+          Navigator.of(dialogContext).pop(); // Close dialog
         },
       ),
     );
@@ -38,10 +40,12 @@ class _DataModelsSectionState extends State<DataModelsSection> {
     final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
-      builder: (context) => DataModelEditorDialog(
+      builder: (dialogContext) => DataModelEditorDialog(
         dataModel: dataModel,
         onSave: (updatedDataModel) {
+          // Use the section's context which has access to ProjectDetailsBloc
           bloc.add(UpdateDataModel(index, updatedDataModel));
+          Navigator.of(dialogContext).pop(); // Close dialog
         },
       ),
     );
@@ -51,7 +55,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
     final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(
           'Delete Data Model',
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
@@ -62,7 +66,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
               style: GoogleFonts.inter(color: AppColors.textSecondary(context)),
@@ -71,7 +75,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
           ElevatedButton(
             onPressed: () {
               bloc.add(DeleteDataModel(index));
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

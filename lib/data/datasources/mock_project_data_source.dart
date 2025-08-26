@@ -3,6 +3,7 @@ import 'project_data_source.dart';
 
 class MockProjectDataSource implements ProjectDataSource {
   final List<Project> _projects = [];
+  static final List<Project> _staticProjects = [];
 
   MockProjectDataSource() {
     _initializeMockData();
@@ -395,4 +396,10 @@ class MockProjectDataSource implements ProjectDataSource {
     _projects.clear();
     _initializeMockData();
   }
+
+  static void addProject(Project project) {
+    _staticProjects.add(project);
+  }
+
+  List<Project> get projects => [..._projects, ..._staticProjects];
 }

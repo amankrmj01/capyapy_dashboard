@@ -30,7 +30,9 @@ class _EndpointsSectionState extends State<EndpointsSection> {
       context: context,
       builder: (dialogContext) => EndpointEditorDialog(
         onSave: (endpoint) {
+          // Use the section's context which has access to ProjectDetailsBloc
           bloc.add(AddEndpoint(endpoint));
+          Navigator.of(dialogContext).pop(); // Close dialog
         },
       ),
     );
@@ -43,7 +45,9 @@ class _EndpointsSectionState extends State<EndpointsSection> {
       builder: (dialogContext) => EndpointEditorDialog(
         endpoint: endpoint,
         onSave: (updatedEndpoint) {
+          // Use the section's context which has access to ProjectDetailsBloc
           bloc.add(UpdateEndpoint(index, updatedEndpoint));
+          Navigator.of(dialogContext).pop(); // Close dialog
         },
       ),
     );
@@ -53,7 +57,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
     final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(
           'Delete Endpoint',
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
@@ -64,7 +68,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
               style: GoogleFonts.inter(color: AppColors.textSecondary(context)),
@@ -73,7 +77,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
           ElevatedButton(
             onPressed: () {
               bloc.add(DeleteEndpoint(index));
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

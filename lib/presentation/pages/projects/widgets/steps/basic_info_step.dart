@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../bloc/project_builder/project_builder_bloc.dart';
-import '../../../../bloc/project_builder/project_builder_event.dart';
-import '../../../../bloc/project_builder/project_builder_state.dart';
+import '../../../../bloc/project_creation/project_creation_bloc.dart';
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../bloc/project_creation/project_creation_state.dart';
 
 class BasicInfoStep extends StatefulWidget {
-  final ProjectBuilderInProgress state;
+  final ProjectCreationInitial state;
 
   const BasicInfoStep({super.key, required this.state});
 
@@ -23,9 +22,11 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
   void initState() {
     super.initState();
     _projectNameController = TextEditingController(
-      text: widget.state.projectName,
+      text: widget.state.formData['name'] ?? '',
     );
-    _basePathController = TextEditingController(text: widget.state.basePath);
+    _basePathController = TextEditingController(
+      text: widget.state.formData['basePath'] ?? '',
+    );
   }
 
   @override
@@ -35,8 +36,20 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
     super.dispose();
   }
 
+  void _updateProjectInfo() {
+    context.read<ProjectCreationBloc>().add(
+      ProjectCreationFieldUpdated('name', _projectNameController.text),
+    );
+    context.read<ProjectCreationBloc>().add(
+      ProjectCreationFieldUpdated('basePath', _basePathController.text),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.state.runtimeType != ProjectCreationInitial) {
+      return Container();
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -324,15 +337,6 @@ class _BasicInfoStepState extends State<BasicInfoStep> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _updateProjectInfo() {
-    context.read<ProjectBuilderBloc>().add(
-      UpdateProjectBasicInfo(
-        projectName: _projectNameController.text,
-        basePath: _basePathController.text,
       ),
     );
   }

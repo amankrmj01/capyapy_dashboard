@@ -7,12 +7,14 @@ import 'package:flutter/material.dart';
 import '../../data/models/project_model.dart';
 import '../../data/repositories/project_repository_impl.dart';
 import '../../data/datasources/mock_project_data_source.dart';
+import '../../presentation/bloc/project_creation/project_creation_bloc.dart';
 import '../../presentation/pages/billings/billing_page.dart';
 import '../../presentation/pages/main_page.dart';
 import '../../presentation/pages/project_details/project_details_page.dart';
 import '../../presentation/bloc/project_details/project_details_bloc.dart';
 import '../../presentation/pages/projects/projects_page.dart';
 import '../../presentation/pages/dashboard/dashboard_page.dart';
+import '../../presentation/pages/projects/widgets/project_creation_wizard.dart';
 import '../../presentation/pages/settings/settings_page.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -34,10 +36,17 @@ final GoRouter appRouter = GoRouter(
               NoTransitionPage(child: const ProjectsPage()),
           routes: [
             GoRoute(
-              path: '/dashboard/project/new',
-              builder: (context, state) => const ProjectsPage(),
-              pageBuilder: (context, state) =>
-                  NoTransitionPage(child: const ProjectsPage()),
+              path: 'new',
+              pageBuilder: (context, state) => NoTransitionPage(
+                child: BlocProvider(
+                  create: (_) => ProjectCreationBloc(),
+                  child: ProjectCreationWizard(
+                    onClose: () {
+                      context.go('/dashboard/project');
+                    },
+                  ),
+                ),
+              ),
             ),
           ],
         ),

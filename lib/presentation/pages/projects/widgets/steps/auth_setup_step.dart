@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../bloc/project_creation/project_creation_bloc.dart';
 import '../../../../../data/models/auth_strategy.dart';
 import '../../../../bloc/project_builder/project_builder_bloc.dart';
 import '../../../../bloc/project_builder/project_builder_event.dart';
 import '../../../../bloc/project_builder/project_builder_state.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../data/models/project_model.dart';
+import '../../../../bloc/project_creation/project_creation_state.dart';
 
 class AuthSetupStep extends StatefulWidget {
-  final ProjectBuilderInProgress state;
+  final ProjectCreationInitial state;
 
   const AuthSetupStep({super.key, required this.state});
 
@@ -27,15 +29,40 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
   @override
   void initState() {
     super.initState();
-    _hasAuth = widget.state.hasAuth;
-    _selectedStrategy = 'oauth2';
-    _selectedScopes = [];
-    _customStrategyName = '';
-    _customConfigFields = [];
+    _hasAuth = widget.state.formData['hasAuth'] ?? false;
+    _selectedStrategy = widget.state.formData['authStrategy'] ?? 'oauth2';
+    _selectedScopes = List<String>.from(
+      widget.state.formData['authScopes'] ?? [],
+    );
+    _customStrategyName = widget.state.formData['customStrategyName'] ?? '';
+    _customConfigFields = List<Map<String, String>>.from(
+      widget.state.formData['customConfigFields'] ?? [],
+    );
+  }
+
+  void _updateAuthFields() {
+    context.read<ProjectCreationBloc>().add(
+      ProjectCreationFieldUpdated('hasAuth', _hasAuth),
+    );
+    context.read<ProjectCreationBloc>().add(
+      ProjectCreationFieldUpdated('authStrategy', _selectedStrategy),
+    );
+    context.read<ProjectCreationBloc>().add(
+      ProjectCreationFieldUpdated('authScopes', _selectedScopes),
+    );
+    context.read<ProjectCreationBloc>().add(
+      ProjectCreationFieldUpdated('customStrategyName', _customStrategyName),
+    );
+    context.read<ProjectCreationBloc>().add(
+      ProjectCreationFieldUpdated('customConfigFields', _customConfigFields),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.state.runtimeType != ProjectCreationInitial) {
+      return Container();
+    }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -130,7 +157,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
                   setState(() {
                     _hasAuth = value;
                   });
-                  _updateAuthSettings();
+                  _updateAuthFields();
                 },
                 activeThumbColor: Colors.blue,
               ),
@@ -195,7 +222,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
                 _customConfigFields = [];
               }
             });
-            _dispatchAuthUpdate();
+            _updateAuthFields();
           },
         ),
         if (_selectedStrategy == 'custom') ...[
@@ -206,7 +233,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
               setState(() {
                 _customStrategyName = val;
               });
-              _dispatchAuthUpdate();
+              _updateAuthFields();
             },
           ),
           const SizedBox(height: 8),
@@ -224,7 +251,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
                       setState(() {
                         _customConfigFields[idx]['key'] = val;
                       });
-                      _dispatchAuthUpdate();
+                      _updateAuthFields();
                     },
                   ),
                 ),
@@ -237,7 +264,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
                       setState(() {
                         _customConfigFields[idx]['value'] = val;
                       });
-                      _dispatchAuthUpdate();
+                      _updateAuthFields();
                     },
                   ),
                 ),
@@ -247,7 +274,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
                     setState(() {
                       _customConfigFields.removeAt(idx);
                     });
-                    _dispatchAuthUpdate();
+                    _updateAuthFields();
                   },
                 ),
               ],
@@ -260,7 +287,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
               setState(() {
                 _customConfigFields.add({'key': '', 'value': ''});
               });
-              _dispatchAuthUpdate();
+              _updateAuthFields();
             },
           ),
         ],
@@ -312,7 +339,7 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
                     _selectedScopes.add(scope);
                   }
                 });
-                _updateAuthSettings();
+                _updateAuthFields();
               },
               borderRadius: BorderRadius.circular(20),
               child: Container(
@@ -382,83 +409,5 @@ class _AuthSetupStepState extends State<AuthSetupStep> {
         ],
       ),
     );
-  }
-
-  void _updateAuthSettings() {
-    AuthStrategy? strategy;
-    if (_hasAuth) {
-      // Map the selected strategy to AuthType enum
-      AuthType authType;
-      switch (_selectedStrategy) {
-        case 'oauth2':
-          authType = AuthType.oauth2;
-          break;
-        case 'jwt':
-          authType = AuthType.bearer;
-          break;
-        case 'apikey':
-          authType = AuthType.apiKey;
-          break;
-        case 'basic':
-          authType = AuthType.basic;
-          break;
-        default:
-          authType = AuthType.bearer;
-      }
-
-      strategy = AuthStrategy(
-        type: authType,
-        config: {'strategy': _selectedStrategy, 'scopes': _selectedScopes},
-      );
-    }
-
-    context.read<ProjectBuilderBloc>().add(
-      UpdateAuthSettings(hasAuth: _hasAuth, authStrategy: strategy),
-    );
-  }
-
-  void _dispatchAuthUpdate() {
-    if (_selectedStrategy == 'custom') {
-      context.read<ProjectBuilderBloc>().add(
-        UpdateAuthSettings(
-          hasAuth: _hasAuth,
-          authStrategy: AuthStrategy(
-            type: AuthType.custom,
-            config: {
-              'customName': _customStrategyName,
-              'customConfig': _customConfigFields,
-              'scopes': _selectedScopes,
-            },
-          ),
-        ),
-      );
-    } else {
-      AuthType type;
-      switch (_selectedStrategy) {
-        case 'oauth2':
-          type = AuthType.oauth2;
-          break;
-        case 'bearer':
-          type = AuthType.bearer;
-          break;
-        case 'apiKey':
-          type = AuthType.apiKey;
-          break;
-        case 'basic':
-          type = AuthType.basic;
-          break;
-        default:
-          type = AuthType.bearer;
-      }
-      context.read<ProjectBuilderBloc>().add(
-        UpdateAuthSettings(
-          hasAuth: _hasAuth,
-          authStrategy: AuthStrategy(
-            type: type,
-            config: {'strategy': _selectedStrategy, 'scopes': _selectedScopes},
-          ),
-        ),
-      );
-    }
   }
 }

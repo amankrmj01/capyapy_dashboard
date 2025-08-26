@@ -99,6 +99,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
         );
       } catch (e) {
         // Handle invalid JSON
+        debugPrint('Error parsing request body: $e');
       }
     }
 
@@ -126,16 +127,16 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
     );
 
     try {
+      // Call the onSave callback provided by the parent
       widget.onSave(endpoint);
-      Navigator.pop(context);
+      // Don't close the dialog here - let the parent handle it
     } catch (e, stackTrace) {
       debugPrint(
         'Error in EndpointEditorDialog onSave:\nException: $e\nStackTrace: $stackTrace',
       );
-      // Optionally, show a snackbar to the user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: ' + e.toString()),
+          content: Text('Error: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -247,7 +248,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<HttpMethod>(
-                      initialValue: _selectedMethod,
+                      value: _selectedMethod,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -339,7 +340,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      initialValue: _requestContentType,
+                      value: _requestContentType,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -425,7 +426,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<int>(
-                      initialValue: int.parse(_responseStatus),
+                      value: int.parse(_responseStatus),
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -468,7 +469,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      initialValue: _responseContentType,
+                      value: _responseContentType,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -606,6 +607,8 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                   itemBuilder: (context, index) {
                     final key = params.keys.elementAt(index);
                     final value = params[key] ?? '';
+                    final keyController = TextEditingController(text: key);
+                    final valueController = TextEditingController(text: value);
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -613,7 +616,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: TextEditingController(text: key),
+                              controller: keyController,
                               decoration: InputDecoration(
                                 labelText: 'Parameter',
                                 hintText: hint,
@@ -630,7 +633,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                                 setState(() {
                                   if (key != newKey) {
                                     params.remove(key);
-                                    params[newKey] = value;
+                                    params[newKey] = valueController.text;
                                   }
                                 });
                               },
@@ -639,7 +642,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                           const SizedBox(width: 8),
                           Expanded(
                             child: TextField(
-                              controller: TextEditingController(text: value),
+                              controller: valueController,
                               decoration: InputDecoration(
                                 labelText: 'Description',
                                 border: OutlineInputBorder(

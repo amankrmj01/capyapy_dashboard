@@ -79,6 +79,21 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
       return;
     }
 
+    // Validate that all fields have names
+    bool hasEmptyFieldNames = _fields.any((field) => field.name.trim().isEmpty);
+    if (hasEmptyFieldNames) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'All fields must have a name',
+            style: GoogleFonts.inter(),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final dataModel = ResourcesModel(
       id:
           widget.dataModel?.id ??
@@ -93,8 +108,21 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
       updatedAt: DateTime.now(),
     );
 
-    widget.onSave(dataModel);
-    Navigator.pop(context);
+    try {
+      // Call the onSave callback provided by the parent
+      widget.onSave(dataModel);
+      // Don't close the dialog here - let the parent handle it
+    } catch (e, stackTrace) {
+      debugPrint(
+        'Error in DataModelEditorDialog onSave:\nException: $e\nStackTrace: $stackTrace',
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -190,7 +218,7 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
           controller: _descriptionController,
           maxLines: 3,
           decoration: InputDecoration(
-            hintText: 'Optional',
+            hintText: 'Optional description of the data model',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: AppColors.border(context)),
@@ -273,7 +301,6 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          // Prevent overflow by minimizing height
           children: [
             Icon(
               Icons.description,
@@ -298,6 +325,23 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
               ),
               textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _addField,
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(
+                'Add Your First Field',
+                style: GoogleFonts.inter(fontSize: 14),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary(context),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -314,6 +358,9 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
   }
 
   Widget _buildFieldEditor(int index, ModelField field) {
+    // Create controllers for this specific field to avoid state issues
+    final nameController = TextEditingController(text: field.name);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -328,11 +375,12 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
             children: [
               Expanded(
                 flex: 2,
-                child: TextFormField(
-                  initialValue: field.name,
+                child: TextField(
+                  controller: nameController,
                   decoration: InputDecoration(
                     labelText: 'Field Name',
                     labelStyle: GoogleFonts.inter(fontSize: 12),
+                    hintText: 'e.g., username, email',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(6),
                     ),
@@ -360,7 +408,7 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<FieldType>(
-                  initialValue: field.type,
+                  value: field.type,
                   decoration: InputDecoration(
                     labelText: 'Type',
                     labelStyle: GoogleFonts.inter(fontSize: 12),
@@ -402,6 +450,7 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
               IconButton(
                 onPressed: () => _removeField(index),
                 icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                tooltip: 'Remove field',
               ),
             ],
           ),
@@ -413,6 +462,13 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
                   title: Text(
                     'Required',
                     style: GoogleFonts.inter(fontSize: 12),
+                  ),
+                  subtitle: Text(
+                    'Field must have a value',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      color: AppColors.textSecondary(context),
+                    ),
                   ),
                   value: field.required,
                   onChanged: (value) {
@@ -436,6 +492,13 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
               Expanded(
                 child: CheckboxListTile(
                   title: Text('Unique', style: GoogleFonts.inter(fontSize: 12)),
+                  subtitle: Text(
+                    'No duplicate values allowed',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      color: AppColors.textSecondary(context),
+                    ),
+                  ),
                   value: field.unique,
                   onChanged: (value) {
                     _updateField(
