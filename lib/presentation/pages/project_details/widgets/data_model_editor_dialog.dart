@@ -408,7 +408,7 @@ class _DataModelEditorDialogState extends State<DataModelEditorDialog> {
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<FieldType>(
-                  value: field.type,
+                  initialValue: field.type,
                   decoration: InputDecoration(
                     labelText: 'Type',
                     labelStyle: GoogleFonts.inter(fontSize: 12),

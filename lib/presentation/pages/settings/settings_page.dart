@@ -419,24 +419,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildTextField(
-    BuildContext context, {
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-  }) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        filled: true,
-        fillColor: AppColors.background(context),
-      ),
-    );
-  }
-
   Widget _buildThemeTile(
     BuildContext context,
     AppThemeMode mode,
@@ -588,11 +570,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   // Action methods
-  void _changeAvatar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Avatar change feature coming soon! 🐹')),
-    );
-  }
 
   void _updatePersonalInfo() {
     ScaffoldMessenger.of(context).showSnackBar(

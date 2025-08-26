@@ -19,7 +19,7 @@ class AuthSetupStep extends StatefulWidget {
 class _AuthSetupStepState extends State<AuthSetupStep> {
   bool _hasAuth = false;
   String _selectedStrategy = 'oauth2';
-  List<String> _selectedScopes = [];
+  final List<String> _selectedScopes = [];
   String _customStrategyName = '';
   List<Map<String, String>> _customConfigFields = [];
 

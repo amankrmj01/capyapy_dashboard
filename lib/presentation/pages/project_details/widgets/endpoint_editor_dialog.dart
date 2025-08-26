@@ -248,7 +248,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<HttpMethod>(
-                      value: _selectedMethod,
+                      initialValue: _selectedMethod,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -340,7 +340,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _requestContentType,
+                      initialValue: _requestContentType,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -426,7 +426,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<int>(
-                      value: int.parse(_responseStatus),
+                      initialValue: int.parse(_responseStatus),
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -469,7 +469,7 @@ class _EndpointEditorDialogState extends State<EndpointEditorDialog>
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _responseContentType,
+                      initialValue: _responseContentType,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),

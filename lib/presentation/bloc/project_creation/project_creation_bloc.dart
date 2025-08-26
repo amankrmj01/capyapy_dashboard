@@ -192,9 +192,7 @@ class ProjectCreationBloc
         final project = _buildProjectFromState(currentState);
         final createdProject = await createProjectUseCase(project);
         emit(ProjectCreationSuccess(createdProject));
-      } catch (error, stackTrace) {
-        print('Error creating project: $error');
-        print('Stack trace: $stackTrace');
+      } catch (error) {
         emit(ProjectCreationError(error.toString()));
       }
     }

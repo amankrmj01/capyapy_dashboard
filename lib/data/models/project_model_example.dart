@@ -523,20 +523,8 @@ class ProjectModelExample {
     final project = createSampleProject();
 
     // Convert to JSON
-    final jsonData = project.toJson();
-    print('Project JSON keys: ${jsonData.keys.join(', ')}');
+    project.toJson();
 
     // Convert back from JSON
-    final reconstructedProject = Project.fromJson(jsonData);
-
-    print('Original project name: ${project.projectName}');
-    print('Reconstructed project name: ${reconstructedProject.projectName}');
-    print('Total API calls: ${reconstructedProject.totalApiCalls}');
-    print('Total endpoints: ${reconstructedProject.totalEndpoints}');
-    print('Total data models: ${reconstructedProject.totalDataModels}');
-    print('Project is active: ${reconstructedProject.isActive}');
-    print(
-      'Success rate: ${reconstructedProject.apiCallsAnalytics.overallSuccessRate.toStringAsFixed(2)}%',
-    );
   }
 }

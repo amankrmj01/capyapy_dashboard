@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/backward_compatibility.dart';
 import '../../../data/models/project_model.dart';
-import '../../../data/repositories/project_repository_impl.dart';
 import '../../../domain/repositories/project_repository.dart';
 import 'project_details_event.dart';
 import 'project_details_state.dart';
