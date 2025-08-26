@@ -100,11 +100,11 @@ class _EndpointsSectionState extends State<EndpointsSection> {
     );
   }
 
-  List<Endpoint> get _filteredEndpoints {
+  List<Endpoint> _filteredEndpoints(Project project) {
     if (_selectedMethod == 'all') {
-      return ProjectProvider.of(context)?.project.endpoints ?? [];
+      return project.endpoints;
     }
-    return (ProjectProvider.of(context)?.project.endpoints ?? [])
+    return project.endpoints
         .where(
           (endpoint) => endpoint.method.name.toLowerCase() == _selectedMethod,
         )
@@ -124,14 +124,15 @@ class _EndpointsSectionState extends State<EndpointsSection> {
           final project = (state is ProjectDetailsLoaded)
               ? state.project
               : (state as ProjectDetailsUpdating).project;
+          final endpoints = _filteredEndpoints(project);
           return Column(
             children: [
               _buildHeader(project),
               _buildMethodFilter(),
               Expanded(
-                child: _filteredEndpoints.isEmpty
+                child: endpoints.isEmpty
                     ? _buildEmptyState()
-                    : _buildEndpointsList(),
+                    : _buildEndpointsList(project, endpoints),
               ),
             ],
           );
@@ -282,15 +283,13 @@ class _EndpointsSectionState extends State<EndpointsSection> {
     );
   }
 
-  Widget _buildEndpointsList() {
+  Widget _buildEndpointsList(Project project, List<Endpoint> endpoints) {
     return ListView.builder(
       padding: const EdgeInsets.all(24),
-      itemCount: _filteredEndpoints.length,
+      itemCount: endpoints.length,
       itemBuilder: (context, index) {
-        final endpoint = _filteredEndpoints[index];
-        final originalIndex =
-            ProjectProvider.of(context)?.project.endpoints.indexOf(endpoint) ??
-            -1;
+        final endpoint = endpoints[index];
+        final originalIndex = project.endpoints.indexOf(endpoint);
         return _buildEndpointCard(originalIndex, endpoint);
       },
     );
