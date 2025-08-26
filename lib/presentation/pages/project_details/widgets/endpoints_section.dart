@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/k.showBlurredBackgroundGeneralDialog.dart';
 import '../../../../data/models/models.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
 import '../../../bloc/project_details/project_details_event.dart';
 import 'endpoint_editor_dialog.dart';
+import 'endpoint_stats.dart';
 
 class EndpointsSection extends StatefulWidget {
   final Project project;
@@ -236,7 +238,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
                 : 'No ${_selectedMethod.toUpperCase()} endpoints found. Try a different filter or create a new endpoint.',
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: AppColors.textSecondary(context).withOpacity(0.7),
+              color: AppColors.textSecondary(context).withValues(alpha: 0.7),
             ),
             textAlign: TextAlign.center,
           ),
@@ -395,6 +397,25 @@ class _EndpointsSectionState extends State<EndpointsSection> {
                     ],
                   ),
                 ),
+                // Add Stats button before the 3-dot button
+                ElevatedButton.icon(
+                  onPressed: () {
+                    showBlurredBackGroundGeneralDialog(
+                      context: context,
+                      builder: (dialogContext) => EndpointStatsDialog(
+                        endpoint: endpoint,
+                        basePath: widget.project.basePath,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.show_chart, size: 18),
+                  label: Text('Stats', style: GoogleFonts.inter(fontSize: 14)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.surface(context),
+                    foregroundColor: AppColors.primary(context),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 PopupMenuButton(
                   icon: Icon(
                     Icons.more_vert,
