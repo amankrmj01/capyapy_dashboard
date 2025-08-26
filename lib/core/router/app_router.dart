@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
 
 import '../../data/models/project_model.dart';
 import '../../presentation/pages/billings/billing_page.dart';
@@ -39,6 +42,24 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) => const SettingsPage(),
           pageBuilder: (context, state) =>
               NoTransitionPage(child: const SettingsPage()),
+          routes: [
+            GoRoute(
+              path: 'edit-profile',
+              builder: (context, state) {
+                final extra = state.extra as Map<String, dynamic>?;
+                final nameController =
+                    extra?['nameController'] as TextEditingController?;
+                final emailController =
+                    extra?['emailController'] as TextEditingController?;
+                final onUpdate = extra?['onUpdate'] as VoidCallback?;
+                return ProfileEditPage(
+                  nameController: nameController!,
+                  emailController: emailController!,
+                  onUpdate: onUpdate!,
+                );
+              },
+            ),
+          ],
         ),
       ],
     ),

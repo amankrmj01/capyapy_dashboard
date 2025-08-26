@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/theme_cubit.dart';
 
@@ -199,14 +200,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: const Icon(Icons.edit, size: 20),
                   tooltip: 'Edit Profile',
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ProfileEditPage(
-                          nameController: _nameController,
-                          emailController: _emailController,
-                          onUpdate: _updatePersonalInfo,
-                        ),
-                      ),
+                    GoRouter.of(context).go(
+                      '/dashboard/settings/edit-profile',
+                      extra: {
+                        'nameController': _nameController,
+                        'emailController': _emailController,
+                        'onUpdate': _updatePersonalInfo,
+                      },
                     );
                   },
                 ),
