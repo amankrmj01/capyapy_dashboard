@@ -26,12 +26,13 @@ class EndpointsStep extends StatefulWidget {
 
 class _EndpointsStepState extends State<EndpointsStep> {
   void _addNewEndpoint() {
-    final bloc = context.read<ProjectDetailsBloc>();
     showDialog(
       context: context,
       builder: (context) => EndpointEditorDialog(
         onSave: (endpoint) {
-          bloc.add(details_events.AddEndpoint(endpoint));
+          BlocProvider.of<ProjectBuilderBloc>(
+            context,
+          ).add(AddEndpoint(endpoint));
         },
       ),
     );

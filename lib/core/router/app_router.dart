@@ -32,6 +32,14 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) => const ProjectsPage(),
           pageBuilder: (context, state) =>
               NoTransitionPage(child: const ProjectsPage()),
+          routes: [
+            GoRoute(
+              path: '/dashboard/project/new',
+              builder: (context, state) => const ProjectsPage(),
+              pageBuilder: (context, state) =>
+                  NoTransitionPage(child: const ProjectsPage()),
+            ),
+          ],
         ),
         GoRoute(
           path: '/dashboard/billing',
