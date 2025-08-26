@@ -112,7 +112,7 @@ class CustomerOrdersTable extends StatelessWidget {
                       ],
                     ),
                   )
-                  .toList(),
+                  ,
             ],
           ),
         ],

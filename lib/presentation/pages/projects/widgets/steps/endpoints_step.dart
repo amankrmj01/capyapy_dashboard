@@ -515,7 +515,7 @@ class _EndpointsStepState extends State<EndpointsStep> {
               ],
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

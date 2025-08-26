@@ -355,7 +355,7 @@ class AnalyticsChart extends StatelessWidget {
                 ),
               ),
             )
-            .toList(),
+            ,
       ],
     );
   }

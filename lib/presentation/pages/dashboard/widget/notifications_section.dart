@@ -79,7 +79,7 @@ class NotificationsSection extends StatelessWidget {
               .map(
                 (notification) => _buildNotificationTile(context, notification),
               )
-              .toList(),
+              ,
         ],
       ),
     );
