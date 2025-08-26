@@ -99,101 +99,225 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/dashboard/project/:id',
           pageBuilder: (context, state) {
-            final project = state.extra as Project;
+            final project = state.extra as Project?;
             final repository = ProjectRepositoryImpl(
               dataSource: sl<MockProjectDataSource>(),
             );
-            return NoTransitionPage(
-              child: BlocProvider<ProjectDetailsBloc>(
-                create: (_) => ProjectDetailsBloc(
-                  repository,
-                  ProjectDetailsUseCases(repository),
-                )..add(LoadProjectDetails(project.id)),
-                child: ProjectOverviewSection(
-                  project: project,
-                  onProjectUpdated: (updatedProject) {
-                    context.read<ProjectDetailsBloc>().add(
-                      UpdateProject(updatedProject),
+            final projectId = state.pathParameters['id']!;
+            if (project != null) {
+              return NoTransitionPage(
+                child: BlocProvider<ProjectDetailsBloc>(
+                  create: (_) => ProjectDetailsBloc(
+                    repository,
+                    ProjectDetailsUseCases(repository),
+                  )..add(LoadProjectDetails(project.id)),
+                  child: ProjectOverviewSection(
+                    project: project,
+                    onProjectUpdated: (updatedProject) {
+                      context.read<ProjectDetailsBloc>().add(
+                        UpdateProject(updatedProject),
+                      );
+                    },
+                  ),
+                ),
+              );
+            } else {
+              return NoTransitionPage(
+                child: FutureBuilder<Project?>(
+                  future: repository.getProjectById(projectId),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.data == null) {
+                      return Center(child: Text('Project not found'));
+                    }
+                    return BlocProvider<ProjectDetailsBloc>(
+                      create: (_) => ProjectDetailsBloc(
+                        repository,
+                        ProjectDetailsUseCases(repository),
+                      )..add(LoadProjectDetails(snapshot.data!.id)),
+                      child: ProjectOverviewSection(
+                        project: snapshot.data!,
+                        onProjectUpdated: (updatedProject) {
+                          context.read<ProjectDetailsBloc>().add(
+                            UpdateProject(updatedProject),
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
-              ),
-            );
+              );
+            }
           },
           routes: [
             GoRoute(
               path: 'data-models',
               pageBuilder: (context, state) {
-                final project = state.extra as Project;
+                final project = state.extra as Project?;
                 final repository = ProjectRepositoryImpl(
                   dataSource: sl<MockProjectDataSource>(),
                 );
-                return NoTransitionPage(
-                  child: BlocProvider<ProjectDetailsBloc>(
-                    create: (_) => ProjectDetailsBloc(
-                      repository,
-                      ProjectDetailsUseCases(repository),
-                    )..add(LoadProjectDetails(project.id)),
-                    child: DataModelsSection(
-                      project: project,
-                      onProjectUpdated: (updatedProject) {
-                        context.read<ProjectDetailsBloc>().add(
-                          UpdateProject(updatedProject),
+                final projectId = state.pathParameters['id']!;
+                if (project != null) {
+                  return NoTransitionPage(
+                    child: BlocProvider<ProjectDetailsBloc>(
+                      create: (_) => ProjectDetailsBloc(
+                        repository,
+                        ProjectDetailsUseCases(repository),
+                      )..add(LoadProjectDetails(project.id)),
+                      child: DataModelsSection(
+                        project: project,
+                        onProjectUpdated: (updatedProject) {
+                          context.read<ProjectDetailsBloc>().add(
+                            UpdateProject(updatedProject),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                } else {
+                  return NoTransitionPage(
+                    child: FutureBuilder<Project?>(
+                      future: repository.getProjectById(projectId),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.data == null) {
+                          return Center(child: Text('Project not found'));
+                        }
+                        return BlocProvider<ProjectDetailsBloc>(
+                          create: (_) => ProjectDetailsBloc(
+                            repository,
+                            ProjectDetailsUseCases(repository),
+                          )..add(LoadProjectDetails(snapshot.data!.id)),
+                          child: DataModelsSection(
+                            project: snapshot.data!,
+                            onProjectUpdated: (updatedProject) {
+                              context.read<ProjectDetailsBloc>().add(
+                                UpdateProject(updatedProject),
+                              );
+                            },
+                          ),
                         );
                       },
                     ),
-                  ),
-                );
+                  );
+                }
               },
             ),
             GoRoute(
               path: 'endpoints',
               pageBuilder: (context, state) {
-                final project = state.extra as Project;
+                final project = state.extra as Project?;
                 final repository = ProjectRepositoryImpl(
                   dataSource: sl<MockProjectDataSource>(),
                 );
-                return NoTransitionPage(
-                  child: BlocProvider<ProjectDetailsBloc>(
-                    create: (_) => ProjectDetailsBloc(
-                      repository,
-                      ProjectDetailsUseCases(repository),
-                    )..add(LoadProjectDetails(project.id)),
-                    child: EndpointsSection(
-                      project: project,
-                      onProjectUpdated: (updatedProject) {
-                        context.read<ProjectDetailsBloc>().add(
-                          UpdateProject(updatedProject),
+                final projectId = state.pathParameters['id']!;
+                if (project != null) {
+                  return NoTransitionPage(
+                    child: BlocProvider<ProjectDetailsBloc>(
+                      create: (_) => ProjectDetailsBloc(
+                        repository,
+                        ProjectDetailsUseCases(repository),
+                      )..add(LoadProjectDetails(project.id)),
+                      child: EndpointsSection(
+                        project: project,
+                        onProjectUpdated: (updatedProject) {
+                          context.read<ProjectDetailsBloc>().add(
+                            UpdateProject(updatedProject),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                } else {
+                  return NoTransitionPage(
+                    child: FutureBuilder<Project?>(
+                      future: repository.getProjectById(projectId),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.data == null) {
+                          return Center(child: Text('Project not found'));
+                        }
+                        return BlocProvider<ProjectDetailsBloc>(
+                          create: (_) => ProjectDetailsBloc(
+                            repository,
+                            ProjectDetailsUseCases(repository),
+                          )..add(LoadProjectDetails(snapshot.data!.id)),
+                          child: EndpointsSection(
+                            project: snapshot.data!,
+                            onProjectUpdated: (updatedProject) {
+                              context.read<ProjectDetailsBloc>().add(
+                                UpdateProject(updatedProject),
+                              );
+                            },
+                          ),
                         );
                       },
                     ),
-                  ),
-                );
+                  );
+                }
               },
             ),
             GoRoute(
               path: 'settings',
               pageBuilder: (context, state) {
-                final project = state.extra as Project;
+                final project = state.extra as Project?;
                 final repository = ProjectRepositoryImpl(
                   dataSource: sl<MockProjectDataSource>(),
                 );
-                return NoTransitionPage(
-                  child: BlocProvider<ProjectDetailsBloc>(
-                    create: (_) => ProjectDetailsBloc(
-                      repository,
-                      ProjectDetailsUseCases(repository),
-                    )..add(LoadProjectDetails(project.id)),
-                    child: ProjectSettingsSection(
-                      project: project,
-                      onProjectUpdated: (updatedProject) {
-                        context.read<ProjectDetailsBloc>().add(
-                          UpdateProject(updatedProject),
+                final projectId = state.pathParameters['id']!;
+                if (project != null) {
+                  return NoTransitionPage(
+                    child: BlocProvider<ProjectDetailsBloc>(
+                      create: (_) => ProjectDetailsBloc(
+                        repository,
+                        ProjectDetailsUseCases(repository),
+                      )..add(LoadProjectDetails(project.id)),
+                      child: ProjectSettingsSection(
+                        project: project,
+                        onProjectUpdated: (updatedProject) {
+                          context.read<ProjectDetailsBloc>().add(
+                            UpdateProject(updatedProject),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                } else {
+                  return NoTransitionPage(
+                    child: FutureBuilder<Project?>(
+                      future: repository.getProjectById(projectId),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        if (snapshot.data == null) {
+                          return Center(child: Text('Project not found'));
+                        }
+                        return BlocProvider<ProjectDetailsBloc>(
+                          create: (_) => ProjectDetailsBloc(
+                            repository,
+                            ProjectDetailsUseCases(repository),
+                          )..add(LoadProjectDetails(snapshot.data!.id)),
+                          child: ProjectSettingsSection(
+                            project: snapshot.data!,
+                            onProjectUpdated: (updatedProject) {
+                              context.read<ProjectDetailsBloc>().add(
+                                UpdateProject(updatedProject),
+                              );
+                            },
+                          ),
                         );
                       },
                     ),
-                  ),
-                );
+                  );
+                }
               },
             ),
           ],
