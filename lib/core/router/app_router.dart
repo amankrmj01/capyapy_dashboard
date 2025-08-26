@@ -92,9 +92,13 @@ final GoRouter appRouter = GoRouter(
       path: '/dashboard/project/:id',
       builder: (context, state) {
         final project = state.extra as Project?;
+        final repository = ProjectRepositoryImpl(
+          dataSource: sl<MockProjectDataSource>(),
+        );
         return BlocProvider<ProjectDetailsBloc>(
           create: (_) => ProjectDetailsBloc(
-            ProjectRepositoryImpl(dataSource: sl<MockProjectDataSource>()),
+            repository,
+            ProjectDetailsUseCases(repository),
           ),
           child: ProjectDetailsPage(project: project!),
         );

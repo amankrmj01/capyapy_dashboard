@@ -28,7 +28,6 @@ class _DataModelsSectionState extends State<DataModelsSection> {
       context: context,
       builder: (dialogContext) => DataModelEditorDialog(
         onSave: (dataModel) {
-          // Use the section's context which has access to ProjectDetailsBloc
           bloc.add(AddDataModel(dataModel));
           Navigator.of(dialogContext).pop(); // Close dialog
         },

@@ -2,14 +2,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/backward_compatibility.dart';
 import '../../../data/models/project_model.dart';
 import '../../../domain/repositories/project_repository.dart';
+import '../../../domain/usecases/project_usecases.dart';
 import 'project_details_event.dart';
 import 'project_details_state.dart';
 
 class ProjectDetailsBloc
     extends Bloc<ProjectDetailsEvent, ProjectDetailsState> {
   final ProjectRepository repository;
+  final ProjectDetailsUseCases useCases;
 
-  ProjectDetailsBloc(this.repository) : super(ProjectDetailsInitial()) {
+  ProjectDetailsBloc(this.repository, this.useCases)
+    : super(ProjectDetailsInitial()) {
     on<LoadProjectDetails>(_onLoadProjectDetails);
     on<UpdateProject>(_onUpdateProject);
     on<AddDataModel>(_onAddDataModel);
@@ -62,18 +65,12 @@ class ProjectDetailsBloc
   ) async {
     if (state is ProjectDetailsLoaded) {
       final currentState = state as ProjectDetailsLoaded;
-      final updatedProject = currentState.project.copyWith(
-        mongoDbDataModels: [
-          ...currentState.project.mongoDbDataModels,
-          event.dataModel,
-        ],
-        updatedAt: DateTime.now(),
-      );
-
-      emit(ProjectDetailsUpdating(updatedProject));
-
+      emit(ProjectDetailsUpdating(currentState.project));
       try {
-        await Future.delayed(const Duration(milliseconds: 300));
+        final updatedProject = await useCases.addDataModel.call(
+          currentState.project.id,
+          event.dataModel,
+        );
         emit(ProjectDetailsLoaded(updatedProject));
       } catch (e) {
         emit(ProjectDetailsError('Failed to add data model: ${e.toString()}'));
@@ -87,20 +84,13 @@ class ProjectDetailsBloc
   ) async {
     if (state is ProjectDetailsLoaded) {
       final currentState = state as ProjectDetailsLoaded;
-      final updatedDataModels = List<DataModel>.from(
-        currentState.project.dataModels,
-      );
-      updatedDataModels[event.index] = event.dataModel;
-
-      final updatedProject = currentState.project.copyWith(
-        mongoDbDataModels: updatedDataModels,
-        updatedAt: DateTime.now(),
-      );
-
-      emit(ProjectDetailsUpdating(updatedProject));
-
+      emit(ProjectDetailsUpdating(currentState.project));
       try {
-        await Future.delayed(const Duration(milliseconds: 300));
+        final updatedProject = await useCases.updateDataModel.call(
+          currentState.project.id,
+          event.index,
+          event.dataModel,
+        );
         emit(ProjectDetailsLoaded(updatedProject));
       } catch (e) {
         emit(
@@ -116,20 +106,12 @@ class ProjectDetailsBloc
   ) async {
     if (state is ProjectDetailsLoaded) {
       final currentState = state as ProjectDetailsLoaded;
-      final updatedDataModels = List<DataModel>.from(
-        currentState.project.dataModels,
-      );
-      updatedDataModels.removeAt(event.index);
-
-      final updatedProject = currentState.project.copyWith(
-        mongoDbDataModels: updatedDataModels,
-        updatedAt: DateTime.now(),
-      );
-
-      emit(ProjectDetailsUpdating(updatedProject));
-
+      emit(ProjectDetailsUpdating(currentState.project));
       try {
-        await Future.delayed(const Duration(milliseconds: 300));
+        final updatedProject = await useCases.deleteDataModel.call(
+          currentState.project.id,
+          event.index,
+        );
         emit(ProjectDetailsLoaded(updatedProject));
       } catch (e) {
         emit(
@@ -145,15 +127,12 @@ class ProjectDetailsBloc
   ) async {
     if (state is ProjectDetailsLoaded) {
       final currentState = state as ProjectDetailsLoaded;
-      final updatedProject = currentState.project.copyWith(
-        endpoints: [...currentState.project.endpoints, event.endpoint],
-        updatedAt: DateTime.now(),
-      );
-
-      emit(ProjectDetailsUpdating(updatedProject));
-
+      emit(ProjectDetailsUpdating(currentState.project));
       try {
-        await Future.delayed(const Duration(milliseconds: 300));
+        final updatedProject = await useCases.addEndpoint.call(
+          currentState.project.id,
+          event.endpoint,
+        );
         emit(ProjectDetailsLoaded(updatedProject));
       } catch (e) {
         emit(ProjectDetailsError('Failed to add endpoint: ${e.toString()}'));
@@ -167,20 +146,13 @@ class ProjectDetailsBloc
   ) async {
     if (state is ProjectDetailsLoaded) {
       final currentState = state as ProjectDetailsLoaded;
-      final updatedEndpoints = List<Endpoint>.from(
-        currentState.project.endpoints,
-      );
-      updatedEndpoints[event.index] = event.endpoint;
-
-      final updatedProject = currentState.project.copyWith(
-        endpoints: updatedEndpoints,
-        updatedAt: DateTime.now(),
-      );
-
-      emit(ProjectDetailsUpdating(updatedProject));
-
+      emit(ProjectDetailsUpdating(currentState.project));
       try {
-        await Future.delayed(const Duration(milliseconds: 300));
+        final updatedProject = await useCases.updateEndpoint.call(
+          currentState.project.id,
+          event.index,
+          event.endpoint,
+        );
         emit(ProjectDetailsLoaded(updatedProject));
       } catch (e) {
         emit(ProjectDetailsError('Failed to update endpoint: ${e.toString()}'));
@@ -194,20 +166,12 @@ class ProjectDetailsBloc
   ) async {
     if (state is ProjectDetailsLoaded) {
       final currentState = state as ProjectDetailsLoaded;
-      final updatedEndpoints = List<Endpoint>.from(
-        currentState.project.endpoints,
-      );
-      updatedEndpoints.removeAt(event.index);
-
-      final updatedProject = currentState.project.copyWith(
-        endpoints: updatedEndpoints,
-        updatedAt: DateTime.now(),
-      );
-
-      emit(ProjectDetailsUpdating(updatedProject));
-
+      emit(ProjectDetailsUpdating(currentState.project));
       try {
-        await Future.delayed(const Duration(milliseconds: 300));
+        final updatedProject = await useCases.deleteEndpoint.call(
+          currentState.project.id,
+          event.index,
+        );
         emit(ProjectDetailsLoaded(updatedProject));
       } catch (e) {
         emit(ProjectDetailsError('Failed to delete endpoint: ${e.toString()}'));
