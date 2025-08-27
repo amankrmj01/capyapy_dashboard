@@ -24,3 +24,32 @@ class UpdateUser extends UserEvent {
 }
 
 class LogoutUser extends UserEvent {}
+
+class AddProjectId extends UserEvent {
+  final String userId;
+  final String projectId;
+
+  AddProjectId(this.userId, this.projectId);
+
+  @override
+  List<Object?> get props => [userId, projectId];
+}
+
+class RemoveProjectId extends UserEvent {
+  final String userId;
+  final String projectId;
+
+  RemoveProjectId(this.userId, this.projectId);
+
+  @override
+  List<Object?> get props => [userId, projectId];
+}
+
+class GetProjectIds extends UserEvent {
+  final String userId;
+
+  GetProjectIds(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
+}

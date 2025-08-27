@@ -71,50 +71,45 @@ class _ProjectsPageState extends State<ProjectsPage> {
       }
     });
     return BlocProvider(
-      create: (_) => ProjectsBloc(
-        projectRepository: ProjectRepositoryImpl(dataSource: dataSource),
-      )..add(const LoadProjects()),
-      child: BlocProvider(
-        create: (_) => ProjectCreationBloc(
-          createProjectUseCase: CreateProjectUseCase(
-            repository: ProjectRepositoryImpl(dataSource: dataSource),
-          ),
+      create: (_) => ProjectCreationBloc(
+        createProjectUseCase: CreateProjectUseCase(
+          repository: ProjectRepositoryImpl(dataSource: dataSource),
         ),
-        child: Builder(
-          builder: (context) =>
-              BlocListener<ProjectCreationBloc, ProjectCreationState>(
-                listener: (context, state) {
-                  if (state is ProjectCreationSuccess) {
-                    // Refresh projects after creating a new one
-                    context.read<ProjectsBloc>().add(const RefreshProjects());
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Project "${state.project.projectName}" created successfully!',
-                        ),
-                        backgroundColor: Colors.green,
+      ),
+      child: Builder(
+        builder: (context) =>
+            BlocListener<ProjectCreationBloc, ProjectCreationState>(
+              listener: (context, state) {
+                if (state is ProjectCreationSuccess) {
+                  // Refresh projects after creating a new one
+                  context.read<ProjectsBloc>().add(const RefreshProjects());
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Project "${state.project.projectName}" created successfully!',
                       ),
-                    );
-                  } else if (state is ProjectCreationError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error: ${state.message}'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                child: _ProjectsPageContent(
-                  scrollController: _scrollController,
-                  transitionProgress: _transitionProgress,
-                  headerHeight: _headerHeight,
-                  collapsedOpacity: _collapsedOpacity,
-                  expandedOpacity: _expandedOpacity,
-                  startProjectCreation: _startProjectCreation,
-                  formatNumber: _formatNumber,
-                ),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else if (state is ProjectCreationError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: ${state.message}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: _ProjectsPageContent(
+                scrollController: _scrollController,
+                transitionProgress: _transitionProgress,
+                headerHeight: _headerHeight,
+                collapsedOpacity: _collapsedOpacity,
+                expandedOpacity: _expandedOpacity,
+                startProjectCreation: _startProjectCreation,
+                formatNumber: _formatNumber,
               ),
-        ),
+            ),
       ),
     );
   }

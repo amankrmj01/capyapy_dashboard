@@ -26,3 +26,39 @@ class UserError extends UserState {
   @override
   List<Object?> get props => [message];
 }
+
+class ProjectIdsLoaded extends UserState {
+  final List<String> projectIds;
+
+  ProjectIdsLoaded(this.projectIds);
+
+  @override
+  List<Object?> get props => [projectIds];
+}
+
+class ProjectIdAdded extends UserState {
+  final String projectId;
+
+  ProjectIdAdded(this.projectId);
+
+  @override
+  List<Object?> get props => [projectId];
+}
+
+class ProjectIdRemoved extends UserState {
+  final String projectId;
+
+  ProjectIdRemoved(this.projectId);
+
+  @override
+  List<Object?> get props => [projectId];
+}
+
+class ProjectIdError extends UserState {
+  final String message;
+
+  ProjectIdError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

@@ -1,6 +1,3 @@
-// Main models export file
-// This file exports all data models for easy importing
-
 // Project-related models
 export 'project/auth_strategy.dart';
 export 'project/project_data_model.dart';
@@ -27,17 +24,22 @@ export 'project/chart_data.dart';
 export 'project/recent_activity.dart';
 export 'project/api_endpoint.dart';
 
-// User models
-export 'user/user.dart';
-
 // Billing models
 export 'project/bill.dart';
 
 // Backward compatibility
 export 'project/backward_compatibility.dart';
+
 export 'project/generic_collection.dart';
 export 'project/generic_document.dart';
 
 // Remove duplicate definitions of GenericDocument and GenericCollection
 
 export 'project/project_model.dart';
+
+//user
+export 'user/user.dart';
+export 'user/user_profile.dart';
+export 'user/user_preferences.dart';
+export 'user/app_theme_mode.dart';
+export 'user/user_plan.dart';

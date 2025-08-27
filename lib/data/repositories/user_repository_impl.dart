@@ -1,32 +1,17 @@
 import 'package:capyapy_dashboard/domain/entities/user.dart';
 import 'package:capyapy_dashboard/domain/repositories/user_repository.dart';
 
+import '../datasource/user/mock_user_data.dart';
 import '../models/user/user.dart';
-import '../models/user/user_plan.dart';
-import '../models/user/user_preferences.dart';
-import '../models/user/user_profile.dart';
 
 class UserRepositoryImpl implements UserRepository {
-  // You can inject data sources here (API, local DB, etc.)
+  final MockUserData userData;
+
+  UserRepositoryImpl({required this.userData});
 
   @override
   Future<User> getUser(String id) async {
-    // TODO: Replace with real data source
-    // Example mock implementation:
-    final userModel = UserModel(
-      id: id,
-      email: 'mock@email.com',
-      username: 'mockuser',
-      profile: UserProfile(),
-      preferences: UserPreferences(),
-      projectIds: [],
-      permissions: {},
-      plan: UserPlan.free,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      isEmailVerified: true,
-    );
-    return userModel.toEntity();
+    return userData.getUser(id);
   }
 
   @override
@@ -40,5 +25,20 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> logoutUser() async {
     // TODO: Implement logout logic
+  }
+
+  @override
+  Future<void> addProjectId(String userId, String projectId) async {
+    await userData.addProjectId(projectId);
+  }
+
+  @override
+  Future<void> removeProjectId(String userId, String projectId) async {
+    await userData.removeProjectId(projectId);
+  }
+
+  @override
+  Future<List<String>> getProjectIds(String userId) async {
+    return await userData.getProjectIds();
   }
 }

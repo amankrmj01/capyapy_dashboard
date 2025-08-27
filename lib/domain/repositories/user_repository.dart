@@ -6,4 +6,10 @@ abstract class UserRepository {
   Future<User> updateUser(User user);
 
   Future<void> logoutUser();
+
+  Future<void> addProjectId(String userId, String projectId);
+
+  Future<void> removeProjectId(String userId, String projectId);
+
+  Future<List<String>> getProjectIds(String userId);
 }
