@@ -1,7 +1,6 @@
+import 'package:capyapy_dashboard/core/utils/export_utils.dart';
 import 'package:capyapy_dashboard/presentation/pages/dashboard/widget/dashboard_sidebar.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../core/constants/app_colors.dart';
+import '../bloc/user/user_bloc.dart';
 
 class MainPage extends StatefulWidget {
   final Widget child;
@@ -14,6 +13,12 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<UserBloc>().add(LoadUser('mock_id'));
+  }
 
   @override
   Widget build(BuildContext context) {
