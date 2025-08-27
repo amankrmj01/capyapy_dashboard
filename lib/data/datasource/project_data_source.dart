@@ -4,6 +4,8 @@ abstract class ProjectDataSource {
   // Project CRUD operations
   Future<List<ProjectModel>> getAllProjects();
 
+  Future<List<ProjectModel>> getProjectsByIds(List<String> ids);
+
   Future<ProjectModel?> getProjectById(String id);
 
   Future<ProjectModel> createProject(ProjectModel project);

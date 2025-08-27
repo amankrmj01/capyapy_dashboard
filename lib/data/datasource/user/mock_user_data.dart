@@ -14,7 +14,7 @@ class MockUserData implements UserDataSource {
       avatarUrl: 'https://example.com/avatar.png',
     ),
     preferences: UserPreferences(theme: AppThemeMode.dark),
-    projectIds: ['project_1', 'project_2', 'project_3'],
+    projectIds: ['project_1', 'project_3'],
     permissions: const {},
     plan: UserPlan.free,
     createdAt: DateTime(2023, 1, 1),

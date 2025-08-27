@@ -424,4 +424,9 @@ class MockProjectDataSource implements ProjectDataSource {
   static void addProject(ProjectModel project) {
     _staticProjects.add(project);
   }
+
+  @override
+  Future<List<ProjectModel>> getProjectsByIds(List<String> ids) async {
+    return _projects.where((project) => ids.contains(project.id)).toList();
+  }
 }

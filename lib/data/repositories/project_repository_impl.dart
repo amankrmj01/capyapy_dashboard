@@ -457,4 +457,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
   Future<int> getTotalApiCalls() async {
     return await dataSource.getTotalApiCalls();
   }
+
+  @override
+  Future<List<ProjectModel>> getProjectsByIds(List<String> ids) async {
+    return await dataSource.getProjectsByIds(ids);
+  }
 }
