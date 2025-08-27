@@ -1,63 +1,64 @@
-import '../../data/models/models.dart';
-import '../repositories/generic_resources_repository.dart';
+import '../../../data/models/models.dart';
+import '../../repositories/document_resources_repository.dart';
 
 class GetAllDocumentsUseCase {
-  final GenericResourcesRepository repository;
+  final DocumentResourcesRepository repository;
 
   GetAllDocumentsUseCase(this.repository);
 
-  List<GenericDocument> call(String collectionName) {
-    return repository.getAll(collectionName);
+  Future<List<GenericDocument>> call(String collectionName) {
+    return repository.getAllDocuments(collectionName);
   }
 }
 
 class AddDocumentUseCase {
-  final GenericResourcesRepository repository;
+  final DocumentResourcesRepository repository;
 
   AddDocumentUseCase(this.repository);
 
   void call(String collectionName, GenericDocument document) {
-    repository.add(collectionName, document);
+    repository.addDocument(collectionName, document);
   }
 }
 
 class UpdateDocumentUseCase {
-  final GenericResourcesRepository repository;
+  final DocumentResourcesRepository repository;
 
   UpdateDocumentUseCase(this.repository);
 
   void call(String collectionName, String id, Map<String, dynamic> newData) {
-    repository.update(collectionName, id, newData);
+    repository.updateDocument(collectionName, id, newData);
   }
 }
 
 class DeleteDocumentUseCase {
-  final GenericResourcesRepository repository;
+  final DocumentResourcesRepository repository;
 
   DeleteDocumentUseCase(this.repository);
 
   void call(String collectionName, String id) {
-    repository.delete(collectionName, id);
+    repository.deleteDocument(collectionName, id);
   }
 }
 
 class GetAllCollectionsUseCase {
-  final GenericResourcesRepository repository;
+  final DocumentResourcesRepository repository;
 
   GetAllCollectionsUseCase(this.repository);
 
-  List<GenericCollection> call() {
+  Future<List<GenericCollection>> call() {
     return repository.getAllCollections();
   }
 }
 
 class GetCollectionByNameUseCase {
-  final GenericResourcesRepository repository;
+  final DocumentResourcesRepository repository;
 
   GetCollectionByNameUseCase(this.repository);
 
-  GenericCollection? call(String collectionName) {
-    return repository.getAllCollections().firstWhere(
+  Future<GenericCollection?> call(String collectionName) async {
+    final collections = await repository.getAllCollections();
+    return collections.firstWhere(
       (c) => c.collectionName == collectionName,
       orElse: () => GenericCollection(collectionName: '404', documents: []),
     );
@@ -65,7 +66,7 @@ class GetCollectionByNameUseCase {
 }
 
 class AddCollectionUseCase {
-  final GenericResourcesRepository repository;
+  final DocumentResourcesRepository repository;
 
   AddCollectionUseCase(this.repository);
 
@@ -75,7 +76,7 @@ class AddCollectionUseCase {
 }
 
 class UpdateCollectionUseCase {
-  final GenericResourcesRepository repository;
+  final DocumentResourcesRepository repository;
 
   UpdateCollectionUseCase(this.repository);
 
@@ -85,7 +86,7 @@ class UpdateCollectionUseCase {
 }
 
 class DeleteCollectionUseCase {
-  final GenericResourcesRepository repository;
+  final DocumentResourcesRepository repository;
 
   DeleteCollectionUseCase(this.repository);
 

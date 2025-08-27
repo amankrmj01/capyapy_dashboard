@@ -1,5 +1,5 @@
 import '../../domain/repositories/project_repository.dart';
-import '../datasources/project_data_source.dart';
+import '../datasource/project_data_source.dart';
 import '../models/models.dart';
 
 class ProjectRepositoryImpl implements ProjectRepository {

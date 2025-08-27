@@ -1,8 +1,9 @@
 import '../models/project/generic_collection.dart';
 import '../models/project/generic_document.dart';
+import 'collection_data_source.dart';
 
 /// Stores mock data for multiple collections, each as a list of GenericDocument.
-class MockCollectionStore {
+class MockCollectionStore implements CollectionDataSource {
   final List<GenericCollection> collections = [
     GenericCollection(
       collectionName: 'posts',
@@ -43,7 +44,8 @@ class MockCollectionStore {
   ];
 
   /// Get all documents for a collection.
-  List<GenericDocument> getDocuments(String collectionName) {
+  @override
+  Future<List<GenericDocument>> getDocuments(String collectionName) async {
     return collections
         .firstWhere(
           (c) => c.collectionName == collectionName,
@@ -53,8 +55,11 @@ class MockCollectionStore {
         .documents;
   }
 
-  /// Add a document to a collection.
-  void addDocument(String collectionName, GenericDocument document) {
+  @override
+  Future<void> addDocument(
+    String collectionName,
+    GenericDocument document,
+  ) async {
     final collection = collections.firstWhere(
       (c) => c.collectionName == collectionName,
       orElse: () =>
@@ -72,12 +77,12 @@ class MockCollectionStore {
     }
   }
 
-  /// Update a document in a collection by id.
-  void updateDocument(
+  @override
+  Future<void> updateDocument(
     String collectionName,
     String id,
     Map<String, dynamic> newData,
-  ) {
+  ) async {
     final collection = collections.firstWhere(
       (c) => c.collectionName == collectionName,
       orElse: () =>
@@ -90,7 +95,8 @@ class MockCollectionStore {
   }
 
   /// Delete a document from a collection by id.
-  void deleteDocument(String collectionName, String id) {
+  @override
+  Future<void> deleteDocument(String collectionName, String id) async {
     final collection = collections.firstWhere(
       (c) => c.collectionName == collectionName,
       orElse: () =>
@@ -112,8 +118,73 @@ class MockCollectionStore {
     }
   }
 
-  void deleteCollection(String collectionName) {
+  @override
+  Future<void> deleteCollection(String collectionName) async {
     collections.removeWhere((c) => c.collectionName == collectionName);
+  }
+
+  @override
+  Future<bool> collectionExists(String collectionName) async {
+    return collections.any((c) => c.collectionName == collectionName);
+  }
+
+  @override
+  Future<void> createCollection(String collectionName) async {
+    if (!collections.any((c) => c.collectionName == collectionName)) {
+      collections.add(
+        GenericCollection(collectionName: collectionName, documents: []),
+      );
+    }
+  }
+
+  @override
+  Future<List<String>> getAllCollections() async {
+    return collections.map((c) => c.collectionName).toList();
+  }
+
+  @override
+  Future<GenericDocument?> getDocumentById(
+    String collectionName,
+    String id,
+  ) async {
+    final collection = collections.firstWhere(
+      (c) => c.collectionName == collectionName,
+      orElse: () =>
+          GenericCollection(collectionName: collectionName, documents: []),
+    );
+    return collection.documents.firstWhere(
+      (doc) => doc.id == id,
+      orElse: () => GenericDocument(id: '404', data: {}),
+    );
+  }
+
+  @override
+  Future<int> getDocumentCount(String collectionName) async {
+    final collection = collections.firstWhere(
+      (c) => c.collectionName == collectionName,
+      orElse: () =>
+          GenericCollection(collectionName: collectionName, documents: []),
+    );
+    return collection.documents.length;
+  }
+
+  @override
+  Future<bool> isFieldValueUnique(
+    String collectionName,
+    String fieldName,
+    value, {
+    String? excludeId,
+  }) async {
+    final collection = collections.firstWhere(
+      (c) => c.collectionName == collectionName,
+      orElse: () =>
+          GenericCollection(collectionName: collectionName, documents: []),
+    );
+    for (final doc in collection.documents) {
+      if (excludeId != null && doc.id == excludeId) continue;
+      if (doc.data[fieldName] == value) return false;
+    }
+    return true;
   }
 
   // void addFieldToCollection(String collectionName, MongoDbField newField) {

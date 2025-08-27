@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../data/datasources/mock_project_data_source.dart';
+import '../../../data/datasource/mock_project_data_source.dart';
 import '../../../domain/usecases/project/create_project_usecase.dart';
 import 'widgets/projects_list.dart';
 import '../../../data/repositories/project_repository_impl.dart';

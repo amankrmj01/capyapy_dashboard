@@ -1,15 +1,19 @@
-import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/data_models_data.dart';
+import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/data_models_document.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/di/services/service_locator.dart';
 import '../../../../core/utils/k.showBlurredBackgroundGeneralDialog.dart';
+import '../../../../data/datasource/mock_collection_store.dart';
 import '../../../../data/models/models.dart';
+import '../../../bloc/collection/collection_bloc.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
 import '../../../bloc/project_details/project_details_event.dart';
 import '../../../bloc/project_details/project_details_state.dart';
 import 'data_model_editor_dialog.dart';
 import '../../project_details/project_provider.dart';
+import 'package:capyapy_dashboard/data/repositories/document_resources_repository_impl.dart';
 
 class DataModelsSection extends StatefulWidget {
   final ProjectModel project;
@@ -101,6 +105,10 @@ class _DataModelsSectionState extends State<DataModelsSection> {
 
   @override
   Widget build(BuildContext context) {
+    return _buildSectionContent(context);
+  }
+
+  Widget _buildSectionContent(BuildContext context) {
     return BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
       builder: (context, state) {
         if (state is ProjectDetailsInitial || state is ProjectDetailsLoading) {
@@ -300,14 +308,21 @@ class _DataModelsSectionState extends State<DataModelsSection> {
                     showBlurredBackGroundGeneralDialog(
                       context: context,
                       builder: (dialogContext) {
-                        return DataModelsData(
-                          collectionName: dataModel.collectionName,
+                        return BlocProvider.value(
+                          value: context.read<CollectionBloc>(),
+                          child: DataModelsDocument(
+                            collectionName: dataModel.collectionName,
+                            fields: dataModel.fields,
+                          ),
                         );
                       },
                     );
                   },
                   icon: const Icon(Icons.show_chart, size: 18),
-                  label: Text('Stats', style: GoogleFonts.inter(fontSize: 14)),
+                  label: Text(
+                    'Documents',
+                    style: GoogleFonts.inter(fontSize: 14),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.surface(context),
                     foregroundColor: AppColors.primary(context),

@@ -1,34 +1,26 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../domain/usecases/generic_collection_usecases.dart';
-import 'generic_collection_event.dart';
-import 'generic_collection_state.dart';
+import '../../../data/models/project/generic_document.dart';
+import '../../../domain/repositories/document_resources_repository.dart';
+import 'collection_event.dart';
+import 'collection_state.dart';
 
-class GenericCollectionBloc
-    extends Bloc<GenericCollectionEvent, GenericCollectionState> {
-  final GetAllDocumentsUseCase getAllDocuments;
-  final AddDocumentUseCase addDocument;
-  final UpdateDocumentUseCase updateDocument;
-  final DeleteDocumentUseCase deleteDocument;
+class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
+  final DocumentResourcesRepository repository;
 
-  GenericCollectionBloc({
-    required this.getAllDocuments,
-    required this.addDocument,
-    required this.updateDocument,
-    required this.deleteDocument,
-  }) : super(CollectionInitial()) {
+  CollectionBloc({required this.repository}) : super(CollectionInitial()) {
     on<LoadDocuments>(_onLoadDocuments);
     on<AddDocument>(_onAddDocument);
     on<UpdateDocument>(_onUpdateDocument);
     on<DeleteDocument>(_onDeleteDocument);
   }
 
-  void _onLoadDocuments(
+  Future<void> _onLoadDocuments(
     LoadDocuments event,
-    Emitter<GenericCollectionState> emit,
-  ) {
+    Emitter<CollectionState> emit,
+  ) async {
     emit(CollectionLoading());
     try {
-      final docs = getAllDocuments.call(event.collectionName);
+      final docs = await repository.getAllDocuments(event.collectionName);
       emit(
         CollectionLoaded(
           event.collectionName,
@@ -40,10 +32,7 @@ class GenericCollectionBloc
     }
   }
 
-  void _onAddDocument(
-    AddDocument event,
-    Emitter<GenericCollectionState> emit,
-  ) async {
+  void _onAddDocument(AddDocument event, Emitter<CollectionState> emit) async {
     if (state is CollectionLoaded) {
       final currentState = state as CollectionLoaded;
       emit(
@@ -51,8 +40,10 @@ class GenericCollectionBloc
       );
 
       try {
-        addDocument.call(event.collectionName, event.document);
-        final docs = getAllDocuments.call(event.collectionName);
+        repository.addDocument(event.collectionName, event.document);
+        final docs = await repository.getAllDocuments.call(
+          event.collectionName,
+        );
         emit(
           CollectionLoaded(
             event.collectionName,
@@ -67,7 +58,7 @@ class GenericCollectionBloc
 
   void _onUpdateDocument(
     UpdateDocument event,
-    Emitter<GenericCollectionState> emit,
+    Emitter<CollectionState> emit,
   ) async {
     if (state is CollectionLoaded) {
       final currentState = state as CollectionLoaded;
@@ -76,8 +67,14 @@ class GenericCollectionBloc
       );
 
       try {
-        updateDocument.call(event.collectionName, event.id, event.newData);
-        final docs = getAllDocuments.call(event.collectionName);
+        repository.updateDocument(
+          event.collectionName,
+          event.id,
+          event.newData,
+        );
+        final docs = await repository.getAllDocuments.call(
+          event.collectionName,
+        );
         emit(
           CollectionLoaded(
             event.collectionName,
@@ -92,7 +89,7 @@ class GenericCollectionBloc
 
   void _onDeleteDocument(
     DeleteDocument event,
-    Emitter<GenericCollectionState> emit,
+    Emitter<CollectionState> emit,
   ) async {
     if (state is CollectionLoaded) {
       final currentState = state as CollectionLoaded;
@@ -101,8 +98,10 @@ class GenericCollectionBloc
       );
 
       try {
-        deleteDocument.call(event.collectionName, event.id);
-        final docs = getAllDocuments.call(event.collectionName);
+        repository.deleteDocument(event.collectionName, event.id);
+        final docs = await repository.getAllDocuments.call(
+          event.collectionName,
+        );
         emit(
           CollectionLoaded(
             event.collectionName,

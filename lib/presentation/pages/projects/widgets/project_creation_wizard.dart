@@ -11,7 +11,7 @@ import 'steps/auth_setup_step.dart';
 import 'steps/storage_step.dart';
 import 'steps/data_models_step.dart';
 import 'steps/endpoints_step.dart';
-import '../../../../data/datasources/mock_project_data_source.dart';
+import '../../../../data/datasource/mock_project_data_source.dart';
 
 class ProjectCreationWizard extends StatelessWidget {
   final VoidCallback onClose;

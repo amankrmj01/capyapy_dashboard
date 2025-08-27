@@ -3,9 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../data/models/models.dart';
+import '../../data/datasource/mock_collection_store.dart';
+import '../../data/repositories/document_resources_repository_impl.dart';
 import '../../data/repositories/project_repository_impl.dart';
-import '../../../data/datasources/mock_project_data_source.dart';
+import '../../../data/datasource/mock_project_data_source.dart';
 import '../../domain/usecases/project/export_project_usecases.dart';
+import '../../presentation/bloc/collection/collection_bloc.dart';
 import '../../presentation/bloc/project_creation/project_creation_bloc.dart';
 import '../../presentation/bloc/project_details/project_details_bloc.dart';
 import '../../presentation/bloc/project_details/project_details_event.dart';
@@ -167,13 +170,20 @@ final GoRouter appRouter = GoRouter(
                         repository,
                         ProjectDetailsUseCases(repository),
                       )..add(LoadProjectDetails(project.id)),
-                      child: DataModelsSection(
-                        project: project,
-                        onProjectUpdated: (updatedProject) {
-                          context.read<ProjectDetailsBloc>().add(
-                            UpdateProject(updatedProject),
-                          );
-                        },
+                      child: BlocProvider<CollectionBloc>(
+                        create: (_) => CollectionBloc(
+                          repository: DocumentResourcesRepositoryImpl(
+                            store: sl<MockCollectionStore>(),
+                          ),
+                        ),
+                        child: DataModelsSection(
+                          project: project,
+                          onProjectUpdated: (updatedProject) {
+                            context.read<ProjectDetailsBloc>().add(
+                              UpdateProject(updatedProject),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   );
