@@ -6,7 +6,7 @@ class SearchProjectsUseCase {
 
   SearchProjectsUseCase({required this.repository});
 
-  Future<List<Project>> call(String query) async {
+  Future<List<ProjectModel>> call(String query) async {
     return await repository.searchProjects(query);
   }
 }

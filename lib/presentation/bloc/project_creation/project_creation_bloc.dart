@@ -222,7 +222,7 @@ class ProjectCreationBloc
     }
   }
 
-  Project _buildProjectFromState(ProjectCreationInitial state) {
+  ProjectModel _buildProjectFromState(ProjectCreationInitial state) {
     final now = DateTime.now();
 
     // Generate unique ID: projectname_uuid
@@ -232,7 +232,7 @@ class ProjectCreationBloc
     final uniqueId = '${sanitizedName}_${uuid.v4()}';
 
     // Create base project with default values
-    final baseProject = Project(
+    final baseProject = ProjectModel(
       id: '',
       // Will be set with copyWith
       projectName: state.projectName,

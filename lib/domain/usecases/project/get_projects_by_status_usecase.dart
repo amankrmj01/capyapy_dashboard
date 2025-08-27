@@ -6,7 +6,7 @@ class GetProjectsByStatusUseCase {
 
   GetProjectsByStatusUseCase({required this.repository});
 
-  Future<List<Project>> call(bool isActive) async {
+  Future<List<ProjectModel>> call(bool isActive) async {
     return await repository.getProjectsByStatus(isActive);
   }
 }

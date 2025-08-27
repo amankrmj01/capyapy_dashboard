@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../data/models/user/user.dart';
-import '../../domain/entities/user.dart';
+
+import '../../../domain/entities/user.dart';
 
 abstract class UserEvent extends Equatable {
   @override

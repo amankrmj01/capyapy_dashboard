@@ -12,8 +12,8 @@ import 'endpoint_stats.dart';
 import '../../project_details/project_provider.dart';
 
 class EndpointsSection extends StatefulWidget {
-  final Project project;
-  final Function(Project)? onProjectUpdated;
+  final ProjectModel project;
+  final Function(ProjectModel)? onProjectUpdated;
 
   const EndpointsSection({
     super.key,
@@ -100,7 +100,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
     );
   }
 
-  List<Endpoint> _filteredEndpoints(Project project) {
+  List<Endpoint> _filteredEndpoints(ProjectModel project) {
     if (_selectedMethod == 'all') {
       return project.endpoints;
     }
@@ -143,7 +143,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
     );
   }
 
-  Widget _buildHeader(Project project) {
+  Widget _buildHeader(ProjectModel project) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -283,7 +283,7 @@ class _EndpointsSectionState extends State<EndpointsSection> {
     );
   }
 
-  Widget _buildEndpointsList(Project project, List<Endpoint> endpoints) {
+  Widget _buildEndpointsList(ProjectModel project, List<Endpoint> endpoints) {
     return ListView.builder(
       padding: const EdgeInsets.all(24),
       itemCount: endpoints.length,

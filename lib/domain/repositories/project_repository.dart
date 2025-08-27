@@ -2,49 +2,52 @@ import '../../data/models/models.dart';
 
 abstract class ProjectRepository {
   // Project CRUD operations
-  Future<List<Project>> getAllProjects();
+  Future<List<ProjectModel>> getAllProjects();
 
-  Future<Project?> getProjectById(String id);
+  Future<ProjectModel?> getProjectById(String id);
 
-  Future<Project> createProject(Project project);
+  Future<ProjectModel> createProject(ProjectModel project);
 
-  Future<Project> updateProject(Project project);
+  Future<ProjectModel> updateProject(ProjectModel project);
 
   Future<void> deleteProject(String id);
 
   // Project filtering and searching
-  Future<List<Project>> getProjectsByUserId(String userId);
+  Future<List<ProjectModel>> getProjectsByUserId(String userId);
 
-  Future<List<Project>> searchProjects(String query);
+  Future<List<ProjectModel>> searchProjects(String query);
 
-  Future<List<Project>> getActiveProjects();
+  Future<List<ProjectModel>> getActiveProjects();
 
-  Future<List<Project>> getProjectsByStatus(bool isActive);
+  Future<List<ProjectModel>> getProjectsByStatus(bool isActive);
 
   // Data Models operations
-  Future<Project> addDataModel(String projectId, ProjectDataModel dataModel);
+  Future<ProjectModel> addDataModel(
+    String projectId,
+    ProjectDataModel dataModel,
+  );
 
-  Future<Project> updateDataModel(
+  Future<ProjectModel> updateDataModel(
     String projectId,
     int index,
     ProjectDataModel dataModel,
   );
 
-  Future<Project> removeDataModel(String projectId, int index);
+  Future<ProjectModel> removeDataModel(String projectId, int index);
 
   // Endpoints operations
-  Future<Project> addEndpoint(String projectId, ProjectEndpoint endpoint);
+  Future<ProjectModel> addEndpoint(String projectId, ProjectEndpoint endpoint);
 
-  Future<Project> updateEndpoint(
+  Future<ProjectModel> updateEndpoint(
     String projectId,
     int index,
     ProjectEndpoint endpoint,
   );
 
-  Future<Project> removeEndpoint(String projectId, int index);
+  Future<ProjectModel> removeEndpoint(String projectId, int index);
 
   // Project settings
-  Future<Project> updateProjectSettings(
+  Future<ProjectModel> updateProjectSettings(
     String projectId, {
     String? projectName,
     String? description,
@@ -61,14 +64,18 @@ abstract class ProjectRepository {
 
   Future<void> incrementApiCall(String projectId, String endpointId);
 
-  Future<List<Project>> getProjectsWithMostApiCalls({int limit = 10});
+  Future<List<ProjectModel>> getProjectsWithMostApiCalls({int limit = 10});
 
   // Bulk operations
-  Future<List<Project>> createMultipleProjects(List<Project> projects);
+  Future<List<ProjectModel>> createMultipleProjects(
+    List<ProjectModel> projects,
+  );
 
   Future<void> deleteMultipleProjects(List<String> projectIds);
 
-  Future<List<Project>> updateMultipleProjects(List<Project> projects);
+  Future<List<ProjectModel>> updateMultipleProjects(
+    List<ProjectModel> projects,
+  );
 
   // Validation and utilities
   Future<bool> projectExists(String id);

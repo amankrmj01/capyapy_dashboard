@@ -99,7 +99,7 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/dashboard/project/:id',
           pageBuilder: (context, state) {
-            final project = state.extra as Project?;
+            final project = state.extra as ProjectModel?;
             final repository = ProjectRepositoryImpl(
               dataSource: sl<MockProjectDataSource>(),
             );
@@ -123,7 +123,7 @@ final GoRouter appRouter = GoRouter(
               );
             } else {
               return NoTransitionPage(
-                child: FutureBuilder<Project?>(
+                child: FutureBuilder<ProjectModel?>(
                   future: repository.getProjectById(projectId),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
@@ -155,7 +155,7 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: 'data-models',
               pageBuilder: (context, state) {
-                final project = state.extra as Project?;
+                final project = state.extra as ProjectModel?;
                 final repository = ProjectRepositoryImpl(
                   dataSource: sl<MockProjectDataSource>(),
                 );
@@ -179,7 +179,7 @@ final GoRouter appRouter = GoRouter(
                   );
                 } else {
                   return NoTransitionPage(
-                    child: FutureBuilder<Project?>(
+                    child: FutureBuilder<ProjectModel?>(
                       future: repository.getProjectById(projectId),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
@@ -211,7 +211,7 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: 'endpoints',
               pageBuilder: (context, state) {
-                final project = state.extra as Project?;
+                final project = state.extra as ProjectModel?;
                 final repository = ProjectRepositoryImpl(
                   dataSource: sl<MockProjectDataSource>(),
                 );
@@ -235,7 +235,7 @@ final GoRouter appRouter = GoRouter(
                   );
                 } else {
                   return NoTransitionPage(
-                    child: FutureBuilder<Project?>(
+                    child: FutureBuilder<ProjectModel?>(
                       future: repository.getProjectById(projectId),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
@@ -267,7 +267,7 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: 'settings',
               pageBuilder: (context, state) {
-                final project = state.extra as Project?;
+                final project = state.extra as ProjectModel?;
                 final repository = ProjectRepositoryImpl(
                   dataSource: sl<MockProjectDataSource>(),
                 );
@@ -291,7 +291,7 @@ final GoRouter appRouter = GoRouter(
                   );
                 } else {
                   return NoTransitionPage(
-                    child: FutureBuilder<Project?>(
+                    child: FutureBuilder<ProjectModel?>(
                       future: repository.getProjectById(projectId),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {

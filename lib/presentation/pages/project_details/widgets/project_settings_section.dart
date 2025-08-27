@@ -9,8 +9,8 @@ import '../../../../../data/models/models.dart';
 import '../project_provider.dart';
 
 class ProjectSettingsSection extends StatefulWidget {
-  final Project project;
-  final Function(Project)? onProjectUpdated;
+  final ProjectModel project;
+  final Function(ProjectModel)? onProjectUpdated;
 
   const ProjectSettingsSection({
     super.key,
@@ -40,7 +40,7 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
     _authRequiredFields = widget.project.authStrategy?.requiredFields ?? [];
   }
 
-  void _updateControllers(Project project) {
+  void _updateControllers(ProjectModel project) {
     _tagsController.text = project.metadata.tags.join(', ');
     _storageType = project.storage.type;
     _authType = project.authStrategy?.type ?? AuthType.bearer;
@@ -53,7 +53,7 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
     super.dispose();
   }
 
-  void _saveSettings(Project project) {
+  void _saveSettings(ProjectModel project) {
     _tagsController.text
         .split(',')
         .map((tag) => tag.trim())
@@ -677,7 +677,7 @@ class _ProjectSettingsSectionState extends State<ProjectSettingsSection> {
     );
   }
 
-  Widget _buildSaveButton(Project project) {
+  Widget _buildSaveButton(ProjectModel project) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(

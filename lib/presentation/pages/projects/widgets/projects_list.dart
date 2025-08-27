@@ -51,7 +51,7 @@ class ProjectsList extends StatelessWidget {
         }
 
         if (state is ProjectsLoaded) {
-          final projects = List<Project>.from(state.projects)
+          final projects = List<ProjectModel>.from(state.projects)
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
           return GridView.builder(
             shrinkWrap: true,
@@ -149,7 +149,7 @@ class ProjectsList extends StatelessWidget {
     );
   }
 
-  Widget _buildProjectCard(BuildContext context, Project project) {
+  Widget _buildProjectCard(BuildContext context, ProjectModel project) {
     final statusColor = _getStatusColor(project.isActive);
     final projectIcon = _getProjectIcon(project.projectName);
     final projectColor = _getProjectColor(project.id.hashCode);
@@ -577,7 +577,7 @@ class ProjectsList extends StatelessWidget {
     }
   }
 
-  void _showDeleteDialog(BuildContext context, Project project) {
+  void _showDeleteDialog(BuildContext context, ProjectModel project) {
     showDialog(
       context: context,
       builder: (dialogContext) {

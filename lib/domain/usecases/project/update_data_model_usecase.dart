@@ -6,7 +6,7 @@ class UpdateDataModelUseCase {
 
   UpdateDataModelUseCase({required this.repository});
 
-  Future<Project> call(
+  Future<ProjectModel> call(
     String projectId,
     int index,
     ProjectDataModel dataModel,

@@ -5,10 +5,10 @@ import '../models.dart';
 
 class ProjectModelExample {
   /// Creates a sample project with all features
-  static Project createSampleProject() {
+  static ProjectModel createSampleProject() {
     final now = DateTime.now();
 
-    return Project(
+    return ProjectModel(
       id: 'proj_123456',
       projectName: 'E-commerce API',
       description:

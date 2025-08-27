@@ -6,7 +6,7 @@ class GetProjectByIdUseCase {
 
   GetProjectByIdUseCase({required this.repository});
 
-  Future<Project?> call(String id) async {
+  Future<ProjectModel?> call(String id) async {
     return await repository.getProjectById(id);
   }
 }

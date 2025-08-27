@@ -6,7 +6,7 @@ class AddEndpointUseCase {
 
   AddEndpointUseCase({required this.repository});
 
-  Future<Project> call(String projectId, ProjectEndpoint endpoint) async {
+  Future<ProjectModel> call(String projectId, ProjectEndpoint endpoint) async {
     return await repository.addEndpoint(projectId, endpoint);
   }
 }

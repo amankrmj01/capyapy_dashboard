@@ -11,8 +11,8 @@ import '../../../bloc/project_details/project_details_event.dart';
 import '../../../bloc/build/build_bloc.dart';
 
 class ProjectOverviewSection extends StatefulWidget {
-  final Project project;
-  final Function(Project)? onProjectUpdated;
+  final ProjectModel project;
+  final Function(ProjectModel)? onProjectUpdated;
 
   const ProjectOverviewSection({
     super.key,
@@ -41,7 +41,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     _descriptionController = TextEditingController();
   }
 
-  void _updateControllers(Project project) {
+  void _updateControllers(ProjectModel project) {
     _nameController.text = project.projectName;
     _basePathController.text = project.apiBasePath;
     _descriptionController.text = project.description;
@@ -56,7 +56,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     super.dispose();
   }
 
-  void _saveChanges(Project project) {
+  void _saveChanges(ProjectModel project) {
     final updatedProject = project.copyWith(
       projectName: _nameController.text,
       apiBasePath: _basePathController.text,
@@ -117,7 +117,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     );
   }
 
-  Widget _buildOverviewCards(Project project) {
+  Widget _buildOverviewCards(ProjectModel project) {
     return BlocBuilder<BuildBloc, BuildState>(
       builder: (context, buildState) {
         return Row(
@@ -199,7 +199,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     );
   }
 
-  Widget _buildProjectBasics(Project project) {
+  Widget _buildProjectBasics(ProjectModel project) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -316,7 +316,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     );
   }
 
-  Widget _buildProjectStats(Project project) {
+  Widget _buildProjectStats(ProjectModel project) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -378,7 +378,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     );
   }
 
-  Widget _buildTagsRow(Project project) {
+  Widget _buildTagsRow(ProjectModel project) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -428,7 +428,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     );
   }
 
-  Widget _buildDownloadBuildCard(Project project) {
+  Widget _buildDownloadBuildCard(ProjectModel project) {
     return SizedBox(
       height: 110, // Match info card height
       child: AspectRatio(

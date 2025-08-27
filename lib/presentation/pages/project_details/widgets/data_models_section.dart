@@ -10,8 +10,8 @@ import 'data_model_editor_dialog.dart';
 import '../../project_details/project_provider.dart';
 
 class DataModelsSection extends StatefulWidget {
-  final Project project;
-  final Function(Project)? onProjectUpdated;
+  final ProjectModel project;
+  final Function(ProjectModel)? onProjectUpdated;
 
   const DataModelsSection({
     super.key,
@@ -127,7 +127,7 @@ class _DataModelsSectionState extends State<DataModelsSection> {
     );
   }
 
-  Widget _buildHeader(Project project) {
+  Widget _buildHeader(ProjectModel project) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(

@@ -9,7 +9,7 @@ abstract class BuildEvent extends Equatable {
 }
 
 class StartBuild extends BuildEvent {
-  final Project project;
+  final ProjectModel project;
 
   const StartBuild(this.project);
 

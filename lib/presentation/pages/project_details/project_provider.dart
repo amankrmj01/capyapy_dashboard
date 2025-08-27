@@ -4,7 +4,7 @@ import '../../../../../data/models/models.dart';
 
 class ProjectProvider extends InheritedWidget {
   final dynamic project;
-  final void Function(Project)? onProjectUpdated;
+  final void Function(ProjectModel)? onProjectUpdated;
 
   const ProjectProvider({
     super.key,

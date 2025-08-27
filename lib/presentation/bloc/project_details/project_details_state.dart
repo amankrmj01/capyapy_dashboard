@@ -13,14 +13,14 @@ class ProjectDetailsInitial extends ProjectDetailsState {}
 class ProjectDetailsLoading extends ProjectDetailsState {}
 
 class ProjectDetailsLoaded extends ProjectDetailsState {
-  final Project project;
+  final ProjectModel project;
 
   const ProjectDetailsLoaded(this.project);
 
   @override
   List<Object?> get props => [project];
 
-  ProjectDetailsLoaded copyWith({Project? project}) {
+  ProjectDetailsLoaded copyWith({ProjectModel? project}) {
     return ProjectDetailsLoaded(project ?? this.project);
   }
 }
@@ -37,7 +37,7 @@ class ProjectDetailsError extends ProjectDetailsState {
 class ProjectDeleted extends ProjectDetailsState {}
 
 class ProjectDetailsUpdating extends ProjectDetailsState {
-  final Project project;
+  final ProjectModel project;
 
   const ProjectDetailsUpdating(this.project);
 

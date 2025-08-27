@@ -8,7 +8,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   ProjectRepositoryImpl({required this.dataSource});
 
   @override
-  Future<List<Project>> getAllProjects() async {
+  Future<List<ProjectModel>> getAllProjects() async {
     try {
       return await dataSource.getAllProjects();
     } catch (e) {
@@ -17,7 +17,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project?> getProjectById(String id) async {
+  Future<ProjectModel?> getProjectById(String id) async {
     try {
       return await dataSource.getProjectById(id);
     } catch (e) {
@@ -26,7 +26,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> createProject(Project project) async {
+  Future<ProjectModel> createProject(ProjectModel project) async {
     try {
       // Validate project name uniqueness
       final isUnique = await dataSource.isProjectNameUnique(
@@ -42,7 +42,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> updateProject(Project project) async {
+  Future<ProjectModel> updateProject(ProjectModel project) async {
     try {
       // Validate project exists
       final exists = await dataSource.projectExists(project.id);
@@ -79,7 +79,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<List<Project>> getProjectsByUserId(String userId) async {
+  Future<List<ProjectModel>> getProjectsByUserId(String userId) async {
     try {
       return await dataSource.getProjectsByUserId(userId);
     } catch (e) {
@@ -88,7 +88,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<List<Project>> searchProjects(String query) async {
+  Future<List<ProjectModel>> searchProjects(String query) async {
     try {
       return await dataSource.searchProjects(query);
     } catch (e) {
@@ -97,7 +97,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<List<Project>> getActiveProjects() async {
+  Future<List<ProjectModel>> getActiveProjects() async {
     try {
       return await dataSource.getActiveProjects();
     } catch (e) {
@@ -106,7 +106,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<List<Project>> getProjectsByStatus(bool isActive) async {
+  Future<List<ProjectModel>> getProjectsByStatus(bool isActive) async {
     try {
       return await dataSource.getProjectsByStatus(isActive);
     } catch (e) {
@@ -115,7 +115,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> addDataModel(
+  Future<ProjectModel> addDataModel(
     String projectId,
     ProjectDataModel dataModel,
   ) async {
@@ -137,7 +137,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> updateDataModel(
+  Future<ProjectModel> updateDataModel(
     String projectId,
     int index,
     ProjectDataModel dataModel,
@@ -169,7 +169,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> removeDataModel(String projectId, int index) async {
+  Future<ProjectModel> removeDataModel(String projectId, int index) async {
     try {
       final project = await dataSource.getProjectById(projectId);
       if (project == null) {
@@ -197,7 +197,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> addEndpoint(
+  Future<ProjectModel> addEndpoint(
     String projectId,
     ProjectEndpoint endpoint,
   ) async {
@@ -219,7 +219,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> updateEndpoint(
+  Future<ProjectModel> updateEndpoint(
     String projectId,
     int index,
     ProjectEndpoint endpoint,
@@ -249,7 +249,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> removeEndpoint(String projectId, int index) async {
+  Future<ProjectModel> removeEndpoint(String projectId, int index) async {
     try {
       final project = await dataSource.getProjectById(projectId);
       if (project == null) {
@@ -275,7 +275,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<Project> updateProjectSettings(
+  Future<ProjectModel> updateProjectSettings(
     String projectId, {
     String? projectName,
     String? description,
@@ -340,7 +340,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<List<Project>> getProjectsWithMostApiCalls({int limit = 10}) async {
+  Future<List<ProjectModel>> getProjectsWithMostApiCalls({
+    int limit = 10,
+  }) async {
     try {
       final allProjects = await dataSource.getAllProjects();
       allProjects.sort(
@@ -355,9 +357,11 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<List<Project>> createMultipleProjects(List<Project> projects) async {
+  Future<List<ProjectModel>> createMultipleProjects(
+    List<ProjectModel> projects,
+  ) async {
     try {
-      final createdProjects = <Project>[];
+      final createdProjects = <ProjectModel>[];
       for (final project in projects) {
         final createdProject = await createProject(project);
         createdProjects.add(createdProject);
@@ -380,9 +384,11 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<List<Project>> updateMultipleProjects(List<Project> projects) async {
+  Future<List<ProjectModel>> updateMultipleProjects(
+    List<ProjectModel> projects,
+  ) async {
     try {
-      final updatedProjects = <Project>[];
+      final updatedProjects = <ProjectModel>[];
       for (final project in projects) {
         final updatedProject = await updateProject(project);
         updatedProjects.add(updatedProject);

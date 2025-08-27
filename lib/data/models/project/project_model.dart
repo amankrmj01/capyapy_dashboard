@@ -1,6 +1,6 @@
 import '../models.dart';
 
-class Project {
+class ProjectModel {
   final String id;
   final String projectName;
   final String description;
@@ -16,7 +16,7 @@ class Project {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  const Project({
+  const ProjectModel({
     required this.id,
     required this.projectName,
     required this.description,
@@ -50,7 +50,7 @@ class Project {
     'updatedAt': updatedAt.toIso8601String(),
   };
 
-  factory Project.fromJson(Map<String, dynamic> json) => Project(
+  factory ProjectModel.fromJson(Map<String, dynamic> json) => ProjectModel(
     id: json['id'],
     projectName: json['projectName'],
     description: json['description'] ?? '',
@@ -89,7 +89,7 @@ class Project {
 
   int get totalDataModels => mongoDbDataModels.length;
 
-  Project copyWith({
+  ProjectModel copyWith({
     String? id,
     String? projectName,
     String? description,
@@ -105,7 +105,7 @@ class Project {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return Project(
+    return ProjectModel(
       id: id ?? this.id,
       projectName: projectName ?? this.projectName,
       description: description ?? this.description,
@@ -125,56 +125,11 @@ class Project {
 }
 
 // Additional backward compatibility for Project constructor
-extension ProjectBackwardCompatibility on Project {
+extension ProjectBackwardCompatibility on ProjectModel {
   // Getter for backward compatibility
   String get basePath => apiBasePath;
 
   List<ProjectDataModel> get dataModels => mongoDbDataModels;
-
-  // Static factory method for backward compatibility
-  static Project createLegacy({
-    required String id,
-    required String projectName,
-    required String basePath,
-    required bool hasAuth,
-    AuthStrategy? authStrategy,
-    required List<DataModel> dataModels,
-    required List<Endpoint> endpoints,
-    required StorageConfig storage,
-    required ProjectMetadata metadata,
-  }) {
-    final now = DateTime.now();
-    return Project(
-      id: id,
-      projectName: projectName,
-      description: '',
-      apiBasePath: basePath,
-      isActive: true,
-      hasAuth: hasAuth,
-      authStrategy: authStrategy,
-      mongoDbDataModels: dataModels,
-      endpoints: endpoints,
-      storage: storage,
-      metadata: metadata,
-      apiCallsAnalytics: ApiCallsAnalytics(lastUpdated: now),
-      createdAt: now,
-      updatedAt: now,
-    );
-  }
-}
-
-// Backward compatibility for StorageConfig
-extension StorageConfigBackwardCompatibility on StorageConfig {
-  bool get enabled => true;
-
-  bool get persist => true;
-}
-
-// Backward compatibility for AuthStrategy
-extension AuthStrategyBackwardCompatibility on AuthStrategy {
-  String get strategy => type.name;
-
-  List<String> get scopes => requiredFields;
 }
 
 // Backward compatibility for ProjectMetadata
@@ -182,11 +137,4 @@ extension ProjectMetadataBackwardCompatibility on ProjectMetadata {
   String get createdBy => author;
 
   DateTime get createdAt => DateTime.now();
-}
-
-// Backward compatibility for ResponseConfig
-extension ResponseConfigBackwardCompatibility on ResponseConfig {
-  String get status => statusCode.toString();
-
-  Map<String, dynamic> get body => schema;
 }

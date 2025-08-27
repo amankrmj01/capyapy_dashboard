@@ -13,7 +13,7 @@ class ProjectsInitial extends ProjectsState {}
 class ProjectsLoading extends ProjectsState {}
 
 class ProjectsLoaded extends ProjectsState {
-  final List<Project> projects;
+  final List<ProjectModel> projects;
   final int totalProjects;
   final int activeProjects;
   final int totalEndpoints;

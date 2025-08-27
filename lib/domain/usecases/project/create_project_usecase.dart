@@ -6,7 +6,7 @@ class CreateProjectUseCase {
 
   CreateProjectUseCase({required this.repository});
 
-  Future<Project> call(Project project) async {
+  Future<ProjectModel> call(ProjectModel project) async {
     return await repository.createProject(project);
   }
 }

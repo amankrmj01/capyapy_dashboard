@@ -6,7 +6,10 @@ class AddDataModelUseCase {
 
   AddDataModelUseCase({required this.repository});
 
-  Future<Project> call(String projectId, ProjectDataModel dataModel) async {
+  Future<ProjectModel> call(
+    String projectId,
+    ProjectDataModel dataModel,
+  ) async {
     return await repository.addDataModel(projectId, dataModel);
   }
 }

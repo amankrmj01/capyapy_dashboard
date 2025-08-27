@@ -6,7 +6,7 @@ class GetAllProjectsUseCase {
 
   GetAllProjectsUseCase({required this.repository});
 
-  Future<List<Project>> call() async {
+  Future<List<ProjectModel>> call() async {
     return await repository.getAllProjects();
   }
 }

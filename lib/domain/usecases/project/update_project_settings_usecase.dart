@@ -6,7 +6,7 @@ class UpdateProjectSettingsUseCase {
 
   UpdateProjectSettingsUseCase({required this.repository});
 
-  Future<Project> call(
+  Future<ProjectModel> call(
     String projectId, {
     String? projectName,
     String? description,

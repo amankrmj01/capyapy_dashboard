@@ -2,24 +2,24 @@ import '../models/models.dart';
 
 abstract class ProjectDataSource {
   // Project CRUD operations
-  Future<List<Project>> getAllProjects();
+  Future<List<ProjectModel>> getAllProjects();
 
-  Future<Project?> getProjectById(String id);
+  Future<ProjectModel?> getProjectById(String id);
 
-  Future<Project> createProject(Project project);
+  Future<ProjectModel> createProject(ProjectModel project);
 
-  Future<Project> updateProject(Project project);
+  Future<ProjectModel> updateProject(ProjectModel project);
 
   Future<void> deleteProject(String id);
 
   // Project filtering and searching
-  Future<List<Project>> getProjectsByUserId(String userId);
+  Future<List<ProjectModel>> getProjectsByUserId(String userId);
 
-  Future<List<Project>> searchProjects(String query);
+  Future<List<ProjectModel>> searchProjects(String query);
 
-  Future<List<Project>> getActiveProjects();
+  Future<List<ProjectModel>> getActiveProjects();
 
-  Future<List<Project>> getProjectsByStatus(bool isActive);
+  Future<List<ProjectModel>> getProjectsByStatus(bool isActive);
 
   // Analytics
   Future<ApiCallsAnalytics> getProjectAnalytics(String projectId);

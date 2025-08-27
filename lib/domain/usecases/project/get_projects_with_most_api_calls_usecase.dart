@@ -6,7 +6,7 @@ class GetProjectsWithMostApiCallsUseCase {
 
   GetProjectsWithMostApiCallsUseCase({required this.repository});
 
-  Future<List<Project>> call({int limit = 10}) async {
+  Future<List<ProjectModel>> call({int limit = 10}) async {
     return await repository.getProjectsWithMostApiCalls(limit: limit);
   }
 }

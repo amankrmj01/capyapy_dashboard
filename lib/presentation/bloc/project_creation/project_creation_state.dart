@@ -104,7 +104,7 @@ class ProjectCreationLoading extends ProjectCreationState {
 }
 
 class ProjectCreationSuccess extends ProjectCreationState {
-  final Project project;
+  final ProjectModel project;
 
   const ProjectCreationSuccess(this.project);
 

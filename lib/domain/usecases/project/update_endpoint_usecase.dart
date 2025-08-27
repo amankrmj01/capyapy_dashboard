@@ -6,7 +6,7 @@ class UpdateEndpointUseCase {
 
   UpdateEndpointUseCase({required this.repository});
 
-  Future<Project> call(
+  Future<ProjectModel> call(
     String projectId,
     int index,
     ProjectEndpoint endpoint,

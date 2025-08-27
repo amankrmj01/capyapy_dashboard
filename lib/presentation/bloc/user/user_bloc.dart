@@ -1,9 +1,9 @@
+import 'package:capyapy_dashboard/presentation/bloc/user/user_event.dart';
+import 'package:capyapy_dashboard/presentation/bloc/user/user_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'user_event.dart';
-import 'user_state.dart';
-import '../../domain/usecases/get_user_usecase.dart';
-import '../../domain/usecases/update_user_usecase.dart';
-import '../../domain/usecases/logout_user_usecase.dart';
+import '../../../domain/usecases/get_user_usecase.dart';
+import '../../../domain/usecases/update_user_usecase.dart';
+import '../../../domain/usecases/logout_user_usecase.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
   final GetUserUseCase getUserUseCase;

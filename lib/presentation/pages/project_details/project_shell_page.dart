@@ -22,7 +22,7 @@ class ProjectShellPage extends StatelessWidget {
 
   void _onSidebarItemSelected(BuildContext context, int index) {
     final location = GoRouterState.of(context).uri.toString();
-    final project = GoRouterState.of(context).extra as Project?;
+    final project = GoRouterState.of(context).extra as ProjectModel?;
     final projectId = _extractProjectId(location);
     if (project == null || projectId == null) return;
     if (index == 0) {

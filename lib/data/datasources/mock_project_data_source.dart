@@ -2,8 +2,8 @@ import '../models/models.dart';
 import 'project_data_source.dart';
 
 class MockProjectDataSource implements ProjectDataSource {
-  final List<Project> _projects = [];
-  static final List<Project> _staticProjects = [];
+  final List<ProjectModel> _projects = [];
+  static final List<ProjectModel> _staticProjects = [];
 
   MockProjectDataSource() {
     _initializeMockData();
@@ -14,7 +14,7 @@ class MockProjectDataSource implements ProjectDataSource {
 
     // Create sample projects
     _projects.addAll([
-      Project(
+      ProjectModel(
         id: 'project_1',
         projectName: 'E-commerce API',
         description: 'REST API for e-commerce platform',
@@ -96,7 +96,7 @@ class MockProjectDataSource implements ProjectDataSource {
         createdAt: now,
         updatedAt: now,
       ),
-      Project(
+      ProjectModel(
         id: 'project_2',
         projectName: 'Blog Management System',
         description: 'Content management system for blogs',
@@ -189,7 +189,7 @@ class MockProjectDataSource implements ProjectDataSource {
         createdAt: now,
         updatedAt: now,
       ),
-      Project(
+      ProjectModel(
         id: 'project_3',
         projectName: 'Analytics Dashboard',
         description: 'Real-time analytics and reporting system',
@@ -227,7 +227,7 @@ class MockProjectDataSource implements ProjectDataSource {
   }
 
   @override
-  Future<List<Project>> getAllProjects() async {
+  Future<List<ProjectModel>> getAllProjects() async {
     await Future.delayed(
       const Duration(milliseconds: 500),
     ); // Simulate network delay
@@ -235,7 +235,7 @@ class MockProjectDataSource implements ProjectDataSource {
   }
 
   @override
-  Future<Project?> getProjectById(String id) async {
+  Future<ProjectModel?> getProjectById(String id) async {
     await Future.delayed(const Duration(milliseconds: 300));
     try {
       return _projects.firstWhere((project) => project.id == id);
@@ -245,7 +245,7 @@ class MockProjectDataSource implements ProjectDataSource {
   }
 
   @override
-  Future<Project> createProject(Project project) async {
+  Future<ProjectModel> createProject(ProjectModel project) async {
     await Future.delayed(const Duration(milliseconds: 800));
     final newProject = project.copyWith(
       id: 'project_${DateTime.now().millisecondsSinceEpoch}',
@@ -257,7 +257,7 @@ class MockProjectDataSource implements ProjectDataSource {
   }
 
   @override
-  Future<Project> updateProject(Project project) async {
+  Future<ProjectModel> updateProject(ProjectModel project) async {
     await Future.delayed(const Duration(milliseconds: 600));
     final index = _projects.indexWhere((p) => p.id == project.id);
     if (index == -1) {
@@ -279,14 +279,14 @@ class MockProjectDataSource implements ProjectDataSource {
   }
 
   @override
-  Future<List<Project>> getProjectsByUserId(String userId) async {
+  Future<List<ProjectModel>> getProjectsByUserId(String userId) async {
     await Future.delayed(const Duration(milliseconds: 400));
     // For mock purposes, return all projects (in real implementation, filter by userId)
     return List.from(_projects);
   }
 
   @override
-  Future<List<Project>> searchProjects(String query) async {
+  Future<List<ProjectModel>> searchProjects(String query) async {
     await Future.delayed(const Duration(milliseconds: 350));
     if (query.isEmpty) return getAllProjects();
 
@@ -301,13 +301,13 @@ class MockProjectDataSource implements ProjectDataSource {
   }
 
   @override
-  Future<List<Project>> getActiveProjects() async {
+  Future<List<ProjectModel>> getActiveProjects() async {
     await Future.delayed(const Duration(milliseconds: 300));
     return _projects.where((project) => project.isActive).toList();
   }
 
   @override
-  Future<List<Project>> getProjectsByStatus(bool isActive) async {
+  Future<List<ProjectModel>> getProjectsByStatus(bool isActive) async {
     await Future.delayed(const Duration(milliseconds: 300));
     return _projects.where((project) => project.isActive == isActive).toList();
   }
@@ -408,7 +408,7 @@ class MockProjectDataSource implements ProjectDataSource {
   }
 
   // Additional helper methods for mock data management
-  void addMockProject(Project project) {
+  void addMockProject(ProjectModel project) {
     _projects.add(project);
   }
 
@@ -421,7 +421,7 @@ class MockProjectDataSource implements ProjectDataSource {
     _initializeMockData();
   }
 
-  static void addProject(Project project) {
+  static void addProject(ProjectModel project) {
     _staticProjects.add(project);
   }
 }

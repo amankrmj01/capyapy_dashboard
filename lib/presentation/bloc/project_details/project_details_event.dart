@@ -18,7 +18,7 @@ class LoadProjectDetails extends ProjectDetailsEvent {
 }
 
 class UpdateProject extends ProjectDetailsEvent {
-  final Project project;
+  final ProjectModel project;
 
   const UpdateProject(this.project);
 
