@@ -1,7 +1,9 @@
+import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/data_models_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/k.showBlurredBackgroundGeneralDialog.dart';
 import '../../../../data/models/models.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
 import '../../../bloc/project_details/project_details_event.dart';
@@ -292,6 +294,26 @@ class _DataModelsSectionState extends State<DataModelsSection> {
                     ],
                   ),
                 ),
+
+                ElevatedButton.icon(
+                  onPressed: () {
+                    showBlurredBackGroundGeneralDialog(
+                      context: context,
+                      builder: (dialogContext) {
+                        return DataModelsData(
+                          collectionName: dataModel.collectionName,
+                        );
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.show_chart, size: 18),
+                  label: Text('Stats', style: GoogleFonts.inter(fontSize: 14)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.surface(context),
+                    foregroundColor: AppColors.primary(context),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 PopupMenuButton(
                   icon: Icon(
                     Icons.more_vert,

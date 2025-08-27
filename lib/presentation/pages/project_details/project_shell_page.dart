@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../data/models/models.dart';
-import 'widgets/widgets.dart';
+import 'widgets/export_widgets.dart';
 import '../../../core/constants/app_colors.dart';
 
 class ProjectShellPage extends StatelessWidget {
