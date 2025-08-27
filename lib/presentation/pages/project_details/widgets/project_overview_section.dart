@@ -26,6 +26,9 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
   late TextEditingController _descriptionController;
   bool _hasAuth = false;
 
+  final ScrollController _scrollController = ScrollController();
+  double _scrollOffset = 0.0;
+
   @override
   void initState() {
     super.initState();
@@ -35,13 +38,7 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     _nameController = TextEditingController();
     _basePathController = TextEditingController();
     _descriptionController = TextEditingController();
-  }
-
-  void _updateControllers(ProjectModel project) {
-    _nameController.text = project.projectName;
-    _basePathController.text = project.apiBasePath;
-    _descriptionController.text = project.description;
-    _hasAuth = project.hasAuth;
+    _scrollController.addListener(_onScroll);
   }
 
   @override
@@ -49,7 +46,109 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
     _nameController.dispose();
     _basePathController.dispose();
     _descriptionController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    setState(() {
+      _scrollOffset = _scrollController.offset.clamp(0.0, 100.0);
+    });
+  }
+
+  double get _transitionProgress => (_scrollOffset / 100.0).clamp(0.0, 1.0);
+
+  double get _headerHeight => 120.0 - (50.0 * _transitionProgress);
+
+  double get _collapsedOpacity =>
+      ((_transitionProgress - 0.4) / 0.6).clamp(0.0, 1.0);
+
+  double get _expandedOpacity =>
+      (1.0 - (_transitionProgress / 0.5)).clamp(0.0, 1.0);
+
+  Widget _buildFloatingHeader(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeOut,
+      margin: EdgeInsets.lerp(
+        const EdgeInsets.only(left: 24, right: 24, top: 16),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        _transitionProgress,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.surface(context),
+        borderRadius: BorderRadius.lerp(
+          BorderRadius.circular(12),
+          BorderRadius.circular(20),
+          _transitionProgress,
+        ),
+        boxShadow: _transitionProgress > 0.3
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1 * _transitionProgress),
+                  blurRadius: 12 * _transitionProgress,
+                  offset: Offset(0, 4 * _transitionProgress),
+                ),
+              ]
+            : null,
+      ),
+      child: Container(
+        height: _headerHeight,
+        padding: EdgeInsets.lerp(
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          _transitionProgress,
+        ),
+        child: Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            // Expanded layout (fades out early)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 100),
+              opacity: _expandedOpacity,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  widget.project.projectName,
+                  style: GoogleFonts.inter(
+                    color: AppColors.textPrimary(context),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28,
+                  ),
+                ),
+              ),
+            ),
+            // Collapsed layout (fades in later)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 100),
+              opacity: _collapsedOpacity,
+              child: Row(
+                children: [
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.project.projectName,
+                      style: GoogleFonts.inter(
+                        color: AppColors.textPrimary(context),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _updateControllers(ProjectModel project) {
+    _nameController.text = project.projectName;
+    _basePathController.text = project.apiBasePath;
+    _descriptionController.text = project.description;
+    _hasAuth = project.hasAuth;
   }
 
   void _saveChanges(ProjectModel project) {
@@ -64,52 +163,71 @@ class _ProjectOverviewSectionState extends State<ProjectOverviewSection> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<BuildBloc>(
-      create: (_) => BuildBloc(),
-      child: Builder(
-        builder: (context) {
-          return BlocListener<BuildBloc, BuildState>(
-            listener: (context, state) {
-              if (state is BuildSuccess) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Successfully built!')));
-              }
-            },
-            child: BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
-              builder: (context, state) {
-                if (state is ProjectDetailsInitial ||
-                    state is ProjectDetailsLoading) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (state is ProjectDetailsError) {
-                  return Center(child: Text('Error: ${state.message}'));
-                } else if (state is ProjectDetailsLoaded ||
-                    state is ProjectDetailsUpdating) {
-                  final project = (state is ProjectDetailsLoaded)
-                      ? state.project
-                      : (state as ProjectDetailsUpdating).project;
-                  _updateControllers(project);
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildOverviewCards(project),
-                        const SizedBox(height: 32),
-                        _buildProjectBasics(project),
-                        const SizedBox(height: 32),
-                        _buildProjectStats(project),
-                      ],
-                    ),
-                  );
-                } else {
-                  return Center(child: Text('Unknown state'));
-                }
-              },
-            ),
-          );
-        },
-      ),
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          controller: _scrollController,
+          child: Column(
+            children: [
+              SizedBox(height: _headerHeight + 20),
+              BlocProvider<BuildBloc>(
+                create: (_) => BuildBloc(),
+                child: Builder(
+                  builder: (context) {
+                    return BlocListener<BuildBloc, BuildState>(
+                      listener: (context, state) {
+                        if (state is BuildSuccess) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Successfully built!')),
+                          );
+                        }
+                      },
+                      child:
+                          BlocBuilder<ProjectDetailsBloc, ProjectDetailsState>(
+                            builder: (context, state) {
+                              if (state is ProjectDetailsInitial ||
+                                  state is ProjectDetailsLoading) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              } else if (state is ProjectDetailsError) {
+                                return Center(
+                                  child: Text('Error: ${state.message}'),
+                                );
+                              } else if (state is ProjectDetailsLoaded ||
+                                  state is ProjectDetailsUpdating) {
+                                final project = (state is ProjectDetailsLoaded)
+                                    ? state.project
+                                    : (state as ProjectDetailsUpdating).project;
+                                _updateControllers(project);
+                                return SingleChildScrollView(
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _buildOverviewCards(project),
+                                      const SizedBox(height: 32),
+                                      _buildProjectBasics(project),
+                                      const SizedBox(height: 32),
+                                      _buildProjectStats(project),
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                return Center(child: Text('Unknown state'));
+                              }
+                            },
+                          ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        _buildFloatingHeader(context),
+      ],
     );
   }
 
