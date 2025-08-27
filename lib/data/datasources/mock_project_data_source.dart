@@ -383,6 +383,30 @@ class MockProjectDataSource implements ProjectDataSource {
     return _projects.length;
   }
 
+  @override
+  Future<int> getTotalApiCalls() async {
+    return _projects.fold<int>(
+      0,
+      (sum, project) => sum + (project.apiCallsAnalytics.totalCalls),
+    );
+  }
+
+  @override
+  Future<int> getTotalEndpoints() async {
+    return _projects.fold<int>(
+      0,
+      (sum, project) => sum + project.endpoints.length,
+    );
+  }
+
+  @override
+  Future<int> getTotalModels() async {
+    return _projects.fold<int>(
+      0,
+      (sum, project) => sum + project.mongoDbDataModels.length,
+    );
+  }
+
   // Additional helper methods for mock data management
   void addMockProject(Project project) {
     _projects.add(project);
@@ -400,6 +424,4 @@ class MockProjectDataSource implements ProjectDataSource {
   static void addProject(Project project) {
     _staticProjects.add(project);
   }
-
-  List<Project> get projects => [..._projects, ..._staticProjects];
 }

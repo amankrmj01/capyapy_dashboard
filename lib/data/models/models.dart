@@ -2,36 +2,42 @@
 // This file exports all data models for easy importing
 
 // Project-related models
-export 'project_model.dart';
-export 'auth_strategy.dart';
-export 'project_data_model.dart';
-export 'project_endpoint.dart';
-export 'storage_config.dart';
-export 'project_metadata.dart';
-export 'api_calls_analytics.dart';
+export 'project/auth_strategy.dart';
+export 'project/project_data_model.dart';
+export 'project/project_endpoint.dart';
+export 'project/storage_config.dart';
+export 'project/project_metadata.dart';
+export 'project/api_calls_analytics.dart';
 
 // MongoDB-related models
-export 'mongodb_field.dart';
-export 'mongodb_index.dart';
+export 'project/mongodb_field.dart';
+export 'project/mongodb_index.dart';
 
 // HTTP configuration models
-export 'http_config.dart';
+export 'project/http_config.dart';
 
 // Analytics models
-export 'endpoint_analytics.dart';
+export 'project/endpoint_analytics.dart';
 
 // Dashboard models
-export 'dashboard_overview.dart';
-export 'analytics_data.dart';
-export 'chart_data.dart';
-export 'recent_activity.dart';
-export 'api_endpoint.dart';
+export 'project/dashboard_model.dart';
+export 'project/dashboard_overview.dart';
+export 'project/analytics_data.dart';
+export 'project/chart_data.dart';
+export 'project/recent_activity.dart';
+export 'project/api_endpoint.dart';
 
 // User models
-export 'user.dart';
+export 'user/user.dart';
 
 // Billing models
-export 'bill.dart';
+export 'project/bill.dart';
 
 // Backward compatibility
-export 'backward_compatibility.dart';
+export 'project/backward_compatibility.dart';
+export 'project/generic_collection.dart';
+export 'project/generic_document.dart';
+
+// Remove duplicate definitions of GenericDocument and GenericCollection
+
+export 'project/project_model.dart';

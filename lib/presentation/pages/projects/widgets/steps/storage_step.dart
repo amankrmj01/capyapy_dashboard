@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../../data/models/storage_config.dart';
+import '../../../../../data/models/models.dart';
 import '../../../../bloc/project_creation/project_creation_bloc.dart';
 import '../../../../bloc/project_creation/project_creation_event.dart';
 import '../../../../bloc/project_creation/project_creation_state.dart';

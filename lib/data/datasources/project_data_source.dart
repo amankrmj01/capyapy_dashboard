@@ -32,4 +32,10 @@ abstract class ProjectDataSource {
   Future<bool> isProjectNameUnique(String name, {String? excludeId});
 
   Future<int> getProjectsCount();
+
+  Future<int> getTotalEndpoints();
+
+  Future<int> getTotalModels();
+
+  Future<int> getTotalApiCalls();
 }

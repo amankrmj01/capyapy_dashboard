@@ -1,5 +1,5 @@
 // Backward compatibility type aliases
-import 'models.dart';
+import '../models.dart';
 
 // Type aliases for backward compatibility with existing codebase
 typedef DataModel = ProjectDataModel;

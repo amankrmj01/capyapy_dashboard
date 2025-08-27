@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../data/models/project_model.dart';
+import '../../../../../data/models/models.dart';
 import 'widgets/widgets.dart';
 import '../../../core/constants/app_colors.dart';
 

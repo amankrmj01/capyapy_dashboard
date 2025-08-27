@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../../data/models/project_model.dart';
+import '../../../data/models/models.dart';
 
 abstract class ProjectDetailsState extends Equatable {
   const ProjectDetailsState();

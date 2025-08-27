@@ -5,9 +5,7 @@ import '../../../bloc/project_details/project_details_bloc.dart';
 import '../../../bloc/project_details/project_details_state.dart';
 import '../../../bloc/project_details/project_details_event.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../data/models/auth_strategy.dart';
-import '../../../../data/models/storage_config.dart';
-import '../../../../data/models/project_model.dart';
+import '../../../../../data/models/models.dart';
 import '../project_provider.dart';
 
 class ProjectSettingsSection extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../../../data/models/project_model.dart';
+import '../../../../../data/models/models.dart';
 
 class ProjectProvider extends InheritedWidget {
   final dynamic project;

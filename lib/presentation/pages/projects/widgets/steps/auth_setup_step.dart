@@ -5,7 +5,7 @@ import '../../../../bloc/project_creation/project_creation_bloc.dart';
 import '../../../../bloc/project_creation/project_creation_event.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../bloc/project_creation/project_creation_state.dart';
-import '../../../../../data/models/auth_strategy.dart';
+import '../../../../../data/models/models.dart';
 
 class AuthSetupStep extends StatefulWidget {
   final ProjectCreationInitial state;

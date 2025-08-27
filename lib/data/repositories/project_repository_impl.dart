@@ -436,4 +436,19 @@ class ProjectRepositoryImpl implements ProjectRepository {
       throw Exception('Failed to get projects count by status: $e');
     }
   }
+
+  @override
+  Future<int> getTotalEndpoints() async {
+    return await dataSource.getTotalEndpoints();
+  }
+
+  @override
+  Future<int> getTotalModels() async {
+    return await dataSource.getTotalModels();
+  }
+
+  @override
+  Future<int> getTotalApiCalls() async {
+    return await dataSource.getTotalApiCalls();
+  }
 }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../../data/models/endpoint_analytics.dart';
-import '../../../../../data/models/http_config.dart';
-import '../../../../../data/models/project_endpoint.dart';
+import '../../../../../data/models/models.dart';
 import '../../../../../core/constants/app_colors.dart';
 import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/endpoint_editor_dialog.dart';
 import '../../../../bloc/project_creation/project_creation_bloc.dart';

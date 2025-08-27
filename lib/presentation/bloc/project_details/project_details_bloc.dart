@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/repositories/project_repository.dart';
-import '../../../domain/usecases/project_usecases.dart';
+import '../../../domain/usecases/project/project_details_usecases.dart';
 import 'project_details_event.dart';
 import 'project_details_state.dart';
 

@@ -1,4 +1,4 @@
-import 'models.dart';
+import '../models.dart';
 
 class Project {
   final String id;

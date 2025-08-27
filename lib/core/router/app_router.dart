@@ -2,10 +2,10 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
-import '../../data/models/project_model.dart';
+import '../../../../../data/models/models.dart';
 import '../../data/repositories/project_repository_impl.dart';
 import '../../../data/datasources/mock_project_data_source.dart';
-import '../../domain/usecases/project_usecases.dart';
+import '../../domain/usecases/project/export_project_usecases.dart';
 import '../../presentation/bloc/project_creation/project_creation_bloc.dart';
 import '../../presentation/bloc/project_details/project_details_bloc.dart';
 import '../../presentation/bloc/project_details/project_details_event.dart';

@@ -78,4 +78,10 @@ abstract class ProjectRepository {
   Future<int> getProjectsCount();
 
   Future<Map<String, int>> getProjectsCountByStatus();
+
+  Future<int> getTotalEndpoints();
+
+  Future<int> getTotalModels();
+
+  Future<int> getTotalApiCalls();
 }

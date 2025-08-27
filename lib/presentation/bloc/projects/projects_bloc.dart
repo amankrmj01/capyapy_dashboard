@@ -19,7 +19,7 @@ class ProjectsBloc extends Bloc<ProjectsEvent, ProjectsState> {
     emit(ProjectsLoading());
     try {
       final projects = await projectRepository.getAllProjects();
-      final activeProjects = projects.where((p) => p.isActive).length;
+      final activeProjects = await projectRepository.getActiveProjects();
       final totalEndpoints = projects.fold<int>(
         0,
         (sum, project) => sum + project.endpoints.length,
@@ -37,7 +37,7 @@ class ProjectsBloc extends Bloc<ProjectsEvent, ProjectsState> {
         ProjectsLoaded(
           projects: projects,
           totalProjects: projects.length,
-          activeProjects: activeProjects,
+          activeProjects: activeProjects.length,
           totalEndpoints: totalEndpoints,
           totalModels: totalModels,
           totalApiCalls: totalApiCalls,

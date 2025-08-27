@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../../data/models/backward_compatibility.dart';
-import '../../../data/models/project_model.dart';
+import '../../../data/models/models.dart';
 
 abstract class ProjectDetailsEvent extends Equatable {
   const ProjectDetailsEvent();

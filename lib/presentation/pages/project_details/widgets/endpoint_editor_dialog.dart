@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../data/models/backward_compatibility.dart';
-import '../../../../data/models/endpoint_analytics.dart';
-import '../../../../data/models/http_config.dart';
-import '../../../../data/models/project_endpoint.dart';
+import '../../../../../data/models/models.dart';
 
 class EndpointEditorDialog extends StatefulWidget {
   final Endpoint? endpoint;
