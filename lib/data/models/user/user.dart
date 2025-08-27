@@ -3,7 +3,9 @@ import 'package:capyapy_dashboard/data/models/user/user_preferences.dart';
 import 'package:capyapy_dashboard/data/models/user/user_profile.dart';
 import 'package:equatable/equatable.dart';
 
-class User extends Equatable {
+import '../../../domain/entities/user.dart';
+
+class UserModel extends Equatable {
   final String id;
   final String email;
   final String username;
@@ -17,7 +19,7 @@ class User extends Equatable {
   final DateTime? lastLoginAt;
   final bool isEmailVerified;
 
-  const User({
+  const UserModel({
     required this.id,
     required this.email,
     required this.username,
@@ -32,7 +34,7 @@ class User extends Equatable {
     required this.isEmailVerified,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) => User(
+  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
     id: json['id'] as String,
     plan: UserPlan.values.firstWhere(
       (e) => e.name == json['plan'],
@@ -69,7 +71,7 @@ class User extends Equatable {
     'plan': plan.name,
   };
 
-  User copyWith({
+  UserModel copyWith({
     UserPlan? plan,
     String? id,
     String? email,
@@ -83,7 +85,7 @@ class User extends Equatable {
     DateTime? lastLoginAt,
     bool? isEmailVerified,
   }) {
-    return User(
+    return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
       username: username ?? this.username,
@@ -96,6 +98,42 @@ class User extends Equatable {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       plan: plan ?? this.plan,
+    );
+  }
+
+  // Conversion from domain entity to data model
+  factory UserModel.fromEntity(User entity) {
+    return UserModel(
+      id: entity.id,
+      email: entity.email,
+      username: entity.username,
+      profile: entity.profile,
+      preferences: entity.preferences,
+      projectIds: entity.projectIds,
+      permissions: entity.permissions,
+      plan: entity.plan,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      lastLoginAt: entity.lastLoginAt,
+      isEmailVerified: entity.isEmailVerified,
+    );
+  }
+
+  // Conversion from data model to domain entity
+  User toEntity() {
+    return User(
+      id: id,
+      email: email,
+      username: username,
+      profile: profile,
+      preferences: preferences,
+      projectIds: projectIds,
+      permissions: permissions,
+      plan: plan,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      lastLoginAt: lastLoginAt,
+      isEmailVerified: isEmailVerified,
     );
   }
 
