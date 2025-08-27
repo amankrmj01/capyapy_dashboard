@@ -6,3 +6,4 @@ export 'package:flutter_bloc/flutter_bloc.dart';
 export 'package:go_router/go_router.dart';
 export '../di/services/service_locator.dart';
 export '../theme/theme_cubit.dart';
+export 'package:fl_chart/fl_chart.dart';

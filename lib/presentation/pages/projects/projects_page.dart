@@ -1,15 +1,10 @@
-import 'package:capyapy_dashboard/presentation/bloc/project_creation/project_creation_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import '../../../data/datasource/mock_project_data_source.dart';
-import '../../../domain/usecases/project/create_project_usecase.dart';
 import 'widgets/projects_list.dart';
-import '../../../data/repositories/project_repository_impl.dart';
 import '../../bloc/projects/projects_bloc.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/di/services/service_locator.dart';
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
@@ -26,6 +21,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
   @override
   void initState() {
     super.initState();
+    context.read<ProjectsBloc>().add(const LoadProjects());
     _scrollController.addListener(_onScroll);
     // Removed the auto-load from here since ProjectsBloc doesn't exist yet
   }
@@ -58,8 +54,6 @@ class _ProjectsPageState extends State<ProjectsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final dataSource = sl<MockProjectDataSource>();
-    // Check for refresh flag in GoRouter extra
     final router = GoRouter.of(context);
     final refreshFlag = router.routerDelegate.currentConfiguration.extra;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -70,47 +64,14 @@ class _ProjectsPageState extends State<ProjectsPage> {
         _hasRefreshed = true;
       }
     });
-    return BlocProvider(
-      create: (_) => ProjectCreationBloc(
-        createProjectUseCase: CreateProjectUseCase(
-          repository: ProjectRepositoryImpl(dataSource: dataSource),
-        ),
-      ),
-      child: Builder(
-        builder: (context) =>
-            BlocListener<ProjectCreationBloc, ProjectCreationState>(
-              listener: (context, state) {
-                if (state is ProjectCreationSuccess) {
-                  // Refresh projects after creating a new one
-                  context.read<ProjectsBloc>().add(const RefreshProjects());
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Project "${state.project.projectName}" created successfully!',
-                      ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } else if (state is ProjectCreationError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error: ${state.message}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              child: _ProjectsPageContent(
-                scrollController: _scrollController,
-                transitionProgress: _transitionProgress,
-                headerHeight: _headerHeight,
-                collapsedOpacity: _collapsedOpacity,
-                expandedOpacity: _expandedOpacity,
-                startProjectCreation: _startProjectCreation,
-                formatNumber: _formatNumber,
-              ),
-            ),
-      ),
+    return _ProjectsPageContent(
+      scrollController: _scrollController,
+      transitionProgress: _transitionProgress,
+      headerHeight: _headerHeight,
+      collapsedOpacity: _collapsedOpacity,
+      expandedOpacity: _expandedOpacity,
+      startProjectCreation: _startProjectCreation,
+      formatNumber: _formatNumber,
     );
   }
 

@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/export_utils.dart';
+import '../../../bloc/user/user_bloc.dart';
 
 class ProjectDetailsSidebar extends StatelessWidget {
   final int selectedIndex;
@@ -122,52 +120,92 @@ class ProjectDetailsSidebar extends StatelessWidget {
             ),
 
             // User Profile Section
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.background(context),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border(context), width: 1),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.blue,
-                    child: Text(
-                      'JD',
-                      style: GoogleFonts.inter(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+            BlocBuilder<UserBloc, UserState>(
+              builder: (context, state) {
+                if (state is UserLoading) {
+                  return Container(
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                } else if (state is UserLoaded) {
+                  final user = state.user;
+                  final initials = (user.username.isNotEmpty)
+                      ? user.username
+                            .trim()
+                            .split(' ')
+                            .map((e) => e.isNotEmpty ? e[0] : '')
+                            .take(2)
+                            .join()
+                            .toUpperCase()
+                      : '';
+                  return Container(
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.background(context),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.border(context),
+                        width: 1,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text(
-                          'John Doe',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary(context),
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.blue,
+                          child: Text(
+                            initials,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        Text(
-                          'john@example.com',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: AppColors.textSecondary(context),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.username,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary(context),
+                                ),
+                              ),
+                              Text(
+                                user.email,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary(context),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
+                  );
+                } else if (state is UserError) {
+                  return Container(
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      'Error loading user',
+                      style: GoogleFonts.inter(color: Colors.red),
+                    ),
+                  );
+                }
+                // Initial or other states
+                return Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
+                  child: Text('No user info', style: GoogleFonts.inter()),
+                );
+              },
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:capyapy_dashboard/presentation/bloc/projects/projects_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,10 +25,7 @@ class ProjectCreationWizard extends StatelessWidget {
           return _DelayedLoadingView(
             key: const ValueKey('_delayedLoadingView'),
             onComplete: () async {
-              debugPrint('Project creation started, waiting 2 seconds...');
               await Future.delayed(const Duration(seconds: 2));
-              debugPrint('Navigating to /dashboard/project...');
-              // Navigation is now handled by the widget itself.
             },
             navigateTo: '/dashboard/project',
           );
@@ -307,12 +305,12 @@ class ProjectCreationWizard extends StatelessWidget {
 
 class _DelayedLoadingView extends StatefulWidget {
   final Future<void> Function() onComplete;
-  final String? navigateTo;
+  final String navigateTo;
 
   const _DelayedLoadingView({
     super.key,
     required this.onComplete,
-    this.navigateTo,
+    required this.navigateTo,
   });
 
   @override
@@ -326,9 +324,8 @@ class _DelayedLoadingViewState extends State<_DelayedLoadingView> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await widget.onComplete();
       if (!mounted) return;
-      if (widget.navigateTo != null) {
-        GoRouter.of(context).go(widget.navigateTo!, extra: {'refresh': true});
-      }
+      context.read<ProjectsBloc>().add(LoadProjects());
+      GoRouter.of(context).go(widget.navigateTo, extra: {'refresh': true});
     });
   }
 

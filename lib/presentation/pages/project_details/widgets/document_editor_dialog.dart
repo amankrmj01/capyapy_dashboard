@@ -1,8 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/models.dart';
+import '../../../../core/utils/export_utils.dart';
 import '../../../bloc/collection/collection_bloc.dart';
 
 class DocumentEditorDialog extends StatefulWidget {
