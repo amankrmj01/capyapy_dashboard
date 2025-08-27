@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../bloc/project_creation/project_creation_bloc.dart';
-import '../../../../bloc/project_creation/project_creation_event.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../bloc/project_creation/project_creation_state.dart';
 
 class BasicInfoStep extends StatefulWidget {
   final ProjectCreationInitial state;

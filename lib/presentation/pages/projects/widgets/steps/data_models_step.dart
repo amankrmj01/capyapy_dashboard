@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../data/models/models.dart';
-import '../../../../bloc/project_creation/project_creation_state.dart';
-import '../../../../bloc/project_creation/project_creation_event.dart';
 import '../../../project_details/widgets/data_model_editor_dialog.dart';
 import '../../../../bloc/project_creation/project_creation_bloc.dart';
 

@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../bloc/dashboard/dashboard_bloc.dart';
-import '../../bloc/dashboard/dashboard_event.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});

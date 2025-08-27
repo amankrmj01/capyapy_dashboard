@@ -1,8 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/project/generic_document.dart';
 import '../../../domain/repositories/document_resources_repository.dart';
-import 'collection_event.dart';
-import 'collection_state.dart';
+import 'package:equatable/equatable.dart';
+import '../../../data/models/models.dart';
+
+part 'collection_event.dart';
+
+part 'collection_state.dart';
 
 class CollectionBloc extends Bloc<CollectionEvent, CollectionState> {
   final DocumentResourcesRepository repository;

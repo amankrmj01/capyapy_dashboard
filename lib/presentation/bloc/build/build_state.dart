@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+part of 'build_bloc.dart';
 
 abstract class BuildState extends Equatable {
   const BuildState();

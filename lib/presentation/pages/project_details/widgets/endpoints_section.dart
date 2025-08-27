@@ -5,8 +5,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/k.showBlurredBackgroundGeneralDialog.dart';
 import '../../../../data/models/models.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
-import '../../../bloc/project_details/project_details_event.dart';
-import '../../../bloc/project_details/project_details_state.dart';
 import 'endpoint_editor_dialog.dart';
 import 'endpoint_stats.dart';
 import '../../project_details/project_provider.dart';

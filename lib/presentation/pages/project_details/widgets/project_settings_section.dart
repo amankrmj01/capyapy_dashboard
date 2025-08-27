@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
-import '../../../bloc/project_details/project_details_state.dart';
-import '../../../bloc/project_details/project_details_event.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../../data/models/models.dart';
 import '../project_provider.dart';

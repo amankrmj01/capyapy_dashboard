@@ -1,8 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
+import '../../../data/models/models.dart';
 import '../../../domain/repositories/project_repository.dart';
 import '../../../domain/usecases/project/project_details_usecases.dart';
-import 'project_details_event.dart';
-import 'project_details_state.dart';
+
+part 'project_details_event.dart';
+
+part 'project_details_state.dart';
 
 class ProjectDetailsBloc
     extends Bloc<ProjectDetailsEvent, ProjectDetailsState> {

@@ -1,5 +1,4 @@
-import 'package:equatable/equatable.dart';
-import '../../../../../data/models/models.dart';
+part of 'build_bloc.dart';
 
 abstract class BuildEvent extends Equatable {
   const BuildEvent();

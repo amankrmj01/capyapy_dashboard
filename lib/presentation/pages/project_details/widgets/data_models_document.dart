@@ -1,11 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/export_utils.dart';
 import '../../../../data/models/models.dart';
 import '../../../bloc/collection/collection_bloc.dart';
-import '../../../bloc/collection/collection_event.dart';
-import '../../../bloc/collection/collection_state.dart';
 import 'document_editor_dialog.dart';
 
 class DataModelsDocument extends StatefulWidget {

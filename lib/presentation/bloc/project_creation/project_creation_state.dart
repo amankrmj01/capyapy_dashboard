@@ -1,5 +1,4 @@
-import 'package:equatable/equatable.dart';
-import '../../../data/models/models.dart';
+part of 'project_creation_bloc.dart';
 
 abstract class ProjectCreationState extends Equatable {
   const ProjectCreationState();

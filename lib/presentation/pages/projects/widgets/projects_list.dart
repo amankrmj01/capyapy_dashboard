@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/models.dart';
 import '../../../bloc/projects/projects_bloc.dart';
-import '../../../bloc/projects/projects_state.dart';
 
 class ProjectsList extends StatelessWidget {
   final void Function(BuildContext) onCreateProject;

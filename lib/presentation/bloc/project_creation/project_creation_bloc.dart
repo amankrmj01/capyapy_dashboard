@@ -1,9 +1,12 @@
-import 'package:capyapy_dashboard/presentation/bloc/project_creation/project_creation_event.dart';
-import 'package:capyapy_dashboard/presentation/bloc/project_creation/project_creation_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/models.dart';
 import '../../../domain/usecases/project/create_project_usecase.dart';
+import 'package:equatable/equatable.dart';
+
+part 'project_creation_event.dart';
+
+part 'project_creation_state.dart';
 
 class ProjectCreationBloc
     extends Bloc<ProjectCreationEvent, ProjectCreationState> {

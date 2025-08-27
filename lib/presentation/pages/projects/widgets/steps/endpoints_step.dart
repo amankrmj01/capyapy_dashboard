@@ -5,8 +5,6 @@ import '../../../../../data/models/models.dart';
 import '../../../../../core/constants/app_colors.dart';
 import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/endpoint_editor_dialog.dart';
 import '../../../../bloc/project_creation/project_creation_bloc.dart';
-import '../../../../bloc/project_creation/project_creation_state.dart';
-import '../../../../bloc/project_creation/project_creation_event.dart';
 
 class EndpointsStep extends StatefulWidget {
   final ProjectCreationInitial state;

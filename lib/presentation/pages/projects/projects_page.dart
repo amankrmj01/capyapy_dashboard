@@ -1,5 +1,4 @@
 import 'package:capyapy_dashboard/presentation/bloc/project_creation/project_creation_bloc.dart';
-import 'package:capyapy_dashboard/presentation/bloc/project_creation/project_creation_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,8 +8,6 @@ import '../../../domain/usecases/project/create_project_usecase.dart';
 import 'widgets/projects_list.dart';
 import '../../../data/repositories/project_repository_impl.dart';
 import '../../bloc/projects/projects_bloc.dart';
-import '../../bloc/projects/projects_event.dart';
-import '../../bloc/projects/projects_state.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/di/services/service_locator.dart';
 

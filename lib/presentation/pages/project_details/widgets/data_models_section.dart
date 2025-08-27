@@ -1,19 +1,10 @@
 import 'package:capyapy_dashboard/presentation/pages/project_details/widgets/data_models_document.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../core/di/services/service_locator.dart';
-import '../../../../core/utils/k.showBlurredBackgroundGeneralDialog.dart';
-import '../../../../data/datasource/mock_collection_store.dart';
+import '../../../../core/utils/export_utils.dart';
 import '../../../../data/models/models.dart';
 import '../../../bloc/collection/collection_bloc.dart';
 import '../../../bloc/project_details/project_details_bloc.dart';
-import '../../../bloc/project_details/project_details_event.dart';
-import '../../../bloc/project_details/project_details_state.dart';
 import 'data_model_editor_dialog.dart';
 import '../../project_details/project_provider.dart';
-import 'package:capyapy_dashboard/data/repositories/document_resources_repository_impl.dart';
 
 class DataModelsSection extends StatefulWidget {
   final ProjectModel project;

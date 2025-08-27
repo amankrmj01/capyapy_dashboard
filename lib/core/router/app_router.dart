@@ -11,7 +11,6 @@ import '../../domain/usecases/project/export_project_usecases.dart';
 import '../../presentation/bloc/collection/collection_bloc.dart';
 import '../../presentation/bloc/project_creation/project_creation_bloc.dart';
 import '../../presentation/bloc/project_details/project_details_bloc.dart';
-import '../../presentation/bloc/project_details/project_details_event.dart';
 import '../../presentation/pages/billings/billing_page.dart';
 import '../../presentation/pages/main_page.dart';
 import '../../presentation/pages/project_details/project_shell_page.dart';

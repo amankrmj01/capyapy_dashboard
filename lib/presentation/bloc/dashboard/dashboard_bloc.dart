@@ -1,6 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dashboard_event.dart';
-import 'dashboard_state.dart';
+import 'package:equatable/equatable.dart';
+
+part 'dashboard_event.dart';
+
+part 'dashboard_state.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   DashboardBloc() : super(const DashboardInitial()) {
