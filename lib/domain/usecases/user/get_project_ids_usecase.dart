@@ -5,7 +5,7 @@ class GetProjectIdsUseCase {
 
   GetProjectIdsUseCase(this.repository);
 
-  Future<List<String>> call(String userId) async {
-    return await repository.getProjectIds(userId);
+  Future<List<String>> call() async {
+    return await repository.getProjectIds();
   }
 }

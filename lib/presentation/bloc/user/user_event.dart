@@ -45,11 +45,4 @@ class RemoveProjectId extends UserEvent {
   List<Object?> get props => [userId, projectId];
 }
 
-class GetProjectIds extends UserEvent {
-  final String userId;
-
-  GetProjectIds(this.userId);
-
-  @override
-  List<Object?> get props => [userId];
-}
+class GetProjectIds extends UserEvent {}

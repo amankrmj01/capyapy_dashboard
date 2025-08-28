@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'widgets/projects_list.dart';
 import '../../bloc/projects/projects_bloc.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../bloc/user/user_bloc.dart';
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
@@ -21,9 +22,11 @@ class _ProjectsPageState extends State<ProjectsPage> {
   @override
   void initState() {
     super.initState();
-    context.read<ProjectsBloc>().add(const LoadProjects());
+    final userState = context.read<UserBloc>().state;
+    if (userState is! UserLoaded) {
+      context.read<UserBloc>().add(GetProjectIds());
+    }
     _scrollController.addListener(_onScroll);
-    // Removed the auto-load from here since ProjectsBloc doesn't exist yet
   }
 
   @override
@@ -64,14 +67,21 @@ class _ProjectsPageState extends State<ProjectsPage> {
         _hasRefreshed = true;
       }
     });
-    return _ProjectsPageContent(
-      scrollController: _scrollController,
-      transitionProgress: _transitionProgress,
-      headerHeight: _headerHeight,
-      collapsedOpacity: _collapsedOpacity,
-      expandedOpacity: _expandedOpacity,
-      startProjectCreation: _startProjectCreation,
-      formatNumber: _formatNumber,
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, state) {
+        if (state is UserLoaded) {
+          context.read<ProjectsBloc>().add(LoadProjects(state.user.projectIds));
+        }
+      },
+      child: _ProjectsPageContent(
+        scrollController: _scrollController,
+        transitionProgress: _transitionProgress,
+        headerHeight: _headerHeight,
+        collapsedOpacity: _collapsedOpacity,
+        expandedOpacity: _expandedOpacity,
+        startProjectCreation: _startProjectCreation,
+        formatNumber: _formatNumber,
+      ),
     );
   }
 

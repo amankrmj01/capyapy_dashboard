@@ -5,12 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../bloc/project_creation/project_creation_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../bloc/user/user_bloc.dart';
 import 'steps/basic_info_step.dart';
 import 'steps/auth_setup_step.dart';
 import 'steps/storage_step.dart';
 import 'steps/data_models_step.dart';
 import 'steps/endpoints_step.dart';
-import '../../../../data/datasource/mock_project_data_source.dart';
 
 class ProjectCreationWizard extends StatelessWidget {
   final VoidCallback onClose;
@@ -34,11 +34,50 @@ class ProjectCreationWizard extends StatelessWidget {
           return _buildWizardView(context, state);
         }
         if (state is ProjectCreationSuccess) {
-          // Add project to mock data source and close wizard
-          Future.microtask(() {
-            // Add to mock data source
-            MockProjectDataSource.addProject(state.project);
-            onClose();
+          print('[ProjectCreationWizard] Entered ProjectCreationSuccess block');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            print('[ProjectCreationWizard] PostFrameCallback executing');
+            final userBloc = context.read<UserBloc>();
+            final userState = userBloc.state;
+            final projectId = state.project.id;
+            String? userId;
+            if (userState is UserLoaded) {
+              userId = userState.user.id;
+              print('[ProjectCreationWizard] About to dispatch AddProjectId');
+              userBloc.add(AddProjectId(userId, projectId));
+              print('[ProjectCreationWizard] About to dispatch GetProjectIds');
+              userBloc.add(GetProjectIds());
+              print('[ProjectCreationWizard] onClose called');
+              onClose();
+            } else if (userState is UserInitial || userState is UserLoading) {
+              // Listen for UserLoaded and then dispatch AddProjectId
+              final scaffold = ScaffoldMessenger.of(context);
+              BlocListener<UserBloc, UserState>(
+                listener: (context, userState) {
+                  if (userState is UserLoaded) {
+                    userId = userState.user.id;
+                    print(
+                      '[ProjectCreationWizard] User loaded, dispatching AddProjectId',
+                    );
+                    userBloc.add(AddProjectId(userId!, projectId));
+                    userBloc.add(GetProjectIds());
+                    print('[ProjectCreationWizard] onClose called');
+                    onClose();
+                  }
+                },
+                child: Container(),
+              );
+              // Try to load user if possible (replace with actual userId source if needed)
+              // If you have a way to get the userId (e.g., from auth), use it here
+              // For now, just print a warning
+              print(
+                '[ProjectCreationWizard] UserBloc state is not UserLoaded, dispatching LoadUser',
+              );
+              // userBloc.add(LoadUser(userId)); // Uncomment and provide userId if available
+            } else {
+              print('[ProjectCreationWizard] UserBloc state is not UserLoaded');
+              onClose();
+            }
           });
           return Container();
         }
@@ -321,12 +360,12 @@ class _DelayedLoadingViewState extends State<_DelayedLoadingView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await widget.onComplete();
-      if (!mounted) return;
-      context.read<ProjectsBloc>().add(LoadProjects());
-      GoRouter.of(context).go(widget.navigateTo, extra: {'refresh': true});
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   await widget.onComplete();
+    //   if (!mounted) return;
+    //   context.read<ProjectsBloc>().add(LoadProjects());
+    //   GoRouter.of(context).go(widget.navigateTo, extra: {'refresh': true});
+    // });
   }
 
   @override

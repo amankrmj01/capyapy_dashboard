@@ -29,6 +29,9 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<void> addProjectId(String userId, String projectId) async {
+    print(
+      '[UserRepositoryImpl] addProjectId called with: userId=$userId, projectId=$projectId',
+    );
     await userData.addProjectId(projectId);
   }
 
@@ -38,7 +41,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<List<String>> getProjectIds(String userId) async {
+  Future<List<String>> getProjectIds() async {
     return await userData.getProjectIds();
   }
 }

@@ -130,8 +130,10 @@ class ProjectDetailsSidebar extends StatelessWidget {
                   );
                 } else if (state is UserLoaded) {
                   final user = state.user;
-                  final initials = (user.username.isNotEmpty)
-                      ? user.username
+                  final username = user.username ?? '';
+                  final email = user.email ?? '';
+                  final initials = (username.isNotEmpty)
+                      ? username
                             .trim()
                             .split(' ')
                             .map((e) => e.isNotEmpty ? e[0] : '')
@@ -169,7 +171,7 @@ class ProjectDetailsSidebar extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                user.username,
+                                username,
                                 style: GoogleFonts.inter(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
@@ -177,7 +179,7 @@ class ProjectDetailsSidebar extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                user.email,
+                                email,
                                 style: GoogleFonts.inter(
                                   fontSize: 12,
                                   color: AppColors.textSecondary(context),

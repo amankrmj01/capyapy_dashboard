@@ -53,12 +53,16 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     AddProjectId event,
     Emitter<UserState> emit,
   ) async {
+    print(
+      '[UserBloc] Received AddProjectId: userId=${event.userId}, projectId=${event.projectId}',
+    );
     emit(UserLoading());
     try {
       await userRepository.addProjectId(event.userId, event.projectId);
-      emit(ProjectIdAdded(event.projectId));
+      final user = await userRepository.getUser(event.userId);
+      emit(UserLoaded(user));
     } catch (e) {
-      emit(ProjectIdError(e.toString()));
+      emit(UserError(e.toString()));
     }
   }
 
@@ -69,9 +73,10 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       await userRepository.removeProjectId(event.userId, event.projectId);
-      emit(ProjectIdRemoved(event.projectId));
+      final user = await userRepository.getUser(event.userId);
+      emit(UserLoaded(user));
     } catch (e) {
-      emit(ProjectIdError(e.toString()));
+      emit(UserError(e.toString()));
     }
   }
 
@@ -81,10 +86,12 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   ) async {
     emit(UserLoading());
     try {
-      final ids = await userRepository.getProjectIds(event.userId);
-      emit(ProjectIdsLoaded(ids));
+      final user = await userRepository.getUser(
+        'mock_id',
+      ); // Use correct userId if available
+      emit(UserLoaded(user));
     } catch (e) {
-      emit(ProjectIdError(e.toString()));
+      emit(UserError(e.toString()));
     }
   }
 }

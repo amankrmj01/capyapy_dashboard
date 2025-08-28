@@ -25,9 +25,11 @@ class MockUserData implements UserDataSource {
 
   @override
   Future<void> addProjectId(String projectId) async {
+    print('[MockUserData] addProjectId called with: $projectId');
     final ids = List<String>.from(_user.projectIds);
     if (!ids.contains(projectId)) {
       ids.add(projectId);
+      print('[MockUserData] projectId added, new list: $ids');
       _user = User(
         id: _user.id,
         email: _user.email,
@@ -42,11 +44,16 @@ class MockUserData implements UserDataSource {
         lastLoginAt: _user.lastLoginAt,
         isEmailVerified: _user.isEmailVerified,
       );
+    } else {
+      print('[MockUserData] projectId already exists, no change.');
     }
   }
 
   @override
   Future<List<String>> getProjectIds() async {
+    print(
+      '[MockUserData] getProjectIds called, returning: ${_user.projectIds}',
+    );
     return _user.projectIds;
   }
 

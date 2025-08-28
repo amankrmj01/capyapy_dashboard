@@ -22,7 +22,7 @@ class ProjectsBloc extends Bloc<ProjectsEvent, ProjectsState> {
   ) async {
     emit(ProjectsLoading());
     try {
-      final projects = await projectRepository.getAllProjects();
+      final projects = await projectRepository.getProjectsByIds(event.ids);
       final activeProjects = await projectRepository.getActiveProjects();
       final totalEndpoints = projects.fold<int>(
         0,

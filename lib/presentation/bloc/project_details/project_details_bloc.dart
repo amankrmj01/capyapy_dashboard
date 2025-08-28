@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../data/models/models.dart';
-import '../../../domain/repositories/project_repository.dart';
 import '../../../domain/usecases/project/project_details_usecases.dart';
 
 part 'project_details_event.dart';
@@ -10,11 +9,9 @@ part 'project_details_state.dart';
 
 class ProjectDetailsBloc
     extends Bloc<ProjectDetailsEvent, ProjectDetailsState> {
-  final ProjectRepository repository;
   final ProjectDetailsUseCases useCases;
 
-  ProjectDetailsBloc(this.repository, this.useCases)
-    : super(ProjectDetailsInitial()) {
+  ProjectDetailsBloc(this.useCases) : super(ProjectDetailsInitial()) {
     on<LoadProjectDetails>(_onLoadProjectDetails);
     on<UpdateProject>(_onUpdateProject);
     on<AddDataModel>(_onAddDataModel);
@@ -31,7 +28,7 @@ class ProjectDetailsBloc
     Emitter<ProjectDetailsState> emit,
   ) async {
     emit(ProjectDetailsLoading());
-    final project = await repository.getProjectById(event.projectId);
+    final project = await useCases.getProjectById(event.projectId);
     if (project != null) {
       emit(ProjectDetailsLoaded(project));
     } else {

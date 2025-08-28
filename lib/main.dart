@@ -26,19 +26,21 @@ class CapyAPYApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ThemeCubit>(create: (context) => sl<ThemeCubit>()),
-        BlocProvider<ProjectsBloc>(
-          create: (context) => ProjectsBloc(
-            projectRepository: ProjectRepositoryImpl(
-              dataSource: sl<MockProjectDataSource>(),
-            ),
-          )..add(const LoadProjects()),
-        ),
 
         BlocProvider<UserBloc>(
           create: (context) => UserBloc(
             userRepository: UserRepositoryImpl(userData: sl<MockUserData>()),
           ),
         ),
+
+        BlocProvider<ProjectsBloc>(
+          create: (context) => ProjectsBloc(
+            projectRepository: ProjectRepositoryImpl(
+              dataSource: sl<MockProjectDataSource>(),
+            ),
+          ),
+        ),
+
         // Add other BLoC providers here as you create them
         // BlocProvider<AuthBloc>(
         //   create: (context) => sl<AuthBloc>(),

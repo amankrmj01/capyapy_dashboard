@@ -427,6 +427,13 @@ class MockProjectDataSource implements ProjectDataSource {
 
   @override
   Future<List<ProjectModel>> getProjectsByIds(List<String> ids) async {
-    return _projects.where((project) => ids.contains(project.id)).toList();
+    print('[MockProjectDataSource] getProjectsByIds called with ids: $ids');
+    final filtered = _projects
+        .where((project) => ids.contains(project.id))
+        .toList();
+    print(
+      '[MockProjectDataSource] getProjectsByIds returning: ${filtered.map((p) => p.id).toList()}',
+    );
+    return filtered;
   }
 }

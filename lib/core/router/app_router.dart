@@ -109,10 +109,9 @@ final GoRouter appRouter = GoRouter(
             if (project != null) {
               return NoTransitionPage(
                 child: BlocProvider<ProjectDetailsBloc>(
-                  create: (_) => ProjectDetailsBloc(
-                    repository,
-                    ProjectDetailsUseCases(repository),
-                  )..add(LoadProjectDetails(project.id)),
+                  create: (_) =>
+                      ProjectDetailsBloc(ProjectDetailsUseCases(repository))
+                        ..add(LoadProjectDetails(project.id)),
                   child: ProjectOverviewSection(
                     project: project,
                     onProjectUpdated: (updatedProject) {
@@ -135,10 +134,9 @@ final GoRouter appRouter = GoRouter(
                       return Center(child: Text('Project not found'));
                     }
                     return BlocProvider<ProjectDetailsBloc>(
-                      create: (_) => ProjectDetailsBloc(
-                        repository,
-                        ProjectDetailsUseCases(repository),
-                      )..add(LoadProjectDetails(snapshot.data!.id)),
+                      create: (_) =>
+                          ProjectDetailsBloc(ProjectDetailsUseCases(repository))
+                            ..add(LoadProjectDetails(snapshot.data!.id)),
                       child: ProjectOverviewSection(
                         project: snapshot.data!,
                         onProjectUpdated: (updatedProject) {
@@ -165,10 +163,9 @@ final GoRouter appRouter = GoRouter(
                 if (project != null) {
                   return NoTransitionPage(
                     child: BlocProvider<ProjectDetailsBloc>(
-                      create: (_) => ProjectDetailsBloc(
-                        repository,
-                        ProjectDetailsUseCases(repository),
-                      )..add(LoadProjectDetails(project.id)),
+                      create: (_) =>
+                          ProjectDetailsBloc(ProjectDetailsUseCases(repository))
+                            ..add(LoadProjectDetails(project.id)),
                       child: BlocProvider<CollectionBloc>(
                         create: (_) => CollectionBloc(
                           repository: DocumentResourcesRepositoryImpl(
@@ -199,7 +196,6 @@ final GoRouter appRouter = GoRouter(
                         }
                         return BlocProvider<ProjectDetailsBloc>(
                           create: (_) => ProjectDetailsBloc(
-                            repository,
                             ProjectDetailsUseCases(repository),
                           )..add(LoadProjectDetails(snapshot.data!.id)),
                           child: DataModelsSection(
@@ -228,10 +224,9 @@ final GoRouter appRouter = GoRouter(
                 if (project != null) {
                   return NoTransitionPage(
                     child: BlocProvider<ProjectDetailsBloc>(
-                      create: (_) => ProjectDetailsBloc(
-                        repository,
-                        ProjectDetailsUseCases(repository),
-                      )..add(LoadProjectDetails(project.id)),
+                      create: (_) =>
+                          ProjectDetailsBloc(ProjectDetailsUseCases(repository))
+                            ..add(LoadProjectDetails(project.id)),
                       child: EndpointsSection(
                         project: project,
                         onProjectUpdated: (updatedProject) {
@@ -255,7 +250,6 @@ final GoRouter appRouter = GoRouter(
                         }
                         return BlocProvider<ProjectDetailsBloc>(
                           create: (_) => ProjectDetailsBloc(
-                            repository,
                             ProjectDetailsUseCases(repository),
                           )..add(LoadProjectDetails(snapshot.data!.id)),
                           child: EndpointsSection(
@@ -284,10 +278,9 @@ final GoRouter appRouter = GoRouter(
                 if (project != null) {
                   return NoTransitionPage(
                     child: BlocProvider<ProjectDetailsBloc>(
-                      create: (_) => ProjectDetailsBloc(
-                        repository,
-                        ProjectDetailsUseCases(repository),
-                      )..add(LoadProjectDetails(project.id)),
+                      create: (_) =>
+                          ProjectDetailsBloc(ProjectDetailsUseCases(repository))
+                            ..add(LoadProjectDetails(project.id)),
                       child: ProjectSettingsSection(
                         project: project,
                         onProjectUpdated: (updatedProject) {
@@ -311,7 +304,6 @@ final GoRouter appRouter = GoRouter(
                         }
                         return BlocProvider<ProjectDetailsBloc>(
                           create: (_) => ProjectDetailsBloc(
-                            repository,
                             ProjectDetailsUseCases(repository),
                           )..add(LoadProjectDetails(snapshot.data!.id)),
                           child: ProjectSettingsSection(

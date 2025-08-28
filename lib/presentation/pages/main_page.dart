@@ -23,7 +23,6 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = MediaQuery.of(context).size.width > 900;
-    // Get current location from GoRouterState
     final state = GoRouterState.of(context);
     final location = state.uri.toString();
     // Set sidebar index based on route
@@ -36,28 +35,33 @@ class _MainPageState extends State<MainPage> {
     } else if (location == '/dashboard/settings') {
       _selectedIndex = 3;
     }
-    return Scaffold(
-      backgroundColor: AppColors.background(context),
-      body: Row(
-        children: [
-          if (isDesktop)
-            DashboardSidebar(
-              selectedIndex: _selectedIndex,
-              onItemSelected: (index) {
-                // Navigate to correct route when sidebar item is clicked
-                if (index == 0) {
-                  GoRouter.of(context).go('/dashboard');
-                } else if (index == 1) {
-                  GoRouter.of(context).go('/dashboard/project');
-                } else if (index == 2) {
-                  GoRouter.of(context).go('/dashboard/billing');
-                } else if (index == 3) {
-                  GoRouter.of(context).go('/dashboard/settings');
-                }
-              },
-            ),
-          Expanded(child: widget.child),
-        ],
+    return BlocListener<UserBloc, UserState>(
+      listener: (context, state) {
+        print('[MainPage] UserBloc state: ' + state.toString());
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background(context),
+        body: Row(
+          children: [
+            if (isDesktop)
+              DashboardSidebar(
+                selectedIndex: _selectedIndex,
+                onItemSelected: (index) {
+                  // Navigate to correct route when sidebar item is clicked
+                  if (index == 0) {
+                    GoRouter.of(context).go('/dashboard');
+                  } else if (index == 1) {
+                    GoRouter.of(context).go('/dashboard/project');
+                  } else if (index == 2) {
+                    GoRouter.of(context).go('/dashboard/billing');
+                  } else if (index == 3) {
+                    GoRouter.of(context).go('/dashboard/settings');
+                  }
+                },
+              ),
+            Expanded(child: widget.child),
+          ],
+        ),
       ),
     );
   }

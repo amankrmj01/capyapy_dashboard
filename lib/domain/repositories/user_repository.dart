@@ -11,5 +11,5 @@ abstract class UserRepository {
 
   Future<void> removeProjectId(String userId, String projectId);
 
-  Future<List<String>> getProjectIds(String userId);
+  Future<List<String>> getProjectIds();
 }
