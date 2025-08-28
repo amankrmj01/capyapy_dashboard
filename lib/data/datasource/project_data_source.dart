@@ -1,9 +1,6 @@
 import '../models/models.dart';
 
 abstract class ProjectDataSource {
-  // Project CRUD operations
-  Future<List<ProjectModel>> getAllProjects();
-
   Future<List<ProjectModel>> getProjectsByIds(List<String> ids);
 
   Future<ProjectModel?> getProjectById(String id);
@@ -14,30 +11,30 @@ abstract class ProjectDataSource {
 
   Future<void> deleteProject(String id);
 
-  // Project filtering and searching
-  Future<List<ProjectModel>> getProjectsByUserId(String userId);
+  // Data Models operations
+  Future<ProjectModel> addDataModel(
+    String projectId,
+    ProjectDataModel dataModel,
+  );
 
-  Future<List<ProjectModel>> searchProjects(String query);
+  Future<ProjectModel> updateDataModel(
+    String projectId,
+    int index,
+    ProjectDataModel dataModel,
+  );
 
-  Future<List<ProjectModel>> getActiveProjects();
+  Future<ProjectModel> removeDataModel(String projectId, int index);
 
-  Future<List<ProjectModel>> getProjectsByStatus(bool isActive);
+  // Endpoints operations
+  Future<ProjectModel> addEndpoint(String projectId, ProjectEndpoint endpoint);
 
-  // Analytics
-  Future<ApiCallsAnalytics> getProjectAnalytics(String projectId);
+  Future<ProjectModel> updateEndpoint(
+    String projectId,
+    int index,
+    ProjectEndpoint endpoint,
+  );
 
-  Future<void> incrementApiCall(String projectId, String endpointId);
+  Future<ProjectModel> removeEndpoint(String projectId, int index);
 
-  // Utility methods
-  Future<bool> projectExists(String id);
-
-  Future<bool> isProjectNameUnique(String name, {String? excludeId});
-
-  Future<int> getProjectsCount();
-
-  Future<int> getTotalEndpoints();
-
-  Future<int> getTotalModels();
-
-  Future<int> getTotalApiCalls();
+  Future<List<ProjectModel>> getAllProjects();
 }

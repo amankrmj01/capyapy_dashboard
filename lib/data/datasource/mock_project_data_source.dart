@@ -227,14 +227,6 @@ class MockProjectDataSource implements ProjectDataSource {
   }
 
   @override
-  Future<List<ProjectModel>> getAllProjects() async {
-    await Future.delayed(
-      const Duration(milliseconds: 500),
-    ); // Simulate network delay
-    return List.from(_projects);
-  }
-
-  @override
   Future<ProjectModel?> getProjectById(String id) async {
     await Future.delayed(const Duration(milliseconds: 300));
     try {
@@ -279,161 +271,120 @@ class MockProjectDataSource implements ProjectDataSource {
   }
 
   @override
-  Future<List<ProjectModel>> getProjectsByUserId(String userId) async {
+  Future<List<ProjectModel>> getProjectsByIds(List<String> ids) async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return _projects.where((project) => ids.contains(project.id)).toList();
+  }
+
+  @override
+  Future<List<ProjectModel>> getAllProjects() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    return List<ProjectModel>.from(_projects);
+  }
+
+  @override
+  Future<ProjectModel> addDataModel(
+    String projectId,
+    ProjectDataModel dataModel,
+  ) async {
     await Future.delayed(const Duration(milliseconds: 400));
-    // For mock purposes, return all projects (in real implementation, filter by userId)
-    return List.from(_projects);
-  }
-
-  @override
-  Future<List<ProjectModel>> searchProjects(String query) async {
-    await Future.delayed(const Duration(milliseconds: 350));
-    if (query.isEmpty) return getAllProjects();
-
-    final lowerQuery = query.toLowerCase();
-    return _projects.where((project) {
-      return project.projectName.toLowerCase().contains(lowerQuery) ||
-          project.description.toLowerCase().contains(lowerQuery) ||
-          project.metadata.tags.any(
-            (tag) => tag.toLowerCase().contains(lowerQuery),
-          );
-    }).toList();
-  }
-
-  @override
-  Future<List<ProjectModel>> getActiveProjects() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return _projects.where((project) => project.isActive).toList();
-  }
-
-  @override
-  Future<List<ProjectModel>> getProjectsByStatus(bool isActive) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    return _projects.where((project) => project.isActive == isActive).toList();
-  }
-
-  @override
-  Future<ApiCallsAnalytics> getProjectAnalytics(String projectId) async {
-    await Future.delayed(const Duration(milliseconds: 250));
     final project = await getProjectById(projectId);
-    if (project == null) {
-      throw Exception('Project not found');
-    }
-    return project.apiCallsAnalytics;
-  }
-
-  @override
-  Future<void> incrementApiCall(String projectId, String endpointId) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    final projectIndex = _projects.indexWhere((p) => p.id == projectId);
-    if (projectIndex == -1) return;
-
-    final project = _projects[projectIndex];
-    final endpointIndex = project.endpoints.indexWhere(
-      (e) => e.id == endpointId,
-    );
-    if (endpointIndex == -1) return;
-
-    // Update endpoint analytics
-    final endpoint = project.endpoints[endpointIndex];
-    final updatedAnalytics = endpoint.analytics.copyWith(
-      totalCalls: endpoint.analytics.totalCalls + 1,
-      successfulCalls: endpoint.analytics.successfulCalls + 1,
-      lastCalledAt: DateTime.now(),
-    );
-
-    final updatedEndpoints = List<ProjectEndpoint>.from(project.endpoints);
-    updatedEndpoints[endpointIndex] = endpoint.copyWith(
-      analytics: updatedAnalytics,
-    );
-
-    // Update project analytics
-    final updatedProjectAnalytics = project.apiCallsAnalytics.copyWith(
-      totalCalls: project.apiCallsAnalytics.totalCalls + 1,
-      totalSuccessfulCalls: project.apiCallsAnalytics.totalSuccessfulCalls + 1,
-      lastUpdated: DateTime.now(),
-    );
-
-    _projects[projectIndex] = project.copyWith(
-      endpoints: updatedEndpoints,
-      apiCallsAnalytics: updatedProjectAnalytics,
+    if (project == null) throw Exception('Project not found');
+    final updatedProject = project.copyWith(
+      mongoDbDataModels: [...project.mongoDbDataModels, dataModel],
       updatedAt: DateTime.now(),
     );
+    return await updateProject(updatedProject);
   }
 
   @override
-  Future<bool> projectExists(String id) async {
-    await Future.delayed(const Duration(milliseconds: 150));
-    return _projects.any((project) => project.id == id);
-  }
-
-  @override
-  Future<bool> isProjectNameUnique(String name, {String? excludeId}) async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    return !_projects.any(
-      (project) =>
-          project.projectName.toLowerCase() == name.toLowerCase() &&
-          project.id != excludeId,
+  Future<ProjectModel> updateDataModel(
+    String projectId,
+    int index,
+    ProjectDataModel dataModel,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    final project = await getProjectById(projectId);
+    if (project == null) throw Exception('Project not found');
+    if (index < 0 || index >= project.mongoDbDataModels.length)
+      throw Exception('Data model index out of bounds');
+    final updatedDataModels = List<ProjectDataModel>.from(
+      project.mongoDbDataModels,
     );
-  }
-
-  @override
-  Future<int> getProjectsCount() async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    return _projects.length;
-  }
-
-  @override
-  Future<int> getTotalApiCalls() async {
-    return _projects.fold<int>(
-      0,
-      (sum, project) => sum + (project.apiCallsAnalytics.totalCalls),
+    updatedDataModels[index] = dataModel.copyWith(updatedAt: DateTime.now());
+    final updatedProject = project.copyWith(
+      mongoDbDataModels: updatedDataModels,
+      updatedAt: DateTime.now(),
     );
+    return await updateProject(updatedProject);
   }
 
   @override
-  Future<int> getTotalEndpoints() async {
-    return _projects.fold<int>(
-      0,
-      (sum, project) => sum + project.endpoints.length,
+  Future<ProjectModel> removeDataModel(String projectId, int index) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    final project = await getProjectById(projectId);
+    if (project == null) throw Exception('Project not found');
+    if (index < 0 || index >= project.mongoDbDataModels.length)
+      throw Exception('Data model index out of bounds');
+    final updatedDataModels = List<ProjectDataModel>.from(
+      project.mongoDbDataModels,
     );
+    updatedDataModels.removeAt(index);
+    final updatedProject = project.copyWith(
+      mongoDbDataModels: updatedDataModels,
+      updatedAt: DateTime.now(),
+    );
+    return await updateProject(updatedProject);
   }
 
   @override
-  Future<int> getTotalModels() async {
-    return _projects.fold<int>(
-      0,
-      (sum, project) => sum + project.mongoDbDataModels.length,
+  Future<ProjectModel> addEndpoint(
+    String projectId,
+    ProjectEndpoint endpoint,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    final project = await getProjectById(projectId);
+    if (project == null) throw Exception('Project not found');
+    final updatedProject = project.copyWith(
+      endpoints: [...project.endpoints, endpoint],
+      updatedAt: DateTime.now(),
     );
-  }
-
-  // Additional helper methods for mock data management
-  void addMockProject(ProjectModel project) {
-    _projects.add(project);
-  }
-
-  void clearMockData() {
-    _projects.clear();
-  }
-
-  void resetMockData() {
-    _projects.clear();
-    _initializeMockData();
-  }
-
-  static void addProject(ProjectModel project) {
-    _staticProjects.add(project);
+    return await updateProject(updatedProject);
   }
 
   @override
-  Future<List<ProjectModel>> getProjectsByIds(List<String> ids) async {
-    print('[MockProjectDataSource] getProjectsByIds called with ids: $ids');
-    final filtered = _projects
-        .where((project) => ids.contains(project.id))
-        .toList();
-    print(
-      '[MockProjectDataSource] getProjectsByIds returning: ${filtered.map((p) => p.id).toList()}',
+  Future<ProjectModel> updateEndpoint(
+    String projectId,
+    int index,
+    ProjectEndpoint endpoint,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    final project = await getProjectById(projectId);
+    if (project == null) throw Exception('Project not found');
+    if (index < 0 || index >= project.endpoints.length)
+      throw Exception('Endpoint index out of bounds');
+    final updatedEndpoints = List<ProjectEndpoint>.from(project.endpoints);
+    updatedEndpoints[index] = endpoint.copyWith(updatedAt: DateTime.now());
+    final updatedProject = project.copyWith(
+      endpoints: updatedEndpoints,
+      updatedAt: DateTime.now(),
     );
-    return filtered;
+    return await updateProject(updatedProject);
+  }
+
+  @override
+  Future<ProjectModel> removeEndpoint(String projectId, int index) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+    final project = await getProjectById(projectId);
+    if (project == null) throw Exception('Project not found');
+    if (index < 0 || index >= project.endpoints.length)
+      throw Exception('Endpoint index out of bounds');
+    final updatedEndpoints = List<ProjectEndpoint>.from(project.endpoints);
+    updatedEndpoints.removeAt(index);
+    final updatedProject = project.copyWith(
+      endpoints: updatedEndpoints,
+      updatedAt: DateTime.now(),
+    );
+    return await updateProject(updatedProject);
   }
 }

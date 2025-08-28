@@ -1,9 +1,6 @@
 import '../../data/models/models.dart';
 
 abstract class ProjectRepository {
-  // Project CRUD operations
-  Future<List<ProjectModel>> getAllProjects();
-
   Future<List<ProjectModel>> getProjectsByIds(List<String> ids);
 
   Future<ProjectModel?> getProjectById(String id);
@@ -13,9 +10,6 @@ abstract class ProjectRepository {
   Future<ProjectModel> updateProject(ProjectModel project);
 
   Future<void> deleteProject(String id);
-
-  // Project filtering and searching
-  Future<List<ProjectModel>> getProjectsByUserId(String userId);
 
   Future<List<ProjectModel>> searchProjects(String query);
 

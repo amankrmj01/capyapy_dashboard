@@ -8,15 +8,6 @@ class ProjectRepositoryImpl implements ProjectRepository {
   ProjectRepositoryImpl({required this.dataSource});
 
   @override
-  Future<List<ProjectModel>> getAllProjects() async {
-    try {
-      return await dataSource.getAllProjects();
-    } catch (e) {
-      throw Exception('Failed to fetch projects: $e');
-    }
-  }
-
-  @override
   Future<ProjectModel?> getProjectById(String id) async {
     try {
       return await dataSource.getProjectById(id);
@@ -29,8 +20,9 @@ class ProjectRepositoryImpl implements ProjectRepository {
   Future<ProjectModel> createProject(ProjectModel project) async {
     try {
       // Validate project name uniqueness
-      final isUnique = await dataSource.isProjectNameUnique(
-        project.projectName,
+      final allProjects = await dataSource.getAllProjects();
+      final isUnique = !allProjects.any(
+        (p) => p.projectName == project.projectName,
       );
       if (!isUnique) {
         throw Exception('Project name already exists');
@@ -45,20 +37,18 @@ class ProjectRepositoryImpl implements ProjectRepository {
   Future<ProjectModel> updateProject(ProjectModel project) async {
     try {
       // Validate project exists
-      final exists = await dataSource.projectExists(project.id);
+      final allProjects = await dataSource.getAllProjects();
+      final exists = allProjects.any((p) => p.id == project.id);
       if (!exists) {
         throw Exception('Project not found');
       }
-
       // Validate project name uniqueness (excluding current project)
-      final isUnique = await dataSource.isProjectNameUnique(
-        project.projectName,
-        excludeId: project.id,
+      final isUnique = !allProjects.any(
+        (p) => p.projectName == project.projectName && p.id != project.id,
       );
       if (!isUnique) {
         throw Exception('Project name already exists');
       }
-
       return await dataSource.updateProject(project);
     } catch (e) {
       throw Exception('Failed to update project: $e');
@@ -68,7 +58,8 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<void> deleteProject(String id) async {
     try {
-      final exists = await dataSource.projectExists(id);
+      final allProjects = await dataSource.getAllProjects();
+      final exists = allProjects.any((p) => p.id == id);
       if (!exists) {
         throw Exception('Project not found');
       }
@@ -79,18 +70,17 @@ class ProjectRepositoryImpl implements ProjectRepository {
   }
 
   @override
-  Future<List<ProjectModel>> getProjectsByUserId(String userId) async {
-    try {
-      return await dataSource.getProjectsByUserId(userId);
-    } catch (e) {
-      throw Exception('Failed to fetch user projects: $e');
-    }
-  }
-
-  @override
   Future<List<ProjectModel>> searchProjects(String query) async {
     try {
-      return await dataSource.searchProjects(query);
+      final allProjects = await dataSource.getAllProjects();
+      final lowerQuery = query.toLowerCase();
+      return allProjects.where((project) {
+        return project.projectName.toLowerCase().contains(lowerQuery) ||
+            project.description.toLowerCase().contains(lowerQuery) ||
+            project.metadata.tags.any(
+              (tag) => tag.toLowerCase().contains(lowerQuery),
+            );
+      }).toList();
     } catch (e) {
       throw Exception('Failed to search projects: $e');
     }
@@ -99,7 +89,8 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<List<ProjectModel>> getActiveProjects() async {
     try {
-      return await dataSource.getActiveProjects();
+      final allProjects = await dataSource.getAllProjects();
+      return allProjects.where((p) => p.isActive).toList();
     } catch (e) {
       throw Exception('Failed to fetch active projects: $e');
     }
@@ -108,7 +99,8 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<List<ProjectModel>> getProjectsByStatus(bool isActive) async {
     try {
-      return await dataSource.getProjectsByStatus(isActive);
+      final allProjects = await dataSource.getAllProjects();
+      return allProjects.where((p) => p.isActive == isActive).toList();
     } catch (e) {
       throw Exception('Failed to fetch projects by status: $e');
     }
@@ -119,21 +111,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     String projectId,
     ProjectDataModel dataModel,
   ) async {
-    try {
-      final project = await dataSource.getProjectById(projectId);
-      if (project == null) {
-        throw Exception('Project not found');
-      }
-
-      final updatedProject = project.copyWith(
-        mongoDbDataModels: [...project.mongoDbDataModels, dataModel],
-        updatedAt: DateTime.now(),
-      );
-
-      return await dataSource.updateProject(updatedProject);
-    } catch (e) {
-      throw Exception('Failed to add data model: $e');
-    }
+    return await dataSource.addDataModel(projectId, dataModel);
   }
 
   @override
@@ -142,58 +120,12 @@ class ProjectRepositoryImpl implements ProjectRepository {
     int index,
     ProjectDataModel dataModel,
   ) async {
-    try {
-      final project = await dataSource.getProjectById(projectId);
-      if (project == null) {
-        throw Exception('Project not found');
-      }
-
-      if (index < 0 || index >= project.mongoDbDataModels.length) {
-        throw Exception('Data model index out of bounds');
-      }
-
-      final updatedDataModels = List<ProjectDataModel>.from(
-        project.mongoDbDataModels,
-      );
-      updatedDataModels[index] = dataModel.copyWith(updatedAt: DateTime.now());
-
-      final updatedProject = project.copyWith(
-        mongoDbDataModels: updatedDataModels,
-        updatedAt: DateTime.now(),
-      );
-
-      return await dataSource.updateProject(updatedProject);
-    } catch (e) {
-      throw Exception('Failed to update data model: $e');
-    }
+    return await dataSource.updateDataModel(projectId, index, dataModel);
   }
 
   @override
   Future<ProjectModel> removeDataModel(String projectId, int index) async {
-    try {
-      final project = await dataSource.getProjectById(projectId);
-      if (project == null) {
-        throw Exception('Project not found');
-      }
-
-      if (index < 0 || index >= project.mongoDbDataModels.length) {
-        throw Exception('Data model index out of bounds');
-      }
-
-      final updatedDataModels = List<ProjectDataModel>.from(
-        project.mongoDbDataModels,
-      );
-      updatedDataModels.removeAt(index);
-
-      final updatedProject = project.copyWith(
-        mongoDbDataModels: updatedDataModels,
-        updatedAt: DateTime.now(),
-      );
-
-      return await dataSource.updateProject(updatedProject);
-    } catch (e) {
-      throw Exception('Failed to remove data model: $e');
-    }
+    return await dataSource.removeDataModel(projectId, index);
   }
 
   @override
@@ -201,21 +133,7 @@ class ProjectRepositoryImpl implements ProjectRepository {
     String projectId,
     ProjectEndpoint endpoint,
   ) async {
-    try {
-      final project = await dataSource.getProjectById(projectId);
-      if (project == null) {
-        throw Exception('Project not found');
-      }
-
-      final updatedProject = project.copyWith(
-        endpoints: [...project.endpoints, endpoint],
-        updatedAt: DateTime.now(),
-      );
-
-      return await dataSource.updateProject(updatedProject);
-    } catch (e) {
-      throw Exception('Failed to add endpoint: $e');
-    }
+    return await dataSource.addEndpoint(projectId, endpoint);
   }
 
   @override
@@ -224,54 +142,12 @@ class ProjectRepositoryImpl implements ProjectRepository {
     int index,
     ProjectEndpoint endpoint,
   ) async {
-    try {
-      final project = await dataSource.getProjectById(projectId);
-      if (project == null) {
-        throw Exception('Project not found');
-      }
-
-      if (index < 0 || index >= project.endpoints.length) {
-        throw Exception('Endpoint index out of bounds');
-      }
-
-      final updatedEndpoints = List<ProjectEndpoint>.from(project.endpoints);
-      updatedEndpoints[index] = endpoint.copyWith(updatedAt: DateTime.now());
-
-      final updatedProject = project.copyWith(
-        endpoints: updatedEndpoints,
-        updatedAt: DateTime.now(),
-      );
-
-      return await dataSource.updateProject(updatedProject);
-    } catch (e) {
-      throw Exception('Failed to update endpoint: $e');
-    }
+    return await dataSource.updateEndpoint(projectId, index, endpoint);
   }
 
   @override
   Future<ProjectModel> removeEndpoint(String projectId, int index) async {
-    try {
-      final project = await dataSource.getProjectById(projectId);
-      if (project == null) {
-        throw Exception('Project not found');
-      }
-
-      if (index < 0 || index >= project.endpoints.length) {
-        throw Exception('Endpoint index out of bounds');
-      }
-
-      final updatedEndpoints = List<ProjectEndpoint>.from(project.endpoints);
-      updatedEndpoints.removeAt(index);
-
-      final updatedProject = project.copyWith(
-        endpoints: updatedEndpoints,
-        updatedAt: DateTime.now(),
-      );
-
-      return await dataSource.updateProject(updatedProject);
-    } catch (e) {
-      throw Exception('Failed to remove endpoint: $e');
-    }
+    return await dataSource.removeEndpoint(projectId, index);
   }
 
   @override
@@ -291,18 +167,16 @@ class ProjectRepositoryImpl implements ProjectRepository {
       if (project == null) {
         throw Exception('Project not found');
       }
-
       // Validate project name uniqueness if name is being changed
       if (projectName != null && projectName != project.projectName) {
-        final isUnique = await dataSource.isProjectNameUnique(
-          projectName,
-          excludeId: projectId,
+        final allProjects = await dataSource.getAllProjects();
+        final isUnique = !allProjects.any(
+          (p) => p.projectName == projectName && p.id != projectId,
         );
         if (!isUnique) {
           throw Exception('Project name already exists');
         }
       }
-
       final updatedProject = project.copyWith(
         projectName: projectName ?? project.projectName,
         description: description ?? project.description,
@@ -314,7 +188,6 @@ class ProjectRepositoryImpl implements ProjectRepository {
         metadata: metadata ?? project.metadata,
         updatedAt: DateTime.now(),
       );
-
       return await dataSource.updateProject(updatedProject);
     } catch (e) {
       throw Exception('Failed to update project settings: $e');
@@ -324,7 +197,11 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<ApiCallsAnalytics> getProjectAnalytics(String projectId) async {
     try {
-      return await dataSource.getProjectAnalytics(projectId);
+      final project = await dataSource.getProjectById(projectId);
+      if (project == null) {
+        throw Exception('Project not found');
+      }
+      return project.apiCallsAnalytics;
     } catch (e) {
       throw Exception('Failed to fetch project analytics: $e');
     }
@@ -333,7 +210,31 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<void> incrementApiCall(String projectId, String endpointId) async {
     try {
-      await dataSource.incrementApiCall(projectId, endpointId);
+      final project = await dataSource.getProjectById(projectId);
+      if (project == null) {
+        throw Exception('Project not found');
+      }
+      final endpointIndex = project.endpoints.indexWhere(
+        (e) => e.id == endpointId,
+      );
+      if (endpointIndex == -1) {
+        throw Exception('Endpoint not found');
+      }
+      final endpoint = project.endpoints[endpointIndex];
+      final updatedAnalytics = endpoint.analytics.copyWith(
+        totalCalls: endpoint.analytics.totalCalls + 1,
+      );
+      final updatedEndpoint = endpoint.copyWith(
+        analytics: updatedAnalytics,
+        updatedAt: DateTime.now(),
+      );
+      final updatedEndpoints = List<ProjectEndpoint>.from(project.endpoints);
+      updatedEndpoints[endpointIndex] = updatedEndpoint;
+      final updatedProject = project.copyWith(
+        endpoints: updatedEndpoints,
+        updatedAt: DateTime.now(),
+      );
+      await dataSource.updateProject(updatedProject);
     } catch (e) {
       throw Exception('Failed to increment API call: $e');
     }
@@ -402,7 +303,8 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<bool> projectExists(String id) async {
     try {
-      return await dataSource.projectExists(id);
+      final allProjects = await dataSource.getAllProjects();
+      return allProjects.any((p) => p.id == id);
     } catch (e) {
       throw Exception('Failed to check if project exists: $e');
     }
@@ -411,7 +313,11 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<bool> isProjectNameUnique(String name, {String? excludeId}) async {
     try {
-      return await dataSource.isProjectNameUnique(name, excludeId: excludeId);
+      final allProjects = await dataSource.getAllProjects();
+      return !allProjects.any(
+        (p) =>
+            p.projectName == name && (excludeId == null || p.id != excludeId),
+      );
     } catch (e) {
       throw Exception('Failed to check project name uniqueness: $e');
     }
@@ -420,7 +326,8 @@ class ProjectRepositoryImpl implements ProjectRepository {
   @override
   Future<int> getProjectsCount() async {
     try {
-      return await dataSource.getProjectsCount();
+      final allProjects = await dataSource.getAllProjects();
+      return allProjects.length;
     } catch (e) {
       throw Exception('Failed to get projects count: $e');
     }
@@ -432,7 +339,6 @@ class ProjectRepositoryImpl implements ProjectRepository {
       final allProjects = await dataSource.getAllProjects();
       final activeCount = allProjects.where((p) => p.isActive).length;
       final inactiveCount = allProjects.length - activeCount;
-
       return {
         'active': activeCount,
         'inactive': inactiveCount,
@@ -445,17 +351,38 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
   @override
   Future<int> getTotalEndpoints() async {
-    return await dataSource.getTotalEndpoints();
+    try {
+      final allProjects = await dataSource.getAllProjects();
+      return allProjects.fold<int>(0, (sum, p) => sum + p.endpoints.length);
+    } catch (e) {
+      throw Exception('Failed to get total endpoints: $e');
+    }
   }
 
   @override
   Future<int> getTotalModels() async {
-    return await dataSource.getTotalModels();
+    try {
+      final allProjects = await dataSource.getAllProjects();
+      return allProjects.fold<int>(
+        0,
+        (sum, p) => sum + p.mongoDbDataModels.length,
+      );
+    } catch (e) {
+      throw Exception('Failed to get total models: $e');
+    }
   }
 
   @override
   Future<int> getTotalApiCalls() async {
-    return await dataSource.getTotalApiCalls();
+    try {
+      final allProjects = await dataSource.getAllProjects();
+      return allProjects.fold<int>(
+        0,
+        (sum, p) => sum + p.apiCallsAnalytics.totalCalls,
+      );
+    } catch (e) {
+      throw Exception('Failed to get total API calls: $e');
+    }
   }
 
   @override
