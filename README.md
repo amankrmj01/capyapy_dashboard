@@ -3,6 +3,10 @@
 A modern Flutter web dashboard for managing mock API projects, data models, endpoints, and billing.
 Built with GoRouter for navigation and BLoC for state management.
 
+## Backend Status
+
+Currently, the backend is in development using Spring Boot and will be available soon.
+
 ## Features
 
 - Responsive dashboard UI for desktop and mobile
@@ -68,8 +72,6 @@ lib/
 
 ## Screenshots
 
-<img src="screenshots/billing_01.png" width="500" />
-<img src="screenshots/billing_02.png" width="500" />
 <img src="screenshots/dashboard_01.png" width="500" />
 <img src="screenshots/dashboard_02.png" width="500" />
 <img src="screenshots/projects_01.png" width="500" />
@@ -88,6 +90,8 @@ lib/
 <img src="screenshots/projects_endpoints_stats_01.png" width="500" />
 <img src="screenshots/projects_settings_01.png" width="500" />
 <img src="screenshots/projects_settings_02.png" width="500" />
+<img src="screenshots/billing_01.png" width="500" />
+<img src="screenshots/billing_02.png" width="500" />
 <img src="screenshots/settings_01.png" width="500" />
 <img src="screenshots/settings_02.png" width="500" />
 

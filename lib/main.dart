@@ -40,14 +40,6 @@ class CapyAPYApp extends StatelessWidget {
             ),
           ),
         ),
-
-        // Add other BLoC providers here as you create them
-        // BlocProvider<AuthBloc>(
-        //   create: (context) => sl<AuthBloc>(),
-        // ),
-        // BlocProvider<ApiBloc>(
-        //   create: (context) => sl<ApiBloc>(),
-        // ),
       ],
       child: BlocBuilder<ThemeCubit, AppThemeMode>(
         builder: (context, themeMode) {
