@@ -1,7 +1,7 @@
 # Capyapy Dashboard
 
-A modern Flutter web dashboard for managing mock API projects, data models, endpoints, and billing.
-Built with GoRouter for navigation and BLoC for state management.
+A modern Flutter web dashboard for managing mock API projects, data models, and endpoints.
+Built with Flutter, GoRouter, and BLoC for state management.
 
 ## Backend Status
 
