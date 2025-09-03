@@ -66,6 +66,31 @@ lib/
 - Uses [flutter_bloc](https://pub.dev/packages/flutter_bloc) for managing state
 - Each major feature (dashboard, projects, project details) has its own BLoC
 
+## Screenshots
+
+<img src="screenshots/billing_01.png" width="500" />
+<img src="screenshots/billing_02.png" width="500" />
+<img src="screenshots/dashboard_01.png" width="500" />
+<img src="screenshots/dashboard_02.png" width="500" />
+<img src="screenshots/projects_01.png" width="500" />
+<img src="screenshots/projects_02.png" width="500" />
+<img src="screenshots/projects_create_01.png" width="500" />
+<img src="screenshots/projects_create_02.png" width="500" />
+<img src="screenshots/projects_create_03.png" width="500" />
+<img src="screenshots/projects_create_04.png" width="500" />
+<img src="screenshots/projects_create_05.png" width="500" />
+<img src="screenshots/projects_dashboard_01.png" width="500" />
+<img src="screenshots/projects_data_models_01.png" width="500" />
+<img src="screenshots/projects_data_models_02.png" width="500" />
+<img src="screenshots/projects_data_models_edit_add_01.png" width="500" />
+<img src="screenshots/projects_endpoints_01.png" width="500" />
+<img src="screenshots/projects_endpoints_add_edit_01.png" width="500" />
+<img src="screenshots/projects_endpoints_stats_01.png" width="500" />
+<img src="screenshots/projects_settings_01.png" width="500" />
+<img src="screenshots/projects_settings_02.png" width="500" />
+<img src="screenshots/settings_01.png" width="500" />
+<img src="screenshots/settings_02.png" width="500" />
+
 ## Contributing
 
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would
@@ -73,9 +98,8 @@ like to change.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE.md)
 
 ## Contact
 
-For questions or feedback, contact [yourname@domain.com](mailto:yourname@domain.com)
-
+will make it available soon!!!!
